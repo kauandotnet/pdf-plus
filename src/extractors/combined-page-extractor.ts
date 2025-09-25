@@ -367,6 +367,7 @@ export class CombinedPageExtractor {
     pageNumber: number
   ): Promise<PageData | null> {
     try {
+      const pdfParse = (await import("pdf-parse")).default;
       const pdfBuffer = fs.readFileSync(pdfPath);
 
       // Load with pdf-lib
