@@ -101,10 +101,13 @@ export class FormatProcessor {
     const placeholders: string[] = [];
     let match: RegExpExecArray | null = null;
 
-    while ((match = placeholderPattern.exec(format)) !== null) {
+    // Extract placeholders from format string
+    match = placeholderPattern.exec(format);
+    while (match !== null) {
       if (match[1]) {
         placeholders.push(match[1]);
       }
+      match = placeholderPattern.exec(format);
     }
 
     return [...new Set(placeholders)]; // Remove duplicates

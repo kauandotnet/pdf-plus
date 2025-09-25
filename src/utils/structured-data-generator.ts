@@ -171,15 +171,37 @@ export class StructuredDataGenerator {
   ): PageImageData[] {
     return images
       .filter((image) => image.page === pageNumber)
-      .map((image) => ({
-        id: image.id,
-        name: image.name || `image_${image.id}`,
-        filename: (image as any).filename || undefined,
-        path: (image as any).path || undefined,
-        position: image.position,
-        format: image.format || "unknown",
-        size: (image as any).size || undefined,
-      }));
+      .map((image): PageImageData => {
+        const result: PageImageData = {
+          id: image.id,
+          name: image.name || `image_${image.id}`,
+          position: image.position,
+          format: image.format || "unknown",
+        };
+
+        if ("filename" in image) {
+          const filename = (image as { filename?: string }).filename;
+          if (filename !== undefined) {
+            result.filename = filename;
+          }
+        }
+
+        if ("path" in image) {
+          const imagePath = (image as { path?: string }).path;
+          if (imagePath !== undefined) {
+            result.path = imagePath;
+          }
+        }
+
+        if ("size" in image) {
+          const size = (image as { size?: number }).size;
+          if (size !== undefined) {
+            result.size = size;
+          }
+        }
+
+        return result;
+      });
   }
 
   /**

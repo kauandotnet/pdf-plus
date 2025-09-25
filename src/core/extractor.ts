@@ -9,6 +9,7 @@ import type {
   TextItem,
   ImageItem,
   PageExtractionResult,
+  PageData,
 } from "../types/index.js";
 import { validateConfig } from "../utils/validation.js";
 import { TextExtractor } from "../extractors/text-extractor.js";
@@ -285,9 +286,14 @@ export class PDFExtractor {
 
   private async processResults(
     pdfPath: string,
-    textData: any,
-    textDataWithMarkers: any,
-    imageData: any,
+    textData: {
+      text: string;
+      pages?: string[];
+      numPages?: number;
+      info?: Record<string, unknown>;
+    } | null,
+    textDataWithMarkers: { text: string; pages?: string[] | PageData[] } | null,
+    imageData: { images: ImageItem[]; totalPages?: number } | null,
     textItems: TextItem[],
     options: ExtractionOptions,
     startTime: number
