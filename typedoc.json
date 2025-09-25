@@ -1,0 +1,72 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "theme": "default",
+  "name": "pdfnode",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "readme": "README.md",
+  "categorizeByGroup": true,
+  "defaultCategory": "Other",
+  "categoryOrder": ["Main Functions", "Classes", "Types", "Utilities", "*"],
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Document",
+    "Project",
+    "Module",
+    "Namespace",
+    "Enum",
+    "EnumMember",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Constructor",
+    "Property",
+    "Variable",
+    "Function",
+    "Accessor",
+    "Method",
+    "Parameter",
+    "TypeParameter",
+    "TypeLiteral",
+    "CallSignature",
+    "ConstructorSignature",
+    "IndexSignature",
+    "GetSignature",
+    "SetSignature"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  },
+  "searchInComments": true,
+  "searchInDocuments": true,
+  "cleanOutputDir": true,
+  "titleLink": "https://github.com/kauandotnet/pdfnode",
+  "navigationLinks": {
+    "GitHub": "https://github.com/kauandotnet/pdfnode",
+    "npm": "https://www.npmjs.com/package/pdfnode"
+  },
+  "sidebarLinks": {
+    "Examples": "https://github.com/kauandotnet/pdfnode/tree/main/examples",
+    "Issues": "https://github.com/kauandotnet/pdfnode/issues"
+  },
+  "hostedBaseUrl": "https://kauandotnet.github.io/pdfnode/",
+  "gitRevision": "main",
+  "gitRemote": "origin",
+  "sourceLinkTemplate": "https://github.com/kauandotnet/pdfnode/blob/{gitRevision}/{path}#L{line}",
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/node_modules/**",
+    "**/dist/**"
+  ],
+  "externalPattern": ["**/node_modules/**"],
+  "excludeNotDocumented": false,
+  "excludeInternal": true,
+  "disableSources": false,
+  "sourceLinkExternal": true
+}

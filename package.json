@@ -1,0 +1,89 @@
+{
+  "name": "pdfnode",
+  "version": "1.0.0",
+  "description": "A comprehensive PDF content extraction library with support for text, images, and structured data",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.mjs",
+    "dist/**/*.d.ts",
+    "dist/**/*.d.mts",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "build:prod": "NODE_ENV=production tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:all": "vitest run tests/unit tests/integration",
+    "test:coverage": "vitest run tests/unit --coverage",
+    "test:ui": "vitest --ui",
+    "lint": "biome lint src",
+    "lint:fix": "biome lint --write src",
+    "format": "biome format src",
+    "format:fix": "biome format --write src",
+    "check": "biome check src",
+    "check:fix": "biome check --write src",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm run clean && pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run build:prod",
+    "docs:dev": "typedoc --watch",
+    "docs:build": "typedoc"
+  },
+  "keywords": [
+    "pdf",
+    "extraction",
+    "text",
+    "images",
+    "document",
+    "parsing",
+    "content",
+    "typescript"
+  ],
+  "author": "Kauan Guesser <54258870+kauandotnet@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kauandotnet/pdfnode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kauandotnet/pdfnode/issues"
+  },
+  "homepage": "https://github.com/kauandotnet/pdfnode#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "node-poppler": "^8.0.4",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^5.4.149",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@types/node": "^24.5.2",
+    "@types/pdf-parse": "^1.1.5",
+    "@types/pngjs": "^6.0.5",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "typedoc": "^0.27.4",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

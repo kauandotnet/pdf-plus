@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Extraction Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            margin: 10px 0;
+        }
+
+        .file-input input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .pages-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .page {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .page-header {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+        }
+
+        .page-content {
+            padding: 20px;
+        }
+
+        .page-text {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+            white-space: pre-wrap;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .page-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .image-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-info {
+            padding: 10px;
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .empty-page {
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 PDF Extraction Viewer</h1>
+            <p>Load your structured-data.json file to view extracted PDF content with images</p>
+            
+            <div class="file-input">
+                <label for="jsonFile">📁 Select structured-data.json:</label>
+                <input type="file" id="jsonFile" accept=".json" />
+                <span id="jsonStatus" style="margin-left: 10px; color: #666;"></span>
+            </div>
+
+            <div class="file-input">
+                <label for="imagesFolder">🖼️ Select images folder:</label>
+                <input type="file" id="imagesFolder" webkitdirectory multiple />
+                <span id="imagesStatus" style="margin-left: 10px; color: #666;"></span>
+            </div>
+        </div>
+
+        <div id="content">
+            <div class="loading">
+                👆 Please select your structured-data.json file and images folder to get started
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let structuredData = null;
+        let imageFiles = new Map();
+
+        // File input handlers
+        document.getElementById('jsonFile').addEventListener('change', handleJsonFile);
+        document.getElementById('imagesFolder').addEventListener('change', handleImagesFolder);
+
+        function handleJsonFile(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                document.getElementById('jsonStatus').textContent = '';
+                return;
+            }
+
+            document.getElementById('jsonStatus').textContent = 'Loading...';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // Validate the structure
+                    if (!data.pages || !Array.isArray(data.pages)) {
+                        throw new Error('Invalid structure: missing or invalid "pages" array');
+                    }
+
+                    structuredData = data;
+                    document.getElementById('jsonStatus').textContent = `✅ Loaded ${data.pages.length} pages`;
+                    updateDisplay();
+
+                    // Show success message
+                    console.log('✅ Loaded structured data:', {
+                        pages: data.pages.length,
+                        document: data.document || data.metadata || 'No document/metadata',
+                        structure: Object.keys(data)
+                    });
+
+                } catch (error) {
+                    document.getElementById('jsonStatus').textContent = '❌ Error loading';
+                    showError('Invalid JSON file: ' + error.message);
+                    console.error('JSON parsing error:', error);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function handleImagesFolder(event) {
+            const files = Array.from(event.target.files);
+            imageFiles.clear();
+
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    imageFiles.set(file.name, file);
+                }
+            });
+
+            document.getElementById('imagesStatus').textContent =
+                imageFiles.size > 0 ? `✅ Loaded ${imageFiles.size} images` : '❌ No images found';
+
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const content = document.getElementById('content');
+
+            if (!structuredData) {
+                content.innerHTML = `
+                    <div class="loading">
+                        ${imageFiles.size > 0 ?
+                            `🖼️ ${imageFiles.size} images loaded. Please select structured-data.json file to continue.` :
+                            '👆 Please select your structured-data.json file and images folder to get started'
+                        }
+                    </div>
+                `;
+                return;
+            }
+
+            content.innerHTML = '';
+
+            // Document stats
+            const stats = createStatsSection();
+            content.appendChild(stats);
+
+            // Controls
+            const controls = createControls();
+            content.appendChild(controls);
+
+            // Pages
+            const pagesContainer = document.createElement('div');
+            pagesContainer.className = 'pages-container';
+
+            if (structuredData.pages && structuredData.pages.length > 0) {
+                structuredData.pages.forEach(page => {
+                    const pageElement = createPageElement(page);
+                    pagesContainer.appendChild(pageElement);
+                });
+            } else {
+                const noPages = document.createElement('div');
+                noPages.className = 'loading';
+                noPages.textContent = 'No pages found in the structured data';
+                pagesContainer.appendChild(noPages);
+            }
+
+            content.appendChild(pagesContainer);
+        }
+
+        function createStatsSection() {
+            const stats = document.createElement('div');
+            stats.className = 'stats';
+
+            // Handle both document and metadata structures
+            const doc = structuredData.document || structuredData.metadata || {};
+
+            const statsData = [
+                { label: 'Total Pages', value: doc.totalPages || 0 },
+                { label: 'Total Images', value: doc.totalImages || 0 },
+                { label: 'Text Length', value: (doc.totalTextLength || 0).toLocaleString() + ' chars' },
+                { label: 'Images Loaded', value: imageFiles.size }
+            ];
+
+            statsData.forEach(stat => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <div class="stat-number">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                `;
+                stats.appendChild(card);
+            });
+
+            return stats;
+        }
+
+        function createControls() {
+            const controls = document.createElement('div');
+            controls.className = 'controls';
+
+            const showAllBtn = document.createElement('button');
+            showAllBtn.className = 'btn btn-primary';
+            showAllBtn.textContent = 'Show All Pages';
+            showAllBtn.onclick = () => showAllPages();
+
+            const showTextOnlyBtn = document.createElement('button');
+            showTextOnlyBtn.className = 'btn btn-secondary';
+            showTextOnlyBtn.textContent = 'Text Only';
+            showTextOnlyBtn.onclick = () => toggleImages(false);
+
+            const showImagesBtn = document.createElement('button');
+            showImagesBtn.className = 'btn btn-secondary';
+            showImagesBtn.textContent = 'Show Images';
+            showImagesBtn.onclick = () => toggleImages(true);
+
+            controls.appendChild(showAllBtn);
+            controls.appendChild(showTextOnlyBtn);
+            controls.appendChild(showImagesBtn);
+
+            return controls;
+        }
+
+        function createPageElement(page) {
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'page';
+
+            const header = document.createElement('div');
+            header.className = 'page-header';
+            header.textContent = `Page ${page.pageNumber || 'Unknown'}`;
+
+            const content = document.createElement('div');
+            content.className = 'page-content';
+
+            // Text content - handle different possible structures
+            let textContent = '';
+
+            if (page.text) {
+                if (typeof page.text === 'string') {
+                    textContent = page.text;
+                } else if (typeof page.text === 'object') {
+                    // Try different properties that might contain the text
+                    textContent = page.text.content || page.text.rawText || page.text.text || '';
+                }
+            }
+
+            // Ensure textContent is a string
+            if (typeof textContent !== 'string') {
+                textContent = '';
+            }
+
+            if (textContent && textContent.trim()) {
+                const textDiv = document.createElement('div');
+                textDiv.className = 'page-text';
+                textDiv.textContent = textContent;
+                content.appendChild(textDiv);
+            } else {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'empty-page';
+                emptyDiv.textContent = 'No text content on this page';
+                content.appendChild(emptyDiv);
+            }
+
+            // Images (if any found in the images folder)
+            const pageImages = findImagesForPage(page.pageNumber || 0);
+            if (pageImages.length > 0) {
+                const imagesDiv = document.createElement('div');
+                imagesDiv.className = 'page-images';
+
+                pageImages.forEach(imageFile => {
+                    const imageItem = createImageElement(imageFile);
+                    imagesDiv.appendChild(imageItem);
+                });
+
+                content.appendChild(imagesDiv);
+            }
+
+            pageDiv.appendChild(header);
+            pageDiv.appendChild(content);
+
+            return pageDiv;
+        }
+
+        function findImagesForPage(pageNumber) {
+            const pageImages = [];
+            const pagePrefix = `img_p${pageNumber}_`;
+            
+            imageFiles.forEach((file, filename) => {
+                if (filename.startsWith(pagePrefix)) {
+                    pageImages.push(file);
+                }
+            });
+
+            return pageImages.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        function createImageElement(imageFile) {
+            const imageItem = document.createElement('div');
+            imageItem.className = 'image-item';
+
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(imageFile);
+            img.alt = imageFile.name;
+            img.title = imageFile.name;
+
+            const info = document.createElement('div');
+            info.className = 'image-info';
+            info.innerHTML = `
+                <strong>${imageFile.name}</strong><br>
+                Size: ${(imageFile.size / 1024).toFixed(1)} KB
+            `;
+
+            imageItem.appendChild(img);
+            imageItem.appendChild(info);
+
+            return imageItem;
+        }
+
+        function showAllPages() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'block';
+            });
+        }
+
+        function toggleImages(show) {
+            document.querySelectorAll('.page-images').forEach(images => {
+                images.style.display = show ? 'grid' : 'none';
+            });
+        }
+
+        function showError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `<div class="error">❌ ${message}</div>`;
+            console.error('Viewer error:', message);
+        }
+
+        // Add some debugging
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            showError('JavaScript error: ' + e.error.message);
+        });
+    </script>
+</body>
+</html>
