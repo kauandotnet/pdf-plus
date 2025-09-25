@@ -5,7 +5,6 @@
 
 import * as fs from "node:fs";
 import { PDFDocument } from "pdf-lib";
-import pdfParse from "pdf-parse";
 
 export interface PageData {
   pageNumber: number;
@@ -81,6 +80,7 @@ export class CombinedPageExtractor {
    * Process with pdf-parse to extract text page by page
    */
   private async processPDFParse(pdfBuffer: Buffer) {
+    const pdfParse = (await import("pdf-parse")).default;
     const pages: any[] = [];
 
     const options = {
