@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import pdfParse from "pdf-parse";
 import { CombinedPageExtractor } from "./combined-page-extractor.js";
 import type { ExtractionOptions, TextItem, PageData } from "../types/index.js";
 
@@ -25,7 +26,6 @@ export class TextExtractor {
    */
   async extract(pdfPath: string): Promise<any> {
     try {
-      const pdfParse = (await import("pdf-parse")).default;
       const dataBuffer = fs.readFileSync(pdfPath);
       const data = await pdfParse(dataBuffer);
 
@@ -54,7 +54,6 @@ export class TextExtractor {
    */
   async extractWithPages(pdfPath: string): Promise<any> {
     try {
-      const pdfParse = (await import("pdf-parse")).default;
       const dataBuffer = fs.readFileSync(pdfPath);
 
       // Custom render function to get page-by-page text
