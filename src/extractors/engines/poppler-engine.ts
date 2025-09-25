@@ -242,7 +242,7 @@ export class PopplerEngine extends BaseImageEngine {
         const index = parseInt(match[2]!, 10);
         const width = parseInt(match[3]!, 10);
         const height = parseInt(match[4]!, 10);
-        const format = match[5]?.toUpperCase();
+        const format = match[5]?.toUpperCase() || "PNG";
 
         images.push({
           page,
