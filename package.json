@@ -1,5 +1,5 @@
 {
-  "name": "pdfnode",
+  "name": "pdf-plus",
   "version": "1.0.0",
   "description": "A comprehensive PDF content extraction library with support for text, images, and structured data",
   "main": "dist/index.js",

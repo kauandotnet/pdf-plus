@@ -1,4 +1,4 @@
-# pdfnode
+# pdf-plus
 
 A comprehensive PDF content extraction library with support for text, images, and structured data.
 
@@ -16,19 +16,19 @@ A comprehensive PDF content extraction library with support for text, images, an
 
 ```bash
 # Using pnpm (recommended)
-pnpm add pdfnode
+pnpm add pdf-plus
 
 # Using npm
-npm install pdfnode
+npm install pdf-plus
 
 # Using yarn
-yarn add pdfnode
+yarn add pdf-plus
 ```
 
 ## Quick Start
 
 ```typescript
-import { extractPdfContent } from "pdfnode";
+import { extractPdfContent } from "pdf-plus";
 
 // Extract both text and images
 const result = await extractPdfContent("document.pdf", {
@@ -48,7 +48,7 @@ console.log(`Text content: ${result.cleanText.substring(0, 100)}...`);
 ### Text-Only Extraction (Fast)
 
 ```typescript
-import { extractText } from "pdfnode";
+import { extractText } from "pdf-plus";
 
 const text = await extractText("document.pdf");
 console.log(`Extracted ${text.length} characters`);
@@ -57,7 +57,7 @@ console.log(`Extracted ${text.length} characters`);
 ### Images-Only Extraction
 
 ```typescript
-import { extractImages } from "pdfnode";
+import { extractImages } from "pdf-plus";
 
 const images = await extractImages("document.pdf", {
   extractImageFiles: true,
@@ -70,7 +70,7 @@ console.log(`Found ${images.length} images`);
 ### Custom Image References
 
 ```typescript
-import { extractPdfContent } from "pdfnode";
+import { extractPdfContent } from "pdf-plus";
 
 const result = await extractPdfContent("document.pdf", {
   imageRefFormat: "📷 Image {index} on page {page}",
@@ -84,7 +84,7 @@ const result = await extractPdfContent("document.pdf", {
 ### Advanced Configuration
 
 ```typescript
-import { PDFExtractor } from "pdfnode";
+import { PDFExtractor } from "pdf-plus";
 
 const extractor = new PDFExtractor();
 
@@ -108,7 +108,7 @@ const result = await extractor.extract("large-document.pdf", {
 #### Extract and Save Images from Academic Papers
 
 ```typescript
-import { extractPdfContent } from "pdfnode";
+import { extractPdfContent } from "pdf-plus";
 import path from "path";
 
 async function extractAcademicPaper(pdfPath: string) {
@@ -138,7 +138,7 @@ async function extractAcademicPaper(pdfPath: string) {
 #### Batch Process Multiple PDFs
 
 ```typescript
-import { PDFExtractor } from "pdfnode";
+import { PDFExtractor } from "pdf-plus";
 import { glob } from "glob";
 
 async function batchProcessPDFs(pattern: string) {
@@ -274,7 +274,7 @@ const result = await extractPdfContent("document.pdf");
 ## Error Handling
 
 ```typescript
-import { extractPdfContent } from "pdfnode";
+import { extractPdfContent } from "pdf-plus";
 
 try {
   const result = await extractPdfContent("document.pdf");
@@ -329,10 +329,10 @@ Make sure you're using the correct import syntax for your environment:
 
 ```typescript
 // ESM (recommended)
-import { extractPdfContent } from "pdfnode";
+import { extractPdfContent } from "pdf-plus";
 
 // CommonJS
-const { extractPdfContent } = require("pdfnode");
+const { extractPdfContent } = require("pdf-plus");
 ```
 
 #### Memory issues with large PDFs
