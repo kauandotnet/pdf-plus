@@ -70,6 +70,7 @@ export interface ExtractionResult {
   pages: PageInfo[];
   images: ImageItem[];
   textItems: TextItem[];
+  text: string; // Main text content (alias for cleanText for backward compatibility)
   textWithRefs: string;
   cleanText: string;
   summary?: DocumentSummary;

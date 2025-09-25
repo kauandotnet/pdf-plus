@@ -138,8 +138,11 @@ export class PDFExtractor {
         // Always extract clean text first
         textData = await this.textExtractor.extract(pdfPath);
 
-        // Generate text with page markers if requested
-        if (config.options.includePageMarkers) {
+        // Generate text with page markers if requested OR if image refs are needed
+        if (
+          config.options.includePageMarkers ||
+          config.options.includeImageRefs
+        ) {
           const pageMarkerFormat =
             config.options.pageMarkerFormat || "--- PAGE {page} ---";
           const pageOffset = config.options.pageOffset || 0;
@@ -302,6 +305,7 @@ export class PDFExtractor {
     const processingTime = Date.now() - startTime;
 
     // Build the result object
+    const cleanText = this.extractRawText(textData?.text || ""); // Apply raw text cleaning
     const result: ExtractionResult = {
       document: {
         filename,
@@ -314,8 +318,9 @@ export class PDFExtractor {
       pages: [],
       images: imageData?.images || [],
       textItems: textItems,
+      text: cleanText, // Main text content (alias for cleanText for backward compatibility)
       textWithRefs: "",
-      cleanText: this.extractRawText(textData?.text || ""), // Apply raw text cleaning
+      cleanText: cleanText,
     };
 
     // Generate text with image references if both are available
@@ -323,8 +328,8 @@ export class PDFExtractor {
       // If we have textDataWithMarkers (from CombinedPageExtractor), it already includes image refs
       if (textDataWithMarkers?.text && options.includeImageRefs) {
         result.textWithRefs = textDataWithMarkers.text;
-      } else {
-        // Fallback: generate image refs using formatProcessor
+      } else if (options.includeImageRefs) {
+        // Generate image refs using formatProcessor
         const baseText = textDataWithMarkers?.text || textData.text;
         result.textWithRefs = this.formatProcessor.generateTextWithImageRefs(
           baseText,
@@ -332,6 +337,9 @@ export class PDFExtractor {
           options.imageRefFormat || "[IMAGE:{id}]",
           result.document.pages
         );
+      } else {
+        // No image refs requested, use clean text
+        result.textWithRefs = textDataWithMarkers?.text || textData.text;
       }
     } else if (options.extractText && textData) {
       // Use marked text if available, otherwise use clean text

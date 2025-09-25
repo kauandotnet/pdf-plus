@@ -27,10 +27,40 @@ export class TextExtractor {
   async extract(pdfPath: string): Promise<any> {
     try {
       const dataBuffer = fs.readFileSync(pdfPath);
-      const data = await pdfParse(dataBuffer);
+
+      // Use custom render function to fix pdf-parse text extraction bug
+      const pageTexts: string[] = [];
+
+      const options = {
+        pagerender: async (pageData: any) => {
+          try {
+            const textContent = await pageData.getTextContent();
+            const text = textContent.items
+              .map((item: any) => item.str)
+              .join(" ");
+
+            // Store the page text
+            pageTexts[pageData.pageNumber - 1] = text;
+
+            return text;
+          } catch (error) {
+            // Store empty text for failed pages
+            pageTexts[pageData.pageNumber - 1] = "";
+            return "";
+          }
+        },
+      };
+
+      const data = await pdfParse(dataBuffer, options);
+
+      // Manually combine the page texts since pdf-parse has a bug where it doesn't
+      // properly combine page results into data.text
+      const combinedText = pageTexts
+        .filter((text) => text && text.length > 0)
+        .join("\n\n");
 
       return {
-        text: data.text,
+        text: combinedText, // Use our manually combined text instead of data.text
         numPages: data.numpages,
         info: data.info,
         metadata: data.metadata,
