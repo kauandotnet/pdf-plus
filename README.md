@@ -298,12 +298,6 @@ pnpm install
 # Build the library
 pnpm run build
 
-# Run tests
-pnpm test
-
-# Run tests with coverage
-pnpm run test:coverage
-
 # Lint and format
 pnpm run lint:fix
 pnpm run format
