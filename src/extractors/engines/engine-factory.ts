@@ -90,7 +90,7 @@ export class ImageEngineFactory {
     
     for (const engineName of priorities) {
       const engine = engines.find(e => e.name === engineName);
-      if (engine && engine.available) {
+      if (engine?.available) {
         return engineName;
       }
     }

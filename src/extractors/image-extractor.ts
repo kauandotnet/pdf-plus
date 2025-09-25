@@ -435,7 +435,7 @@ export class ImageExtractor {
     error?: string;
   }> {
     try {
-      const zlib = await import("zlib");
+      const zlib = await import("node:zlib");
       let imageData: Buffer;
       let mimeType = "image/jpeg"; // Default
       let extension = "jpg";

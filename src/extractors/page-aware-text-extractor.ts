@@ -3,7 +3,7 @@
  * This ensures text extraction page numbers match image extraction page numbers
  */
 
-import * as fs from "fs";
+import * as fs from "node:fs";
 import pdfParse from "pdf-parse";
 
 export class PageAwareTextExtractor {
@@ -124,7 +124,7 @@ export class PageAwareTextExtractor {
     // If we have too many pages, merge the last ones
     while (pageTexts.length > totalPages) {
       const lastPage = pageTexts.pop() || "";
-      pageTexts[pageTexts.length - 1] += "\n" + lastPage;
+      pageTexts[pageTexts.length - 1] += `\n${lastPage}`;
     }
 
     return pageTexts;

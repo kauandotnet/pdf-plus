@@ -3,7 +3,7 @@
  * This ensures text extraction page numbers match actual PDF page structure
  */
 
-import * as fs from "fs";
+import * as fs from "node:fs";
 import { PDFDocument } from "pdf-lib";
 import pdfParse from "pdf-parse";
 
@@ -117,12 +117,12 @@ export class CombinedPageExtractor {
               lineText = item.str;
             } else if (Math.abs(y - currentY) > 2) {
               // New line
-              text += lineText + "\n";
+              text += `${lineText}\n`;
               currentY = y;
               lineText = item.str;
             } else {
               // Same line
-              lineText += " " + item.str;
+              lineText += ` ${item.str}`;
             }
           }
 
@@ -266,7 +266,7 @@ export class CombinedPageExtractor {
               lines.splice(1, 0, imageRefs);
               pageText = lines.join("\n");
             } else {
-              pageText = pageText + "\n" + imageRefs;
+              pageText = `${pageText}\n${imageRefs}`;
             }
           } else {
             pageText = imageRefs;

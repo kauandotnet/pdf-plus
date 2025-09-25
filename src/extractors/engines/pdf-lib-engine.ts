@@ -1,7 +1,7 @@
 import { BaseImageEngine } from "./base-image-engine.js";
 import type { ExtractionOptions, ImageItem } from "../../types/index.js";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 /**
  * PDF-lib based image extraction engine
@@ -72,7 +72,7 @@ export class PdfLibEngine extends BaseImageEngine {
         if (!xObjects) continue;
 
         const xObjectEntries = (xObjects as any).entries?.() || [];
-        let pageImageCount = 0;
+        let _pageImageCount = 0;
 
         if (options.verbose) {
           console.log(
@@ -87,7 +87,7 @@ export class PdfLibEngine extends BaseImageEngine {
           const subtype = (xObject as any).dict?.get?.(PDFName.of("Subtype"));
           if (subtype?.toString() !== "/Image") continue;
 
-          pageImageCount++;
+          _pageImageCount++;
 
           // Extract image using the existing logic
           const imageResult = await this.extractImageFromPdfObject(
@@ -247,7 +247,7 @@ export class PdfLibEngine extends BaseImageEngine {
     error?: string;
   }> {
     try {
-      const zlib = await import("zlib");
+      const zlib = await import("node:zlib");
       let imageData: Buffer;
       let mimeType = "image/jpeg"; // Default
       let extension = "jpg";

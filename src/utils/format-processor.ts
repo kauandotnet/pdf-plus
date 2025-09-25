@@ -99,7 +99,7 @@ export class FormatProcessor {
   extractPlaceholders(format: string): string[] {
     const placeholderPattern = /\{([^}]+)\}/g;
     const placeholders: string[] = [];
-    let match;
+    let match: RegExpExecArray | null = null;
 
     while ((match = placeholderPattern.exec(format)) !== null) {
       if (match[1]) {

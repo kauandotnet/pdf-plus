@@ -276,7 +276,7 @@ export class PDFExtractor {
 
     return result.images
       .filter((img) => img.filePath)
-      .map((img) => img.filePath!);
+      .map((img) => img.filePath as string);
   }
 
   private validateConfiguration(config: ExtractorConfig): ValidationError[] {
@@ -512,7 +512,8 @@ export class PDFExtractor {
       // Find the part that corresponds to our page
       for (let i = 1; i < parts.length; i += 4) {
         const pageNum = parseInt(
-          parts[i] || parts[i + 1] || parts[i + 2] || "0"
+          parts[i] || parts[i + 1] || parts[i + 2] || "0",
+          10
         );
         if (pageNum === pageNumber) {
           return parts[i + 3] || "";

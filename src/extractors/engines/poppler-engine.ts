@@ -1,7 +1,7 @@
 import { BaseImageEngine } from "./base-image-engine.js";
 import type { ExtractionOptions, ImageItem } from "../../types/index.js";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 /**
  * Poppler-based image extraction engine
@@ -133,7 +133,7 @@ export class PopplerEngine extends BaseImageEngine {
 
           // Parse filename to get image index (format: img-000.png, img-001.png, etc.)
           const match = filename.match(/img-(\d+)\.png/);
-          const imageIndex = match ? parseInt(match[1]!) + 1 : i + 1; // Convert 0-based to 1-based
+          const imageIndex = match ? parseInt(match[1]!, 10) + 1 : i + 1; // Convert 0-based to 1-based
 
           // Get metadata for this image by index (poppler outputs images sequentially)
           const metadata = imageMetadata[i] || {
@@ -238,11 +238,11 @@ export class PopplerEngine extends BaseImageEngine {
       );
 
       if (match) {
-        const page = parseInt(match[1]!);
-        const index = parseInt(match[2]!);
-        const width = parseInt(match[3]!);
-        const height = parseInt(match[4]!);
-        const format = match[5]!.toUpperCase();
+        const page = parseInt(match[1]!, 10);
+        const index = parseInt(match[2]!, 10);
+        const width = parseInt(match[3]!, 10);
+        const height = parseInt(match[4]!, 10);
+        const format = match[5]?.toUpperCase();
 
         images.push({
           page,

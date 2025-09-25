@@ -106,7 +106,7 @@ export class CacheManager {
       const cacheDir = this.getCacheDir(pdfPath);
       const pageFile = path.join(cacheDir, `page-${pageNumber}.json`);
       fs.writeFileSync(pageFile, JSON.stringify(result, null, 2));
-    } catch (error) {
+    } catch (_error) {
       // Silently fail cache writes
     }
   }

@@ -3,7 +3,7 @@
  * This ensures text extraction page numbers match actual PDF page structure
  */
 
-import * as fs from "fs";
+import * as fs from "node:fs";
 
 export class PDFJSPageExtractor {
   private pdfjsLib: any;
@@ -134,7 +134,7 @@ export class PDFJSPageExtractor {
             characterCount,
           });
 
-          fullText += pageText + "\n";
+          fullText += `${pageText}\n`;
 
           console.log(
             `   Page ${pageNum}: ${characterCount} chars, ${wordCount} words`
