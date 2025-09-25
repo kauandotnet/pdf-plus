@@ -1,6 +1,6 @@
-# Contributing to pdfnode
+# Contributing to pdf-plus
 
-Thank you for your interest in contributing to pdfnode! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to pdf-plus! This document provides guidelines and information for contributors.
 
 ## Development Setup
 
@@ -16,8 +16,8 @@ Thank you for your interest in contributing to pdfnode! This document provides g
 2. Clone your fork:
 
    ```bash
-   git clone https://github.com/your-username/pdfnode.git
-   cd pdfnode
+   git clone https://github.com/your-username/pdf-plus.git
+   cd pdf-plus
    ```
 
 3. Install dependencies:
@@ -179,7 +179,7 @@ When reporting issues, please include:
 
 ## Questions and Support
 
-- Check existing [issues](https://github.com/kauandotnet/pdfnode/issues)
+- Check existing [issues](https://github.com/kauandotnet/pdf-plus/issues)
 - Create a new issue for bugs or feature requests
 - Use discussions for questions and general support
 

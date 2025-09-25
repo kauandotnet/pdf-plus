@@ -82,6 +82,6 @@ jobs:
           echo "Testing package installation..."
           node -e "console.log('✅ Package installed successfully');"
           echo "Testing CommonJS import..."
-          node -e "const lib = require('pdfnode'); console.log('✅ CJS import works, exports:', Object.keys(lib).length, 'items');"
+          node -e "const lib = require('pdf-plus'); console.log('✅ CJS import works, exports:', Object.keys(lib).length, 'items');"
           echo "Testing ESM import..."
-          node -e "import('pdfnode').then(() => console.log('✅ ESM import works')).catch(e => { console.log('⚠️  ESM import has known pdf-parse issue (resolved with dynamic imports):', e.message.split('\n')[0]); console.log('✅ This is expected and does not affect library functionality'); });"
+          node -e "import('pdf-plus').then(() => console.log('✅ ESM import works')).catch(e => { console.log('⚠️  ESM import has known pdf-parse issue (resolved with dynamic imports):', e.message.split('\n')[0]); console.log('✅ This is expected and does not affect library functionality'); });"

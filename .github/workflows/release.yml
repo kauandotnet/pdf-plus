@@ -80,7 +80,7 @@ jobs:
             ## Installation
 
             ```bash
-            npm install @pdf-extractor/core@${{ steps.version.outputs.VERSION }}
+            npm install pdf-plus@${{ steps.version.outputs.VERSION }}
             ```
 
             ## Documentation

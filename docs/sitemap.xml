@@ -1,159 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/index.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/index.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/modules.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/modules.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/hierarchy.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/hierarchy.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/classes/PDFExtractor.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/classes/PDFExtractor.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/variables/pdfExtractor.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/variables/pdfExtractor.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/classes/ImageExtractor.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/classes/ImageExtractor.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/classes/TextExtractor.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/classes/TextExtractor.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/functions/extractPdfContent.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/functions/extractPdfContent.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/functions/extractText.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/functions/extractText.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/functions/extractImages.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/functions/extractImages.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/functions/extractImageFiles.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/functions/extractImageFiles.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/variables/version.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/variables/version.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/variables/default.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/variables/default.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/Position.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/Position.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/FontInfo.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/FontInfo.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/TextItem.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/TextItem.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ImageItem.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ImageItem.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/PageInfo.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/PageInfo.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/DocumentMetadata.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/DocumentMetadata.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ExtractionResult.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ExtractionResult.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/DocumentSummary.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/DocumentSummary.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/types/ImageExtractionEngine.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/types/ImageExtractionEngine.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ExtractionOptions.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ExtractionOptions.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ProgressInfo.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ProgressInfo.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ExtractorConfig.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ExtractorConfig.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ValidationError.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ValidationError.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ExtractionError.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ExtractionError.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/types/FormatPlaceholder.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/types/FormatPlaceholder.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/FormatContext.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/FormatContext.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/ProcessingPhase.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/ProcessingPhase.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/MemoryUsage.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/MemoryUsage.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/StreamingOptions.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/StreamingOptions.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/OCROptions.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/OCROptions.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/AnalyticsData.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/AnalyticsData.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/interfaces/TemplateOptions.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/interfaces/TemplateOptions.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/classes/FormatProcessor.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/classes/FormatProcessor.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/functions/validateConfig.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/functions/validateConfig.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/functions/validateImageRefFormat.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/functions/validateImageRefFormat.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 	<url>
-		<loc>https://kauandotnet.github.io/pdfnode/functions/validateFilePath.html</loc>
+		<loc>https://kauandotnet.github.io/pdf-plus/functions/validateFilePath.html</loc>
 		<lastmod>2025-09-25T03:42:20.714Z</lastmod>
 	</url>
 </urlset>

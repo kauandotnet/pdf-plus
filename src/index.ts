@@ -1,5 +1,5 @@
 /**
- * pdfnode - A comprehensive PDF content extraction library
+ * pdf-plus - A comprehensive PDF content extraction library
  *
  * Main entry point for the PDF content extraction library.
  * Provides both high-level convenience functions and low-level access to extractors.
@@ -66,7 +66,7 @@ import { pdfExtractor } from "./core/extractor.js";
  *
  * @example
  * ```typescript
- * import { extractPdfContent } from 'pdfnode';
+ * import { extractPdfContent } from 'pdf-plus';
  *
  * const result = await extractPdfContent('document.pdf', {
  *   extractText: true,
@@ -93,7 +93,7 @@ export async function extractPdfContent(
  *
  * @example
  * ```typescript
- * import { extractText } from 'pdfnode';
+ * import { extractText } from 'pdf-plus';
  *
  * const text = await extractText('document.pdf');
  * console.log(`Extracted ${text.length} characters`);
@@ -115,7 +115,7 @@ export async function extractText(
  *
  * @example
  * ```typescript
- * import { extractImages } from 'pdfnode';
+ * import { extractImages } from 'pdf-plus';
  *
  * const images = await extractImages('document.pdf', {
  *   extractImageFiles: true,
@@ -142,7 +142,7 @@ export async function extractImages(
  *
  * @example
  * ```typescript
- * import { extractImageFiles } from 'pdfnode';
+ * import { extractImageFiles } from 'pdf-plus';
  *
  * const filePaths = await extractImageFiles('document.pdf', './images', {
  *   verbose: true

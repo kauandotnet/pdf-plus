@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of pdfnode
+- Initial release of pdf-plus
 - Comprehensive PDF content extraction with text and image support
 - Multiple extraction engines (pdf-lib, poppler)
 - TypeScript support with full type definitions

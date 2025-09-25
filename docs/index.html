@@ -1,146 +1,1082 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="./"><head><meta charset="utf-8"/><link rel="canonical" href="https://kauandotnet.github.io/pdfnode/"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>pdfnode - v1.0.0</title><meta name="description" content="Documentation for pdfnode"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="https://github.com/kauandotnet/pdfnode" class="title">pdfnode - v1.0.0</a><div id="tsd-toolbar-links"><a href="https://github.com/kauandotnet/pdfnode">GitHub</a><a href="https://www.npmjs.com/package/pdfnode">npm</a></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>pdfnode - v1.0.0</h1></div><div class="tsd-panel tsd-typography"><h1 id="pdfnode" class="tsd-anchor-link">pdfnode<a href="#pdfnode" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1><p>A comprehensive PDF content extraction library with support for text, images, and structured data.</p>
-<h2 id="features" class="tsd-anchor-link">Features<a href="#features" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
-<li>📝 <strong>Text Extraction</strong> - High-quality text extraction with positioning</li>
-<li>🖼️ <strong>Image Detection</strong> - Detect and reference images in PDF content</li>
-<li>💾 <strong>Image File Extraction</strong> - Extract actual image files from PDFs</li>
-<li>🎨 <strong>Flexible Formatting</strong> - Customizable image reference formats</li>
-<li>⚡ <strong>Performance Options</strong> - Text-only, images-only, or combined modes</li>
-<li>🔧 <strong>TypeScript Support</strong> - Full TypeScript definitions included</li>
-<li>🛡️ <strong>Robust Validation</strong> - Comprehensive input validation and error handling</li>
-</ul>
-<h2 id="installation" class="tsd-anchor-link">Installation<a href="#installation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><pre><code class="bash"><span class="hl-0"># Using pnpm (recommended)</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">add</span><span class="hl-2"> </span><span class="hl-3">pdfnode</span><br/><br/><span class="hl-0"># Using npm</span><br/><span class="hl-1">npm</span><span class="hl-2"> </span><span class="hl-3">install</span><span class="hl-2"> </span><span class="hl-3">pdfnode</span><br/><br/><span class="hl-0"># Using yarn</span><br/><span class="hl-1">yarn</span><span class="hl-2"> </span><span class="hl-3">add</span><span class="hl-2"> </span><span class="hl-3">pdfnode</span>
+<!DOCTYPE html>
+<html class="default" lang="en" data-base="./">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="canonical" href="https://kauandotnet.github.io/pdf-plus/" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <title>pdf-plus - v1.0.0</title>
+    <meta name="description" content="Documentation for pdf-plus" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="stylesheet" href="assets/highlight.css" />
+    <script defer src="assets/main.js"></script>
+    <script async src="assets/icons.js" id="tsd-icons-script"></script>
+    <script async src="assets/search.js" id="tsd-search-script"></script>
+    <script async src="assets/navigation.js" id="tsd-nav-script"></script>
+  </head>
+  <body>
+    <script>
+      document.documentElement.dataset.theme =
+        localStorage.getItem("tsd-theme") || "os";
+      document.body.style.display = "none";
+      setTimeout(
+        () =>
+          window.app
+            ? app.showPage()
+            : document.body.style.removeProperty("display"),
+        500
+      );
+    </script>
+    <header class="tsd-page-toolbar">
+      <div class="tsd-toolbar-contents container">
+        <a href="https://github.com/kauandotnet/pdf-plus" class="title"
+          >pdf-plus - v1.0.0</a
+        >
+        <div id="tsd-toolbar-links">
+          <a href="https://github.com/kauandotnet/pdf-plus">GitHub</a
+          ><a href="https://www.npmjs.com/package/pdf-plus">npm</a>
+        </div>
+        <button id="tsd-search-trigger" class="tsd-widget" aria-label="Search">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <use href="assets/icons.svg#icon-search"></use>
+          </svg>
+        </button>
+        <dialog id="tsd-search" aria-label="Search">
+          <input
+            role="combobox"
+            id="tsd-search-input"
+            aria-controls="tsd-search-results"
+            aria-autocomplete="list"
+            aria-expanded="true"
+            autocapitalize="off"
+            autocomplete="off"
+            placeholder="Search the docs"
+            maxlength="100"
+          />
+          <ul role="listbox" id="tsd-search-results"></ul>
+          <div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+            <div>Preparing search index...</div>
+          </div>
+        </dialog>
+        <a
+          href="#"
+          class="tsd-widget menu"
+          id="tsd-toolbar-menu-trigger"
+          data-toggle="menu"
+          aria-label="Menu"
+          ><svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <use href="assets/icons.svg#icon-menu"></use></svg
+        ></a>
+      </div>
+    </header>
+    <div class="container container-main">
+      <div class="col-content">
+        <div class="tsd-page-title"><h1>pdf-plus - v1.0.0</h1></div>
+        <div class="tsd-panel tsd-typography">
+          <h1 id="pdf-plus" class="tsd-anchor-link">
+            pdf-plus<a
+              href="#pdf-plus"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h1>
+          <p>
+            A comprehensive PDF content extraction library with support for
+            text, images, and structured data.
+          </p>
+          <h2 id="features" class="tsd-anchor-link">
+            Features<a
+              href="#features"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <ul>
+            <li>
+              📝 <strong>Text Extraction</strong> - High-quality text extraction
+              with positioning
+            </li>
+            <li>
+              🖼️ <strong>Image Detection</strong> - Detect and reference images
+              in PDF content
+            </li>
+            <li>
+              💾 <strong>Image File Extraction</strong> - Extract actual image
+              files from PDFs
+            </li>
+            <li>
+              🎨 <strong>Flexible Formatting</strong> - Customizable image
+              reference formats
+            </li>
+            <li>
+              ⚡ <strong>Performance Options</strong> - Text-only, images-only,
+              or combined modes
+            </li>
+            <li>
+              🔧 <strong>TypeScript Support</strong> - Full TypeScript
+              definitions included
+            </li>
+            <li>
+              🛡️ <strong>Robust Validation</strong> - Comprehensive input
+              validation and error handling
+            </li>
+          </ul>
+          <h2 id="installation" class="tsd-anchor-link">
+            Installation<a
+              href="#installation"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <pre><code class="bash"><span class="hl-0"># Using pnpm (recommended)</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">add</span><span class="hl-2"> </span><span class="hl-3">pdf-plus</span><br/><br/><span class="hl-0"># Using npm</span><br/><span class="hl-1">npm</span><span class="hl-2"> </span><span class="hl-3">install</span><span class="hl-2"> </span><span class="hl-3">pdf-plus</span><br/><br/><span class="hl-0"># Using yarn</span><br/><span class="hl-1">yarn</span><span class="hl-2"> </span><span class="hl-3">add</span><span class="hl-2"> </span><span class="hl-3">pdf-plus</span>
 </code><button type="button">Copy</button></pre>
 
-<h2 id="quick-start" class="tsd-anchor-link">Quick Start<a href="#quick-start" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-0">// Extract both text and images</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><br/><span class="hl-2">  </span><span class="hl-3">`Extracted </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">images</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> images from </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">pages</span><span class="hl-6">}</span><span class="hl-3"> pages`</span><br/><span class="hl-2">);</span><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Text content: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">cleanText</span><span class="hl-8">.</span><span class="hl-1">substring</span><span class="hl-8">(</span><span class="hl-9">0</span><span class="hl-8">, </span><span class="hl-9">100</span><span class="hl-8">)</span><span class="hl-6">}</span><span class="hl-3">...`</span><span class="hl-2">);</span>
+          <h2 id="quick-start" class="tsd-anchor-link">
+            Quick Start<a
+              href="#quick-start"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-0">// Extract both text and images</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><br/><span class="hl-2">  </span><span class="hl-3">`Extracted </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">images</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> images from </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">pages</span><span class="hl-6">}</span><span class="hl-3"> pages`</span><br/><span class="hl-2">);</span><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Text content: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">cleanText</span><span class="hl-8">.</span><span class="hl-1">substring</span><span class="hl-8">(</span><span class="hl-9">0</span><span class="hl-8">, </span><span class="hl-9">100</span><span class="hl-8">)</span><span class="hl-6">}</span><span class="hl-3">...`</span><span class="hl-2">);</span>
 </code><button type="button">Copy</button></pre>
 
-<h2 id="usage-examples" class="tsd-anchor-link">Usage Examples<a href="#usage-examples" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><h3 id="text-only-extraction-fast" class="tsd-anchor-link">Text-Only Extraction (Fast)<a href="#text-only-extraction-fast" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractText</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">text</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractText</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Extracted </span><span class="hl-6">${</span><span class="hl-5">text</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> characters`</span><span class="hl-2">);</span>
+          <h2 id="usage-examples" class="tsd-anchor-link">
+            Usage Examples<a
+              href="#usage-examples"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <h3 id="text-only-extraction-fast" class="tsd-anchor-link">
+            Text-Only Extraction (Fast)<a
+              href="#text-only-extraction-fast"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractText</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">text</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractText</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Extracted </span><span class="hl-6">${</span><span class="hl-5">text</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> characters`</span><span class="hl-2">);</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="images-only-extraction" class="tsd-anchor-link">Images-Only Extraction<a href="#images-only-extraction" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractImages</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">images</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractImages</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">&quot;./my-images&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Found </span><span class="hl-6">${</span><span class="hl-5">images</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> images`</span><span class="hl-2">);</span>
+          <h3 id="images-only-extraction" class="tsd-anchor-link">
+            Images-Only Extraction<a
+              href="#images-only-extraction"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractImages</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">images</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractImages</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">&quot;./my-images&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Found </span><span class="hl-6">${</span><span class="hl-5">images</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> images`</span><span class="hl-2">);</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="custom-image-references" class="tsd-anchor-link">Custom Image References<a href="#custom-image-references" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">imageRefFormat:</span><span class="hl-2"> </span><span class="hl-3">&quot;📷 Image {index} on page {page}&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">useImagePaths:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-0">// Text will contain: &quot;📷 Image 1 on page 1&quot; instead of &quot;[IMAGE:img_1]&quot;</span>
+          <h3 id="custom-image-references" class="tsd-anchor-link">
+            Custom Image References<a
+              href="#custom-image-references"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">imageRefFormat:</span><span class="hl-2"> </span><span class="hl-3">&quot;📷 Image {index} on page {page}&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">useImagePaths:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-0">// Text will contain: &quot;📷 Image 1 on page 1&quot; instead of &quot;[IMAGE:img_1]&quot;</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="advanced-configuration" class="tsd-anchor-link">Advanced Configuration<a href="#advanced-configuration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">PDFExtractor</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">extractor</span><span class="hl-2"> = </span><span class="hl-6">new</span><span class="hl-2"> </span><span class="hl-1">PDFExtractor</span><span class="hl-2">();</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-5">extractor</span><span class="hl-2">.</span><span class="hl-1">extract</span><span class="hl-2">(</span><span class="hl-3">&quot;large-document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">&quot;./extracted-images&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit:</span><span class="hl-2"> </span><span class="hl-3">&quot;1GB&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">10</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-1">progressCallback</span><span class="hl-5">:</span><span class="hl-2"> (</span><span class="hl-5">progress</span><span class="hl-2">) </span><span class="hl-6">=&gt;</span><span class="hl-2"> {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><br/><span class="hl-2">      </span><span class="hl-3">`Processing page </span><span class="hl-6">${</span><span class="hl-5">progress</span><span class="hl-8">.</span><span class="hl-5">currentPage</span><span class="hl-6">}</span><span class="hl-3">/</span><span class="hl-6">${</span><span class="hl-5">progress</span><span class="hl-8">.</span><span class="hl-5">totalPages</span><span class="hl-6">}</span><span class="hl-3">`</span><br/><span class="hl-2">    );</span><br/><span class="hl-2">  },</span><br/><span class="hl-2">});</span>
+          <h3 id="advanced-configuration" class="tsd-anchor-link">
+            Advanced Configuration<a
+              href="#advanced-configuration"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">PDFExtractor</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">extractor</span><span class="hl-2"> = </span><span class="hl-6">new</span><span class="hl-2"> </span><span class="hl-1">PDFExtractor</span><span class="hl-2">();</span><br/><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-5">extractor</span><span class="hl-2">.</span><span class="hl-1">extract</span><span class="hl-2">(</span><span class="hl-3">&quot;large-document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">&quot;./extracted-images&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit:</span><span class="hl-2"> </span><span class="hl-3">&quot;1GB&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">10</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-1">progressCallback</span><span class="hl-5">:</span><span class="hl-2"> (</span><span class="hl-5">progress</span><span class="hl-2">) </span><span class="hl-6">=&gt;</span><span class="hl-2"> {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><br/><span class="hl-2">      </span><span class="hl-3">`Processing page </span><span class="hl-6">${</span><span class="hl-5">progress</span><span class="hl-8">.</span><span class="hl-5">currentPage</span><span class="hl-6">}</span><span class="hl-3">/</span><span class="hl-6">${</span><span class="hl-5">progress</span><span class="hl-8">.</span><span class="hl-5">totalPages</span><span class="hl-6">}</span><span class="hl-3">`</span><br/><span class="hl-2">    );</span><br/><span class="hl-2">  },</span><br/><span class="hl-2">});</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="real-world-examples" class="tsd-anchor-link">Real-World Examples<a href="#real-world-examples" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><h4 id="extract-and-save-images-from-academic-papers" class="tsd-anchor-link">Extract and Save Images from Academic Papers<a href="#extract-and-save-images-from-academic-papers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><span class="hl-4">import</span><span class="hl-2"> </span><span class="hl-5">path</span><span class="hl-2"> </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;path&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">async</span><span class="hl-2"> </span><span class="hl-6">function</span><span class="hl-2"> </span><span class="hl-1">extractAcademicPaper</span><span class="hl-2">(</span><span class="hl-5">pdfPath</span><span class="hl-2">: </span><span class="hl-10">string</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-5">pdfPath</span><span class="hl-2">, {</span><br/><span class="hl-2">    </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">&quot;./paper-images&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">imageRefFormat:</span><span class="hl-2"> </span><span class="hl-3">&quot;Figure {index}: {name}&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  });</span><br/><br/><span class="hl-2">  </span><span class="hl-0">// Save text content</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">fs</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-6">import</span><span class="hl-2">(</span><span class="hl-3">&quot;fs&quot;</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">fs</span><span class="hl-2">.</span><span class="hl-1">writeFileSync</span><span class="hl-2">(</span><span class="hl-3">&quot;./paper-text.txt&quot;</span><span class="hl-2">, </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">cleanText</span><span class="hl-2">);</span><br/><br/><span class="hl-2">  </span><span class="hl-0">// Log extraction summary</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`📄 Extracted from </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">filename</span><span class="hl-6">}</span><span class="hl-3">:`</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`   📝 Text: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">textLength</span><span class="hl-6">}</span><span class="hl-3"> characters`</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`   🖼️  Images: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">images</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> found`</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`   📊 Pages: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">pages</span><span class="hl-6">}</span><span class="hl-3">`</span><span class="hl-2">);</span><br/><br/><span class="hl-2">  </span><span class="hl-4">return</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">;</span><br/><span class="hl-2">}</span>
+          <h3 id="real-world-examples" class="tsd-anchor-link">
+            Real-World Examples<a
+              href="#real-world-examples"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <h4
+            id="extract-and-save-images-from-academic-papers"
+            class="tsd-anchor-link"
+          >
+            Extract and Save Images from Academic Papers<a
+              href="#extract-and-save-images-from-academic-papers"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><span class="hl-4">import</span><span class="hl-2"> </span><span class="hl-5">path</span><span class="hl-2"> </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;path&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">async</span><span class="hl-2"> </span><span class="hl-6">function</span><span class="hl-2"> </span><span class="hl-1">extractAcademicPaper</span><span class="hl-2">(</span><span class="hl-5">pdfPath</span><span class="hl-2">: </span><span class="hl-10">string</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-5">pdfPath</span><span class="hl-2">, {</span><br/><span class="hl-2">    </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">&quot;./paper-images&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">imageRefFormat:</span><span class="hl-2"> </span><span class="hl-3">&quot;Figure {index}: {name}&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  });</span><br/><br/><span class="hl-2">  </span><span class="hl-0">// Save text content</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">fs</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-6">import</span><span class="hl-2">(</span><span class="hl-3">&quot;fs&quot;</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">fs</span><span class="hl-2">.</span><span class="hl-1">writeFileSync</span><span class="hl-2">(</span><span class="hl-3">&quot;./paper-text.txt&quot;</span><span class="hl-2">, </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">cleanText</span><span class="hl-2">);</span><br/><br/><span class="hl-2">  </span><span class="hl-0">// Log extraction summary</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`📄 Extracted from </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">filename</span><span class="hl-6">}</span><span class="hl-3">:`</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`   📝 Text: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">textLength</span><span class="hl-6">}</span><span class="hl-3"> characters`</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`   🖼️  Images: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">images</span><span class="hl-8">.</span><span class="hl-5">length</span><span class="hl-6">}</span><span class="hl-3"> found`</span><span class="hl-2">);</span><br/><span class="hl-2">  </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`   📊 Pages: </span><span class="hl-6">${</span><span class="hl-5">result</span><span class="hl-8">.</span><span class="hl-5">document</span><span class="hl-8">.</span><span class="hl-5">pages</span><span class="hl-6">}</span><span class="hl-3">`</span><span class="hl-2">);</span><br/><br/><span class="hl-2">  </span><span class="hl-4">return</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">;</span><br/><span class="hl-2">}</span>
 </code><button type="button">Copy</button></pre>
 
-<h4 id="batch-process-multiple-pdfs" class="tsd-anchor-link">Batch Process Multiple PDFs<a href="#batch-process-multiple-pdfs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">PDFExtractor</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">glob</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;glob&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">async</span><span class="hl-2"> </span><span class="hl-6">function</span><span class="hl-2"> </span><span class="hl-1">batchProcessPDFs</span><span class="hl-2">(</span><span class="hl-5">pattern</span><span class="hl-2">: </span><span class="hl-10">string</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">extractor</span><span class="hl-2"> = </span><span class="hl-6">new</span><span class="hl-2"> </span><span class="hl-1">PDFExtractor</span><span class="hl-2">(</span><span class="hl-3">&quot;./cache&quot;</span><span class="hl-2">); </span><span class="hl-0">// Enable caching</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">pdfFiles</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">glob</span><span class="hl-2">(</span><span class="hl-5">pattern</span><span class="hl-2">);</span><br/><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">results</span><span class="hl-2"> = [];</span><br/><br/><span class="hl-2">  </span><span class="hl-4">for</span><span class="hl-2"> (</span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">pdfFile</span><span class="hl-2"> </span><span class="hl-6">of</span><span class="hl-2"> </span><span class="hl-5">pdfFiles</span><span class="hl-2">) {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Processing: </span><span class="hl-6">${</span><span class="hl-5">pdfFile</span><span class="hl-6">}</span><span class="hl-3">`</span><span class="hl-2">);</span><br/><br/><span class="hl-2">    </span><span class="hl-4">try</span><span class="hl-2"> {</span><br/><span class="hl-2">      </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-5">extractor</span><span class="hl-2">.</span><span class="hl-1">extract</span><span class="hl-2">(</span><span class="hl-5">pdfFile</span><span class="hl-2">, {</span><br/><span class="hl-2">        </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">`./output/</span><span class="hl-6">${</span><span class="hl-5">path</span><span class="hl-8">.</span><span class="hl-1">basename</span><span class="hl-8">(</span><span class="hl-5">pdfFile</span><span class="hl-8">, </span><span class="hl-3">&quot;.pdf&quot;</span><span class="hl-8">)</span><span class="hl-6">}</span><span class="hl-3">`</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">5</span><span class="hl-2">, </span><span class="hl-0">// Process 5 pages at a time</span><br/><span class="hl-2">        </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">false</span><span class="hl-2">,</span><br/><span class="hl-2">      });</span><br/><br/><span class="hl-2">      </span><span class="hl-5">results</span><span class="hl-2">.</span><span class="hl-1">push</span><span class="hl-2">({</span><br/><span class="hl-2">        </span><span class="hl-5">file:</span><span class="hl-2"> </span><span class="hl-5">pdfFile</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">success:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">pages:</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">document</span><span class="hl-2">.</span><span class="hl-5">pages</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">images:</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">images</span><span class="hl-2">.</span><span class="hl-5">length</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">textLength:</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">document</span><span class="hl-2">.</span><span class="hl-5">textLength</span><span class="hl-2">,</span><br/><span class="hl-2">      });</span><br/><span class="hl-2">    } </span><span class="hl-4">catch</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">) {</span><br/><span class="hl-2">      </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">`Failed to process </span><span class="hl-6">${</span><span class="hl-5">pdfFile</span><span class="hl-6">}</span><span class="hl-3">:`</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">);</span><br/><span class="hl-2">      </span><span class="hl-5">results</span><span class="hl-2">.</span><span class="hl-1">push</span><span class="hl-2">({</span><br/><span class="hl-2">        </span><span class="hl-5">file:</span><span class="hl-2"> </span><span class="hl-5">pdfFile</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">success:</span><span class="hl-2"> </span><span class="hl-6">false</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">error:</span><span class="hl-2"> </span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">message</span><span class="hl-2">,</span><br/><span class="hl-2">      });</span><br/><span class="hl-2">    }</span><br/><span class="hl-2">  }</span><br/><br/><span class="hl-2">  </span><span class="hl-4">return</span><span class="hl-2"> </span><span class="hl-5">results</span><span class="hl-2">;</span><br/><span class="hl-2">}</span>
+          <h4 id="batch-process-multiple-pdfs" class="tsd-anchor-link">
+            Batch Process Multiple PDFs<a
+              href="#batch-process-multiple-pdfs"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">PDFExtractor</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">glob</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;glob&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-6">async</span><span class="hl-2"> </span><span class="hl-6">function</span><span class="hl-2"> </span><span class="hl-1">batchProcessPDFs</span><span class="hl-2">(</span><span class="hl-5">pattern</span><span class="hl-2">: </span><span class="hl-10">string</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">extractor</span><span class="hl-2"> = </span><span class="hl-6">new</span><span class="hl-2"> </span><span class="hl-1">PDFExtractor</span><span class="hl-2">(</span><span class="hl-3">&quot;./cache&quot;</span><span class="hl-2">); </span><span class="hl-0">// Enable caching</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">pdfFiles</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">glob</span><span class="hl-2">(</span><span class="hl-5">pattern</span><span class="hl-2">);</span><br/><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">results</span><span class="hl-2"> = [];</span><br/><br/><span class="hl-2">  </span><span class="hl-4">for</span><span class="hl-2"> (</span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">pdfFile</span><span class="hl-2"> </span><span class="hl-6">of</span><span class="hl-2"> </span><span class="hl-5">pdfFiles</span><span class="hl-2">) {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">log</span><span class="hl-2">(</span><span class="hl-3">`Processing: </span><span class="hl-6">${</span><span class="hl-5">pdfFile</span><span class="hl-6">}</span><span class="hl-3">`</span><span class="hl-2">);</span><br/><br/><span class="hl-2">    </span><span class="hl-4">try</span><span class="hl-2"> {</span><br/><span class="hl-2">      </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-5">extractor</span><span class="hl-2">.</span><span class="hl-1">extract</span><span class="hl-2">(</span><span class="hl-5">pdfFile</span><span class="hl-2">, {</span><br/><span class="hl-2">        </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">extractImages:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">imageOutputDir:</span><span class="hl-2"> </span><span class="hl-3">`./output/</span><span class="hl-6">${</span><span class="hl-5">path</span><span class="hl-8">.</span><span class="hl-1">basename</span><span class="hl-8">(</span><span class="hl-5">pdfFile</span><span class="hl-8">, </span><span class="hl-3">&quot;.pdf&quot;</span><span class="hl-8">)</span><span class="hl-6">}</span><span class="hl-3">`</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">5</span><span class="hl-2">, </span><span class="hl-0">// Process 5 pages at a time</span><br/><span class="hl-2">        </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">false</span><span class="hl-2">,</span><br/><span class="hl-2">      });</span><br/><br/><span class="hl-2">      </span><span class="hl-5">results</span><span class="hl-2">.</span><span class="hl-1">push</span><span class="hl-2">({</span><br/><span class="hl-2">        </span><span class="hl-5">file:</span><span class="hl-2"> </span><span class="hl-5">pdfFile</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">success:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">pages:</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">document</span><span class="hl-2">.</span><span class="hl-5">pages</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">images:</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">images</span><span class="hl-2">.</span><span class="hl-5">length</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">textLength:</span><span class="hl-2"> </span><span class="hl-5">result</span><span class="hl-2">.</span><span class="hl-5">document</span><span class="hl-2">.</span><span class="hl-5">textLength</span><span class="hl-2">,</span><br/><span class="hl-2">      });</span><br/><span class="hl-2">    } </span><span class="hl-4">catch</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">) {</span><br/><span class="hl-2">      </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">`Failed to process </span><span class="hl-6">${</span><span class="hl-5">pdfFile</span><span class="hl-6">}</span><span class="hl-3">:`</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">);</span><br/><span class="hl-2">      </span><span class="hl-5">results</span><span class="hl-2">.</span><span class="hl-1">push</span><span class="hl-2">({</span><br/><span class="hl-2">        </span><span class="hl-5">file:</span><span class="hl-2"> </span><span class="hl-5">pdfFile</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">success:</span><span class="hl-2"> </span><span class="hl-6">false</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-5">error:</span><span class="hl-2"> </span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">message</span><span class="hl-2">,</span><br/><span class="hl-2">      });</span><br/><span class="hl-2">    }</span><br/><span class="hl-2">  }</span><br/><br/><span class="hl-2">  </span><span class="hl-4">return</span><span class="hl-2"> </span><span class="hl-5">results</span><span class="hl-2">;</span><br/><span class="hl-2">}</span>
 </code><button type="button">Copy</button></pre>
 
-<h2 id="api-reference" class="tsd-anchor-link">API Reference<a href="#api-reference" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><h3 id="main-functions" class="tsd-anchor-link">Main Functions<a href="#main-functions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><h4 id="extractpdfcontentpdfpath-options" class="tsd-anchor-link"><code>extractPdfContent(pdfPath, options)</code><a href="#extractpdfcontentpdfpath-options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Extract complete content from a PDF file.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>pdfPath</code> (string) - Path to the PDF file</li>
-<li><code>options</code> (ExtractionOptions) - Extraction configuration</li>
-</ul>
-<p><strong>Returns:</strong> <code>Promise&lt;ExtractionResult&gt;</code></p>
-<h4 id="extracttextpdfpath-options" class="tsd-anchor-link"><code>extractText(pdfPath, options)</code><a href="#extracttextpdfpath-options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Extract only text content (optimized for speed).</p>
-<p><strong>Returns:</strong> <code>Promise&lt;string&gt;</code></p>
-<h4 id="extractimagespdfpath-options" class="tsd-anchor-link"><code>extractImages(pdfPath, options)</code><a href="#extractimagespdfpath-options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Extract only image references.</p>
-<p><strong>Returns:</strong> <code>Promise&lt;ImageItem[]&gt;</code></p>
-<h4 id="extractimagefilespdfpath-outputdir-options" class="tsd-anchor-link"><code>extractImageFiles(pdfPath, outputDir, options)</code><a href="#extractimagefilespdfpath-outputdir-options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Extract and save actual image files.</p>
-<p><strong>Returns:</strong> <code>Promise&lt;string[]&gt;</code> - Array of saved file paths</p>
-<h3 id="options" class="tsd-anchor-link">Options<a href="#options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-6">interface</span><span class="hl-2"> </span><span class="hl-10">ExtractionOptions</span><span class="hl-2"> {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Extract text content (default: true)</span><br/><span class="hl-2">  </span><span class="hl-5">extractImages</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Extract image references (default: true)</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Save actual image files (default: false)</span><br/><span class="hl-2">  </span><span class="hl-5">useImagePaths</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Use file paths in references (default: false)</span><br/><span class="hl-2">  </span><span class="hl-5">imageOutputDir</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Directory for image files (default: &#39;./extracted-images&#39;)</span><br/><span class="hl-2">  </span><span class="hl-5">imageRefFormat</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Custom reference format (default: &#39;[IMAGE:{id}]&#39;)</span><br/><span class="hl-2">  </span><span class="hl-5">baseName</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Base name for output files</span><br/><span class="hl-2">  </span><span class="hl-5">verbose</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Show detailed progress (default: false)</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Memory limit (e.g., &#39;512MB&#39;, &#39;1GB&#39;)</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize</span><span class="hl-2">?: </span><span class="hl-10">number</span><span class="hl-2">; </span><span class="hl-0">// Pages per batch (1-100)</span><br/><span class="hl-2">  </span><span class="hl-1">progressCallback</span><span class="hl-2">?: (</span><span class="hl-5">progress</span><span class="hl-2">: </span><span class="hl-10">ProgressInfo</span><span class="hl-2">) </span><span class="hl-6">=&gt;</span><span class="hl-2"> </span><span class="hl-10">void</span><span class="hl-2">;</span><br/><span class="hl-2">}</span>
+          <h2 id="api-reference" class="tsd-anchor-link">
+            API Reference<a
+              href="#api-reference"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <h3 id="main-functions" class="tsd-anchor-link">
+            Main Functions<a
+              href="#main-functions"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <h4 id="extractpdfcontentpdfpath-options" class="tsd-anchor-link">
+            <code>extractPdfContent(pdfPath, options)</code
+            ><a
+              href="#extractpdfcontentpdfpath-options"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>Extract complete content from a PDF file.</p>
+          <p><strong>Parameters:</strong></p>
+          <ul>
+            <li><code>pdfPath</code> (string) - Path to the PDF file</li>
+            <li>
+              <code>options</code> (ExtractionOptions) - Extraction
+              configuration
+            </li>
+          </ul>
+          <p>
+            <strong>Returns:</strong>
+            <code>Promise&lt;ExtractionResult&gt;</code>
+          </p>
+          <h4 id="extracttextpdfpath-options" class="tsd-anchor-link">
+            <code>extractText(pdfPath, options)</code
+            ><a
+              href="#extracttextpdfpath-options"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>Extract only text content (optimized for speed).</p>
+          <p><strong>Returns:</strong> <code>Promise&lt;string&gt;</code></p>
+          <h4 id="extractimagespdfpath-options" class="tsd-anchor-link">
+            <code>extractImages(pdfPath, options)</code
+            ><a
+              href="#extractimagespdfpath-options"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>Extract only image references.</p>
+          <p>
+            <strong>Returns:</strong> <code>Promise&lt;ImageItem[]&gt;</code>
+          </p>
+          <h4
+            id="extractimagefilespdfpath-outputdir-options"
+            class="tsd-anchor-link"
+          >
+            <code>extractImageFiles(pdfPath, outputDir, options)</code
+            ><a
+              href="#extractimagefilespdfpath-outputdir-options"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>Extract and save actual image files.</p>
+          <p>
+            <strong>Returns:</strong> <code>Promise&lt;string[]&gt;</code> -
+            Array of saved file paths
+          </p>
+          <h3 id="options" class="tsd-anchor-link">
+            Options<a
+              href="#options"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-6">interface</span><span class="hl-2"> </span><span class="hl-10">ExtractionOptions</span><span class="hl-2"> {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Extract text content (default: true)</span><br/><span class="hl-2">  </span><span class="hl-5">extractImages</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Extract image references (default: true)</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Save actual image files (default: false)</span><br/><span class="hl-2">  </span><span class="hl-5">useImagePaths</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Use file paths in references (default: false)</span><br/><span class="hl-2">  </span><span class="hl-5">imageOutputDir</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Directory for image files (default: &#39;./extracted-images&#39;)</span><br/><span class="hl-2">  </span><span class="hl-5">imageRefFormat</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Custom reference format (default: &#39;[IMAGE:{id}]&#39;)</span><br/><span class="hl-2">  </span><span class="hl-5">baseName</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Base name for output files</span><br/><span class="hl-2">  </span><span class="hl-5">verbose</span><span class="hl-2">?: </span><span class="hl-10">boolean</span><span class="hl-2">; </span><span class="hl-0">// Show detailed progress (default: false)</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit</span><span class="hl-2">?: </span><span class="hl-10">string</span><span class="hl-2">; </span><span class="hl-0">// Memory limit (e.g., &#39;512MB&#39;, &#39;1GB&#39;)</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize</span><span class="hl-2">?: </span><span class="hl-10">number</span><span class="hl-2">; </span><span class="hl-0">// Pages per batch (1-100)</span><br/><span class="hl-2">  </span><span class="hl-1">progressCallback</span><span class="hl-2">?: (</span><span class="hl-5">progress</span><span class="hl-2">: </span><span class="hl-10">ProgressInfo</span><span class="hl-2">) </span><span class="hl-6">=&gt;</span><span class="hl-2"> </span><span class="hl-10">void</span><span class="hl-2">;</span><br/><span class="hl-2">}</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="format-placeholders" class="tsd-anchor-link">Format Placeholders<a href="#format-placeholders" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Use these placeholders in <code>imageRefFormat</code>:</p>
-<ul>
-<li><code>{id}</code> - Unique image ID (e.g., <code>img_1</code>)</li>
-<li><code>{name}</code> - Original image name from PDF</li>
-<li><code>{page}</code> - Page number</li>
-<li><code>{index}</code> - Global image index</li>
-<li><code>{path}</code> - File path (when <code>extractImageFiles</code> is true)</li>
-</ul>
-<p><strong>Examples:</strong></p>
-<ul>
-<li><code>[IMAGE:{id}]</code> → <code>[IMAGE:img_1]</code></li>
-<li><code>📷 Image {index}</code> → <code>📷 Image 1</code></li>
-<li><code>{name} on page {page}</code> → <code>artwork_1 on page 5</code></li>
-<li><code>&lt;img src=&quot;{path}&quot;&gt;</code> → <code>&lt;img src=&quot;./images/img_1.jpg&quot;&gt;</code></li>
-</ul>
-<h2 id="performance-modes" class="tsd-anchor-link">Performance Modes<a href="#performance-modes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><h3 id="text-only-mode-fastest" class="tsd-anchor-link">Text-Only Mode (Fastest)<a href="#text-only-mode-fastest" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">text</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractText</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-0">// ~40% faster than combined mode</span>
+          <h3 id="format-placeholders" class="tsd-anchor-link">
+            Format Placeholders<a
+              href="#format-placeholders"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <p>Use these placeholders in <code>imageRefFormat</code>:</p>
+          <ul>
+            <li>
+              <code>{id}</code> - Unique image ID (e.g., <code>img_1</code>)
+            </li>
+            <li><code>{name}</code> - Original image name from PDF</li>
+            <li><code>{page}</code> - Page number</li>
+            <li><code>{index}</code> - Global image index</li>
+            <li>
+              <code>{path}</code> - File path (when
+              <code>extractImageFiles</code> is true)
+            </li>
+          </ul>
+          <p><strong>Examples:</strong></p>
+          <ul>
+            <li><code>[IMAGE:{id}]</code> → <code>[IMAGE:img_1]</code></li>
+            <li><code>📷 Image {index}</code> → <code>📷 Image 1</code></li>
+            <li>
+              <code>{name} on page {page}</code> →
+              <code>artwork_1 on page 5</code>
+            </li>
+            <li>
+              <code>&lt;img src=&quot;{path}&quot;&gt;</code> →
+              <code>&lt;img src=&quot;./images/img_1.jpg&quot;&gt;</code>
+            </li>
+          </ul>
+          <h2 id="performance-modes" class="tsd-anchor-link">
+            Performance Modes<a
+              href="#performance-modes"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <h3 id="text-only-mode-fastest" class="tsd-anchor-link">
+            Text-Only Mode (Fastest)<a
+              href="#text-only-mode-fastest"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">text</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractText</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-0">// ~40% faster than combined mode</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="images-only-mode" class="tsd-anchor-link">Images-Only Mode<a href="#images-only-mode" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">images</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractImages</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-0">// ~20% faster than combined mode</span>
+          <h3 id="images-only-mode" class="tsd-anchor-link">
+            Images-Only Mode<a
+              href="#images-only-mode"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">images</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractImages</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-0">// ~20% faster than combined mode</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="combined-mode-default" class="tsd-anchor-link">Combined Mode (Default)<a href="#combined-mode-default" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-0">// Full extraction with text and image references</span>
+          <h3 id="combined-mode-default" class="tsd-anchor-link">
+            Combined Mode (Default)<a
+              href="#combined-mode-default"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-0">// Full extraction with text and image references</span>
 </code><button type="button">Copy</button></pre>
 
-<h2 id="error-handling" class="tsd-anchor-link">Error Handling<a href="#error-handling" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-4">try</span><span class="hl-2"> {</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-2">} </span><span class="hl-4">catch</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-4">if</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">code</span><span class="hl-2"> === </span><span class="hl-3">&quot;VALIDATION_ERROR&quot;</span><span class="hl-2">) {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">&quot;Configuration error:&quot;</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">validationErrors</span><span class="hl-2">);</span><br/><span class="hl-2">  } </span><span class="hl-4">else</span><span class="hl-2"> </span><span class="hl-4">if</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">code</span><span class="hl-2"> === </span><span class="hl-3">&quot;EXTRACTION_ERROR&quot;</span><span class="hl-2">) {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">&quot;Extraction failed:&quot;</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">message</span><span class="hl-2">);</span><br/><span class="hl-2">  } </span><span class="hl-4">else</span><span class="hl-2"> {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">&quot;Unexpected error:&quot;</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">);</span><br/><span class="hl-2">  }</span><br/><span class="hl-2">}</span>
+          <h2 id="error-handling" class="tsd-anchor-link">
+            Error Handling<a
+              href="#error-handling"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <pre><code class="typescript"><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-4">try</span><span class="hl-2"> {</span><br/><span class="hl-2">  </span><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><span class="hl-2">} </span><span class="hl-4">catch</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-4">if</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">code</span><span class="hl-2"> === </span><span class="hl-3">&quot;VALIDATION_ERROR&quot;</span><span class="hl-2">) {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">&quot;Configuration error:&quot;</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">validationErrors</span><span class="hl-2">);</span><br/><span class="hl-2">  } </span><span class="hl-4">else</span><span class="hl-2"> </span><span class="hl-4">if</span><span class="hl-2"> (</span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">code</span><span class="hl-2"> === </span><span class="hl-3">&quot;EXTRACTION_ERROR&quot;</span><span class="hl-2">) {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">&quot;Extraction failed:&quot;</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">.</span><span class="hl-5">message</span><span class="hl-2">);</span><br/><span class="hl-2">  } </span><span class="hl-4">else</span><span class="hl-2"> {</span><br/><span class="hl-2">    </span><span class="hl-5">console</span><span class="hl-2">.</span><span class="hl-1">error</span><span class="hl-2">(</span><span class="hl-3">&quot;Unexpected error:&quot;</span><span class="hl-2">, </span><span class="hl-5">error</span><span class="hl-2">);</span><br/><span class="hl-2">  }</span><br/><span class="hl-2">}</span>
 </code><button type="button">Copy</button></pre>
 
-<h2 id="development" class="tsd-anchor-link">Development<a href="#development" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><pre><code class="bash"><span class="hl-0"># Install dependencies</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">install</span><br/><br/><span class="hl-0"># Build the library</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">build</span><br/><br/><span class="hl-0"># Lint and format</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">lint:fix</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">format</span><br/><br/><span class="hl-0"># Type checking</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">check</span>
+          <h2 id="development" class="tsd-anchor-link">
+            Development<a
+              href="#development"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <pre><code class="bash"><span class="hl-0"># Install dependencies</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">install</span><br/><br/><span class="hl-0"># Build the library</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">build</span><br/><br/><span class="hl-0"># Lint and format</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">lint:fix</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">format</span><br/><br/><span class="hl-0"># Type checking</span><br/><span class="hl-1">pnpm</span><span class="hl-2"> </span><span class="hl-3">run</span><span class="hl-2"> </span><span class="hl-3">check</span>
 </code><button type="button">Copy</button></pre>
 
-<h2 id="requirements" class="tsd-anchor-link">Requirements<a href="#requirements" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
-<li>Node.js &gt;= 18.0.0</li>
-<li>TypeScript &gt;= 5.0 (for development)</li>
-</ul>
-<h2 id="license" class="tsd-anchor-link">License<a href="#license" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>MIT</p>
-<h2 id="contributing" class="tsd-anchor-link">Contributing<a href="#contributing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>Contributions are welcome! Please read our contributing guidelines and submit pull requests to our repository.</p>
-<h2 id="troubleshooting" class="tsd-anchor-link">Troubleshooting<a href="#troubleshooting" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><h3 id="common-issues" class="tsd-anchor-link">Common Issues<a href="#common-issues" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><h4 id="cannot-find-module-errors" class="tsd-anchor-link">&quot;Cannot find module&quot; errors<a href="#cannot-find-module-errors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Make sure you're using the correct import syntax for your environment:</p>
-<pre><code class="typescript"><span class="hl-0">// ESM (recommended)</span><br/><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-0">// CommonJS</span><br/><span class="hl-6">const</span><span class="hl-2"> { </span><span class="hl-7">extractPdfContent</span><span class="hl-2"> } = </span><span class="hl-1">require</span><span class="hl-2">(</span><span class="hl-3">&quot;pdfnode&quot;</span><span class="hl-2">);</span>
+          <h2 id="requirements" class="tsd-anchor-link">
+            Requirements<a
+              href="#requirements"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <ul>
+            <li>Node.js &gt;= 18.0.0</li>
+            <li>TypeScript &gt;= 5.0 (for development)</li>
+          </ul>
+          <h2 id="license" class="tsd-anchor-link">
+            License<a
+              href="#license"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <p>MIT</p>
+          <h2 id="contributing" class="tsd-anchor-link">
+            Contributing<a
+              href="#contributing"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <p>
+            Contributions are welcome! Please read our contributing guidelines
+            and submit pull requests to our repository.
+          </p>
+          <h2 id="troubleshooting" class="tsd-anchor-link">
+            Troubleshooting<a
+              href="#troubleshooting"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <h3 id="common-issues" class="tsd-anchor-link">
+            Common Issues<a
+              href="#common-issues"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <h4 id="cannot-find-module-errors" class="tsd-anchor-link">
+            &quot;Cannot find module&quot; errors<a
+              href="#cannot-find-module-errors"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>
+            Make sure you're using the correct import syntax for your
+            environment:
+          </p>
+          <pre><code class="typescript"><span class="hl-0">// ESM (recommended)</span><br/><span class="hl-4">import</span><span class="hl-2"> { </span><span class="hl-5">extractPdfContent</span><span class="hl-2"> } </span><span class="hl-4">from</span><span class="hl-2"> </span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">;</span><br/><br/><span class="hl-0">// CommonJS</span><br/><span class="hl-6">const</span><span class="hl-2"> { </span><span class="hl-7">extractPdfContent</span><span class="hl-2"> } = </span><span class="hl-1">require</span><span class="hl-2">(</span><span class="hl-3">&quot;pdf-plus&quot;</span><span class="hl-2">);</span>
 </code><button type="button">Copy</button></pre>
 
-<h4 id="memory-issues-with-large-pdfs" class="tsd-anchor-link">Memory issues with large PDFs<a href="#memory-issues-with-large-pdfs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>For large documents, use streaming options:</p>
-<pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;large-document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit:</span><span class="hl-2"> </span><span class="hl-3">&quot;512MB&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">5</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">useCache:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span>
+          <h4 id="memory-issues-with-large-pdfs" class="tsd-anchor-link">
+            Memory issues with large PDFs<a
+              href="#memory-issues-with-large-pdfs"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>For large documents, use streaming options:</p>
+          <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;large-document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit:</span><span class="hl-2"> </span><span class="hl-3">&quot;512MB&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">5</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">useCache:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span>
 </code><button type="button">Copy</button></pre>
 
-<h4 id="image-extraction-not-working" class="tsd-anchor-link">Image extraction not working<a href="#image-extraction-not-working" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Try different engines:</p>
-<pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">imageEngine:</span><span class="hl-2"> </span><span class="hl-3">&quot;poppler&quot;</span><span class="hl-2">, </span><span class="hl-0">// or &#39;pdf-lib&#39;, &#39;auto&#39;</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span>
+          <h4 id="image-extraction-not-working" class="tsd-anchor-link">
+            Image extraction not working<a
+              href="#image-extraction-not-working"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>Try different engines:</p>
+          <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">imageEngine:</span><span class="hl-2"> </span><span class="hl-3">&quot;poppler&quot;</span><span class="hl-2">, </span><span class="hl-0">// or &#39;pdf-lib&#39;, &#39;auto&#39;</span><br/><span class="hl-2">  </span><span class="hl-5">extractImageFiles:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">});</span>
 </code><button type="button">Copy</button></pre>
 
-<h4 id="text-extraction-issues" class="tsd-anchor-link">Text extraction issues<a href="#text-extraction-issues" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Some PDFs may have encoding issues. Try:</p>
-<pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">textEngine:</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfjs&quot;</span><span class="hl-2">, </span><span class="hl-0">// Alternative engine</span><br/><span class="hl-2">  </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">, </span><span class="hl-0">// See detailed logs</span><br/><span class="hl-2">});</span>
+          <h4 id="text-extraction-issues" class="tsd-anchor-link">
+            Text extraction issues<a
+              href="#text-extraction-issues"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h4>
+          <p>Some PDFs may have encoding issues. Try:</p>
+          <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">extractText:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">textEngine:</span><span class="hl-2"> </span><span class="hl-3">&quot;pdfjs&quot;</span><span class="hl-2">, </span><span class="hl-0">// Alternative engine</span><br/><span class="hl-2">  </span><span class="hl-5">verbose:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2">, </span><span class="hl-0">// See detailed logs</span><br/><span class="hl-2">});</span>
 </code><button type="button">Copy</button></pre>
 
-<h3 id="performance-tips" class="tsd-anchor-link">Performance Tips<a href="#performance-tips" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ol>
-<li>
-<p><strong>Use specific extraction modes</strong> for better performance:</p>
-<pre><code class="typescript"><span class="hl-0">// Text only (fastest)</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">text</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractText</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><br/><span class="hl-0">// Images only</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">images</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractImages</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span>
+          <h3 id="performance-tips" class="tsd-anchor-link">
+            Performance Tips<a
+              href="#performance-tips"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <ol>
+            <li>
+              <p>
+                <strong>Use specific extraction modes</strong> for better
+                performance:
+              </p>
+              <pre><code class="typescript"><span class="hl-0">// Text only (fastest)</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">text</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractText</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span><br/><br/><span class="hl-0">// Images only</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">images</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractImages</span><span class="hl-2">(</span><span class="hl-3">&quot;document.pdf&quot;</span><span class="hl-2">);</span>
 </code><button type="button">Copy</button></pre>
-
-</li>
-<li>
-<p><strong>Enable caching</strong> for repeated operations:</p>
-<pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">extractor</span><span class="hl-2"> = </span><span class="hl-6">new</span><span class="hl-2"> </span><span class="hl-1">PDFExtractor</span><span class="hl-2">(</span><span class="hl-3">&quot;./cache&quot;</span><span class="hl-2">);</span>
+            </li>
+            <li>
+              <p><strong>Enable caching</strong> for repeated operations:</p>
+              <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">extractor</span><span class="hl-2"> = </span><span class="hl-6">new</span><span class="hl-2"> </span><span class="hl-1">PDFExtractor</span><span class="hl-2">(</span><span class="hl-3">&quot;./cache&quot;</span><span class="hl-2">);</span>
 </code><button type="button">Copy</button></pre>
-
-</li>
-<li>
-<p><strong>Process pages in batches</strong> for large documents:</p>
-<pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;large.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">10</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit:</span><span class="hl-2"> </span><span class="hl-3">&quot;1GB&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">});</span>
+            </li>
+            <li>
+              <p>
+                <strong>Process pages in batches</strong> for large documents:
+              </p>
+              <pre><code class="typescript"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-4">await</span><span class="hl-2"> </span><span class="hl-1">extractPdfContent</span><span class="hl-2">(</span><span class="hl-3">&quot;large.pdf&quot;</span><span class="hl-2">, {</span><br/><span class="hl-2">  </span><span class="hl-5">batchSize:</span><span class="hl-2"> </span><span class="hl-9">10</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-5">memoryLimit:</span><span class="hl-2"> </span><span class="hl-3">&quot;1GB&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">});</span>
 </code><button type="button">Copy</button></pre>
-
-</li>
-</ol>
-<h3 id="getting-help" class="tsd-anchor-link">Getting Help<a href="#getting-help" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ul>
-<li>Check the <a href="https://github.com/kauandotnet/pdfnode/issues" target="_blank" class="external">Issues</a> page</li>
-<li>Review <a href="media/examples">examples</a> for common use cases</li>
-<li>Enable verbose logging for debugging: <code>{ verbose: true }</code></li>
-</ul>
-<h2 id="roadmap" class="tsd-anchor-link">Roadmap<a href="#roadmap" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><h3 id="planned-features" class="tsd-anchor-link">Planned Features<a href="#planned-features" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ul>
-<li><strong>OCR Support</strong>: Text extraction from image-based PDFs</li>
-<li><strong>Advanced Text Analysis</strong>: Font detection, text classification</li>
-<li><strong>Streaming API</strong>: Process large documents efficiently</li>
-<li><strong>Cloud Integration</strong>: Direct integration with cloud storage</li>
-<li><strong>CLI Tool</strong>: Command-line interface for batch processing</li>
-<li><strong>Web Worker Support</strong>: Browser-based extraction</li>
-<li><strong>Plugin System</strong>: Extensible architecture for custom extractors</li>
-</ul>
-<h3 id="version-1x-roadmap" class="tsd-anchor-link">Version 1.x Roadmap<a href="#version-1x-roadmap" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ul>
-<li>[ ] OCR integration with Tesseract.js</li>
-<li>[ ] Advanced image processing options</li>
-<li>[ ] Streaming extraction API</li>
-<li>[ ] Performance optimizations</li>
-<li>[ ] Browser compatibility layer</li>
-<li>[ ] CLI tool development</li>
-</ul>
-<p>See <a href="media/CHANGELOG.md">CHANGELOG.md</a> for detailed version history.</p>
-</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#pdfnode"><span>pdfnode</span></a><ul><li><a href="#features"><span>Features</span></a></li><li><a href="#installation"><span>Installation</span></a></li><li><a href="#quick-start"><span>Quick <wbr/>Start</span></a></li><li><a href="#usage-examples"><span>Usage <wbr/>Examples</span></a></li><li><ul><li><a href="#text-only-extraction-fast"><span>Text-<wbr/>Only <wbr/>Extraction (<wbr/>Fast)</span></a></li><li><a href="#images-only-extraction"><span>Images-<wbr/>Only <wbr/>Extraction</span></a></li><li><a href="#custom-image-references"><span>Custom <wbr/>Image <wbr/>References</span></a></li><li><a href="#advanced-configuration"><span>Advanced <wbr/>Configuration</span></a></li><li><a href="#real-world-examples"><span>Real-<wbr/>World <wbr/>Examples</span></a></li><li><ul><li><a href="#extract-and-save-images-from-academic-papers"><span>Extract and <wbr/>Save <wbr/>Images from <wbr/>Academic <wbr/>Papers</span></a></li><li><a href="#batch-process-multiple-pdfs"><span>Batch <wbr/>Process <wbr/>Multiple <wbr/>PD<wbr/>Fs</span></a></li></ul></li></ul></li><li><a href="#api-reference"><span>API <wbr/>Reference</span></a></li><li><ul><li><a href="#main-functions"><span>Main <wbr/>Functions</span></a></li><li><ul><li><a href="#extractpdfcontentpdfpath-options"><span>extract<wbr/>Pdf<wbr/>Content(pdf<wbr/>Path, options)</span></a></li><li><a href="#extracttextpdfpath-options"><span>extract<wbr/>Text(pdf<wbr/>Path, options)</span></a></li><li><a href="#extractimagespdfpath-options"><span>extract<wbr/>Images(pdf<wbr/>Path, options)</span></a></li><li><a href="#extractimagefilespdfpath-outputdir-options"><span>extract<wbr/>Image<wbr/>Files(pdf<wbr/>Path, output<wbr/>Dir, options)</span></a></li></ul></li><li><a href="#options"><span>Options</span></a></li><li><a href="#format-placeholders"><span>Format <wbr/>Placeholders</span></a></li></ul></li><li><a href="#performance-modes"><span>Performance <wbr/>Modes</span></a></li><li><ul><li><a href="#text-only-mode-fastest"><span>Text-<wbr/>Only <wbr/>Mode (<wbr/>Fastest)</span></a></li><li><a href="#images-only-mode"><span>Images-<wbr/>Only <wbr/>Mode</span></a></li><li><a href="#combined-mode-default"><span>Combined <wbr/>Mode (<wbr/>Default)</span></a></li></ul></li><li><a href="#error-handling"><span>Error <wbr/>Handling</span></a></li><li><a href="#development"><span>Development</span></a></li><li><a href="#requirements"><span>Requirements</span></a></li><li><a href="#license"><span>License</span></a></li><li><a href="#contributing"><span>Contributing</span></a></li><li><a href="#troubleshooting"><span>Troubleshooting</span></a></li><li><ul><li><a href="#common-issues"><span>Common <wbr/>Issues</span></a></li><li><ul><li><a href="#cannot-find-module-errors"><span>&quot;<wbr/>Cannot find module&quot; errors</span></a></li><li><a href="#memory-issues-with-large-pdfs"><span>Memory issues with large <wbr/>PD<wbr/>Fs</span></a></li><li><a href="#image-extraction-not-working"><span>Image extraction not working</span></a></li><li><a href="#text-extraction-issues"><span>Text extraction issues</span></a></li></ul></li><li><a href="#performance-tips"><span>Performance <wbr/>Tips</span></a></li><li><a href="#getting-help"><span>Getting <wbr/>Help</span></a></li></ul></li><li><a href="#roadmap"><span>Roadmap</span></a></li><li><ul><li><a href="#planned-features"><span>Planned <wbr/>Features</span></a></li><li><a href="#version-1x-roadmap"><span>Version 1.x <wbr/>Roadmap</span></a></li></ul></li></ul></div></details></div><div class="site-menu"><nav id="tsd-sidebar-links" class="tsd-navigation"><a href="https://github.com/kauandotnet/pdfnode/tree/main/examples">Examples</a><a href="https://github.com/kauandotnet/pdfnode/issues">Issues</a><a href="https://github.com/kauandotnet/pdfnode" class="tsd-nav-link">GitHub</a><a href="https://www.npmjs.com/package/pdfnode" class="tsd-nav-link">npm</a></nav><nav class="tsd-navigation"><a href="modules.html">pdfnode - v1.0.0</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>
+            </li>
+          </ol>
+          <h3 id="getting-help" class="tsd-anchor-link">
+            Getting Help<a
+              href="#getting-help"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <ul>
+            <li>
+              Check the
+              <a
+                href="https://github.com/kauandotnet/pdf-plus/issues"
+                target="_blank"
+                class="external"
+                >Issues</a
+              >
+              page
+            </li>
+            <li>
+              Review <a href="media/examples">examples</a> for common use cases
+            </li>
+            <li>
+              Enable verbose logging for debugging:
+              <code>{ verbose: true }</code>
+            </li>
+          </ul>
+          <h2 id="roadmap" class="tsd-anchor-link">
+            Roadmap<a
+              href="#roadmap"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h2>
+          <h3 id="planned-features" class="tsd-anchor-link">
+            Planned Features<a
+              href="#planned-features"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <ul>
+            <li>
+              <strong>OCR Support</strong>: Text extraction from image-based
+              PDFs
+            </li>
+            <li>
+              <strong>Advanced Text Analysis</strong>: Font detection, text
+              classification
+            </li>
+            <li>
+              <strong>Streaming API</strong>: Process large documents
+              efficiently
+            </li>
+            <li>
+              <strong>Cloud Integration</strong>: Direct integration with cloud
+              storage
+            </li>
+            <li>
+              <strong>CLI Tool</strong>: Command-line interface for batch
+              processing
+            </li>
+            <li>
+              <strong>Web Worker Support</strong>: Browser-based extraction
+            </li>
+            <li>
+              <strong>Plugin System</strong>: Extensible architecture for custom
+              extractors
+            </li>
+          </ul>
+          <h3 id="version-1x-roadmap" class="tsd-anchor-link">
+            Version 1.x Roadmap<a
+              href="#version-1x-roadmap"
+              aria-label="Permalink"
+              class="tsd-anchor-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="assets/icons.svg#icon-anchor"></use></svg
+            ></a>
+          </h3>
+          <ul>
+            <li>[ ] OCR integration with Tesseract.js</li>
+            <li>[ ] Advanced image processing options</li>
+            <li>[ ] Streaming extraction API</li>
+            <li>[ ] Performance optimizations</li>
+            <li>[ ] Browser compatibility layer</li>
+            <li>[ ] CLI tool development</li>
+          </ul>
+          <p>
+            See <a href="media/CHANGELOG.md">CHANGELOG.md</a> for detailed
+            version history.
+          </p>
+        </div>
+      </div>
+      <div class="col-sidebar">
+        <div class="page-menu">
+          <div class="tsd-navigation settings">
+            <details class="tsd-accordion">
+              <summary class="tsd-accordion-summary">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <use href="assets/icons.svg#icon-chevronDown"></use>
+                </svg>
+                <h3>Settings</h3>
+              </summary>
+              <div class="tsd-accordion-details">
+                <div class="tsd-filter-visibility">
+                  <span class="settings-label">Member Visibility</span>
+                  <ul id="tsd-filter-options">
+                    <li class="tsd-filter-item">
+                      <label class="tsd-filter-input"
+                        ><input
+                          type="checkbox"
+                          id="tsd-filter-protected"
+                          name="protected"
+                        /><svg
+                          width="32"
+                          height="32"
+                          viewBox="0 0 32 32"
+                          aria-hidden="true"
+                        >
+                          <rect
+                            class="tsd-checkbox-background"
+                            width="30"
+                            height="30"
+                            x="1"
+                            y="1"
+                            rx="6"
+                            fill="none"
+                          ></rect>
+                          <path
+                            class="tsd-checkbox-checkmark"
+                            d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25"
+                            stroke="none"
+                            stroke-width="3.5"
+                            stroke-linejoin="round"
+                            fill="none"
+                          ></path></svg
+                        ><span>Protected</span></label
+                      >
+                    </li>
+                    <li class="tsd-filter-item">
+                      <label class="tsd-filter-input"
+                        ><input
+                          type="checkbox"
+                          id="tsd-filter-inherited"
+                          name="inherited"
+                          checked
+                        /><svg
+                          width="32"
+                          height="32"
+                          viewBox="0 0 32 32"
+                          aria-hidden="true"
+                        >
+                          <rect
+                            class="tsd-checkbox-background"
+                            width="30"
+                            height="30"
+                            x="1"
+                            y="1"
+                            rx="6"
+                            fill="none"
+                          ></rect>
+                          <path
+                            class="tsd-checkbox-checkmark"
+                            d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25"
+                            stroke="none"
+                            stroke-width="3.5"
+                            stroke-linejoin="round"
+                            fill="none"
+                          ></path></svg
+                        ><span>Inherited</span></label
+                      >
+                    </li>
+                  </ul>
+                </div>
+                <div class="tsd-theme-toggle">
+                  <label class="settings-label" for="tsd-theme">Theme</label
+                  ><select id="tsd-theme">
+                    <option value="os">OS</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+          </div>
+          <details open class="tsd-accordion tsd-page-navigation">
+            <summary class="tsd-accordion-summary">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <use href="assets/icons.svg#icon-chevronDown"></use>
+              </svg>
+              <h3>On This Page</h3>
+            </summary>
+            <div class="tsd-accordion-details">
+              <a href="#pdf-plus"><span>pdf-plus</span></a>
+              <ul>
+                <li>
+                  <a href="#features"><span>Features</span></a>
+                </li>
+                <li>
+                  <a href="#installation"><span>Installation</span></a>
+                </li>
+                <li>
+                  <a href="#quick-start"
+                    ><span>Quick <wbr />Start</span></a
+                  >
+                </li>
+                <li>
+                  <a href="#usage-examples"
+                    ><span>Usage <wbr />Examples</span></a
+                  >
+                </li>
+                <li>
+                  <ul>
+                    <li>
+                      <a href="#text-only-extraction-fast"
+                        ><span
+                          >Text-<wbr />Only <wbr />Extraction (<wbr />Fast)</span
+                        ></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#images-only-extraction"
+                        ><span>Images-<wbr />Only <wbr />Extraction</span></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#custom-image-references"
+                        ><span>Custom <wbr />Image <wbr />References</span></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#advanced-configuration"
+                        ><span>Advanced <wbr />Configuration</span></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#real-world-examples"
+                        ><span>Real-<wbr />World <wbr />Examples</span></a
+                      >
+                    </li>
+                    <li>
+                      <ul>
+                        <li>
+                          <a
+                            href="#extract-and-save-images-from-academic-papers"
+                            ><span
+                              >Extract and <wbr />Save <wbr />Images from
+                              <wbr />Academic <wbr />Papers</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a href="#batch-process-multiple-pdfs"
+                            ><span
+                              >Batch <wbr />Process <wbr />Multiple
+                              <wbr />PD<wbr />Fs</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#api-reference"
+                    ><span>API <wbr />Reference</span></a
+                  >
+                </li>
+                <li>
+                  <ul>
+                    <li>
+                      <a href="#main-functions"
+                        ><span>Main <wbr />Functions</span></a
+                      >
+                    </li>
+                    <li>
+                      <ul>
+                        <li>
+                          <a href="#extractpdfcontentpdfpath-options"
+                            ><span
+                              >extract<wbr />Pdf<wbr />Content(pdf<wbr />Path,
+                              options)</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a href="#extracttextpdfpath-options"
+                            ><span
+                              >extract<wbr />Text(pdf<wbr />Path, options)</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a href="#extractimagespdfpath-options"
+                            ><span
+                              >extract<wbr />Images(pdf<wbr />Path,
+                              options)</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a href="#extractimagefilespdfpath-outputdir-options"
+                            ><span
+                              >extract<wbr />Image<wbr />Files(pdf<wbr />Path,
+                              output<wbr />Dir, options)</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#options"><span>Options</span></a>
+                    </li>
+                    <li>
+                      <a href="#format-placeholders"
+                        ><span>Format <wbr />Placeholders</span></a
+                      >
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#performance-modes"
+                    ><span>Performance <wbr />Modes</span></a
+                  >
+                </li>
+                <li>
+                  <ul>
+                    <li>
+                      <a href="#text-only-mode-fastest"
+                        ><span
+                          >Text-<wbr />Only <wbr />Mode (<wbr />Fastest)</span
+                        ></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#images-only-mode"
+                        ><span>Images-<wbr />Only <wbr />Mode</span></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#combined-mode-default"
+                        ><span>Combined <wbr />Mode (<wbr />Default)</span></a
+                      >
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#error-handling"
+                    ><span>Error <wbr />Handling</span></a
+                  >
+                </li>
+                <li>
+                  <a href="#development"><span>Development</span></a>
+                </li>
+                <li>
+                  <a href="#requirements"><span>Requirements</span></a>
+                </li>
+                <li>
+                  <a href="#license"><span>License</span></a>
+                </li>
+                <li>
+                  <a href="#contributing"><span>Contributing</span></a>
+                </li>
+                <li>
+                  <a href="#troubleshooting"><span>Troubleshooting</span></a>
+                </li>
+                <li>
+                  <ul>
+                    <li>
+                      <a href="#common-issues"
+                        ><span>Common <wbr />Issues</span></a
+                      >
+                    </li>
+                    <li>
+                      <ul>
+                        <li>
+                          <a href="#cannot-find-module-errors"
+                            ><span
+                              >&quot;<wbr />Cannot find module&quot;
+                              errors</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a href="#memory-issues-with-large-pdfs"
+                            ><span
+                              >Memory issues with large <wbr />PD<wbr />Fs</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a href="#image-extraction-not-working"
+                            ><span>Image extraction not working</span></a
+                          >
+                        </li>
+                        <li>
+                          <a href="#text-extraction-issues"
+                            ><span>Text extraction issues</span></a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#performance-tips"
+                        ><span>Performance <wbr />Tips</span></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#getting-help"
+                        ><span>Getting <wbr />Help</span></a
+                      >
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#roadmap"><span>Roadmap</span></a>
+                </li>
+                <li>
+                  <ul>
+                    <li>
+                      <a href="#planned-features"
+                        ><span>Planned <wbr />Features</span></a
+                      >
+                    </li>
+                    <li>
+                      <a href="#version-1x-roadmap"
+                        ><span>Version 1.x <wbr />Roadmap</span></a
+                      >
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </details>
+        </div>
+        <div class="site-menu">
+          <nav id="tsd-sidebar-links" class="tsd-navigation">
+            <a href="https://github.com/kauandotnet/pdf-plus/tree/main/examples"
+              >Examples</a
+            ><a href="https://github.com/kauandotnet/pdf-plus/issues">Issues</a
+            ><a
+              href="https://github.com/kauandotnet/pdf-plus"
+              class="tsd-nav-link"
+              >GitHub</a
+            ><a
+              href="https://www.npmjs.com/package/pdf-plus"
+              class="tsd-nav-link"
+              >npm</a
+            >
+          </nav>
+          <nav class="tsd-navigation">
+            <a href="modules.html">pdf-plus - v1.0.0</a>
+            <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+              <li>Loading...</li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <p class="tsd-generator">
+        Generated using
+        <a href="https://typedoc.org/" target="_blank">TypeDoc</a>
+      </p>
+    </footer>
+    <div class="overlay"></div>
+  </body>
+</html>

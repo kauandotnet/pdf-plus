@@ -398,7 +398,7 @@ const result = await extractPdfContent("document.pdf", {
 
 ### Getting Help
 
-- Check the [Issues](https://github.com/kauandotnet/pdfnode/issues) page
+- Check the [Issues](https://github.com/kauandotnet/pdf-plus/issues) page
 - Review [examples](./examples/) for common use cases
 - Enable verbose logging for debugging: `{ verbose: true }`
 

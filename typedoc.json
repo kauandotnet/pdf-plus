@@ -3,7 +3,7 @@
   "entryPoints": ["src/index.ts"],
   "out": "docs",
   "theme": "default",
-  "name": "pdfnode",
+  "name": "pdf-plus",
   "includeVersion": true,
   "excludePrivate": true,
   "excludeProtected": false,
@@ -45,19 +45,19 @@
   "searchInComments": true,
   "searchInDocuments": true,
   "cleanOutputDir": true,
-  "titleLink": "https://github.com/kauandotnet/pdfnode",
+  "titleLink": "https://github.com/kauandotnet/pdf-plus",
   "navigationLinks": {
-    "GitHub": "https://github.com/kauandotnet/pdfnode",
-    "npm": "https://www.npmjs.com/package/pdfnode"
+    "GitHub": "https://github.com/kauandotnet/pdf-plus",
+    "npm": "https://www.npmjs.com/package/pdf-plus"
   },
   "sidebarLinks": {
-    "Examples": "https://github.com/kauandotnet/pdfnode/tree/main/examples",
-    "Issues": "https://github.com/kauandotnet/pdfnode/issues"
+    "Examples": "https://github.com/kauandotnet/pdf-plus/tree/main/examples",
+    "Issues": "https://github.com/kauandotnet/pdf-plus/issues"
   },
-  "hostedBaseUrl": "https://kauandotnet.github.io/pdfnode/",
+  "hostedBaseUrl": "https://kauandotnet.github.io/pdf-plus/",
   "gitRevision": "main",
   "gitRemote": "origin",
-  "sourceLinkTemplate": "https://github.com/kauandotnet/pdfnode/blob/{gitRevision}/{path}#L{line}",
+  "sourceLinkTemplate": "https://github.com/kauandotnet/pdf-plus/blob/{gitRevision}/{path}#L{line}",
   "exclude": [
     "**/*.test.ts",
     "**/*.spec.ts",
