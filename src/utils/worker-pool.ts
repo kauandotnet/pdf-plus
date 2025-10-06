@@ -296,7 +296,7 @@ export class AdaptiveWorkerPool {
   /**
    * Handle worker error
    */
-  private handleWorkerError(workerId: string, error: Error): void {
+  private handleWorkerError(workerId: string, _error: Error): void {
     const workerInfo = this.workers.get(workerId);
     if (workerInfo) {
       workerInfo.state = "idle";

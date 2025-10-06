@@ -15,13 +15,9 @@ interface ColorSpaceConfig {
  * Pixel converter with optimized buffer operations
  */
 export class PixelConverter {
-  private readonly width: number;
-  private readonly height: number;
   private readonly totalPixels: number;
 
   constructor(width: number, height: number) {
-    this.width = width;
-    this.height = height;
     this.totalPixels = width * height;
   }
 
@@ -29,13 +25,19 @@ export class PixelConverter {
    * Detect color space from PDF metadata
    */
   static detectColorSpace(colorSpaceStr: string): ColorSpaceConfig {
-    if (colorSpaceStr.includes("DeviceGray") || colorSpaceStr.includes("Gray")) {
+    if (
+      colorSpaceStr.includes("DeviceGray") ||
+      colorSpaceStr.includes("Gray")
+    ) {
       return { componentsPerPixel: 1, colorType: 0 }; // Grayscale
     }
     if (colorSpaceStr.includes("DeviceRGB") || colorSpaceStr.includes("RGB")) {
       return { componentsPerPixel: 3, colorType: 2 }; // RGB
     }
-    if (colorSpaceStr.includes("DeviceCMYK") || colorSpaceStr.includes("CMYK")) {
+    if (
+      colorSpaceStr.includes("DeviceCMYK") ||
+      colorSpaceStr.includes("CMYK")
+    ) {
       return { componentsPerPixel: 4, colorType: 2 }; // CMYK (will convert to RGB)
     }
     return { componentsPerPixel: 3, colorType: 2 }; // Default RGB
@@ -44,10 +46,7 @@ export class PixelConverter {
   /**
    * Convert pixel data to RGBA format
    */
-  convertToRGBA(
-    rawData: Buffer,
-    componentsPerPixel: number
-  ): Buffer | null {
+  convertToRGBA(rawData: Buffer, componentsPerPixel: number): Buffer | null {
     switch (componentsPerPixel) {
       case 1:
         return this.grayscaleToRGBA(rawData);
@@ -70,10 +69,10 @@ export class PixelConverter {
     for (let i = 0; i < this.totalPixels; i++) {
       const gray = rawData[i] ?? 0;
       const offset = i * 4;
-      output[offset] = gray;     // R
+      output[offset] = gray; // R
       output[offset + 1] = gray; // G
       output[offset + 2] = gray; // B
-      output[offset + 3] = 255;  // A
+      output[offset + 3] = 255; // A
     }
 
     return output;
@@ -89,10 +88,10 @@ export class PixelConverter {
     for (let i = 0; i < this.totalPixels; i++) {
       const inputOffset = i * 3;
       const outputOffset = i * 4;
-      output[outputOffset] = rawData[inputOffset] ?? 0;         // R
+      output[outputOffset] = rawData[inputOffset] ?? 0; // R
       output[outputOffset + 1] = rawData[inputOffset + 1] ?? 0; // G
       output[outputOffset + 2] = rawData[inputOffset + 2] ?? 0; // B
-      output[outputOffset + 3] = 255;                           // A
+      output[outputOffset + 3] = 255; // A
     }
 
     return output;
@@ -113,13 +112,12 @@ export class PixelConverter {
       const k = (rawData[inputOffset + 3] ?? 0) / 255;
 
       const outputOffset = i * 4;
-      output[outputOffset] = Math.round(255 * (1 - c) * (1 - k));     // R
+      output[outputOffset] = Math.round(255 * (1 - c) * (1 - k)); // R
       output[outputOffset + 1] = Math.round(255 * (1 - m) * (1 - k)); // G
       output[outputOffset + 2] = Math.round(255 * (1 - y) * (1 - k)); // B
-      output[outputOffset + 3] = 255;                                 // A
+      output[outputOffset + 3] = 255; // A
     }
 
     return output;
   }
 }
-

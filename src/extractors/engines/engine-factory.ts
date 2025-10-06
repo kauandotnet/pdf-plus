@@ -43,7 +43,6 @@ export class ImageEngineFactory {
       name: string;
       description: string;
       available: boolean;
-      capabilities: ReturnType<BaseImageEngine["getCapabilities"]>;
     }>
   > {
     const engine = new PdfLibEngine();
@@ -54,7 +53,6 @@ export class ImageEngineFactory {
         name: engine.name,
         description: engine.description,
         available,
-        capabilities: engine.getCapabilities(),
       },
     ];
   }

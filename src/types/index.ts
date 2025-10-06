@@ -178,6 +178,12 @@ export interface ExtractionOptions {
   imageQuality?: number;
 
   /**
+   * Convert JPEG 2000 images to JPG format for better compatibility.
+   * (default: true - convert JP2 to JPG)
+   */
+  convertJp2ToJpg?: boolean;
+
+  /**
    * Preserve JPEG 2000 images in their original format.
    * By default (false), JPEG 2000 images (jp2, jpx, j2c, jpm) are converted to JPG for better compatibility.
    * Set to true to keep JPEG 2000 files in their original format.

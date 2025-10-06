@@ -125,7 +125,7 @@ export class LZWDecoder {
   /**
    * Create new entry when code is not in dictionary
    */
-  private createNewEntry(prevCode: number, code: number): Buffer | null {
+  private createNewEntry(prevCode: number, _code: number): Buffer | null {
     const prevEntry = this.dictionary.get(prevCode);
     if (!prevEntry) return null;
 
@@ -194,4 +194,3 @@ class BitReader {
     this.codeSize = 9;
   }
 }
-

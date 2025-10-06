@@ -1,4 +1,3 @@
-import { BaseImageEngine } from "./base-image-engine.js";
 import type { ExtractionOptions, ImageItem } from "../../types/index.js";
 import { ParallelProcessor } from "../../utils/parallel-processor.js";
 import { AdaptiveWorkerPool } from "../../utils/worker-pool.js";
@@ -6,13 +5,18 @@ import type { WorkerTask } from "../../types/worker-types.js";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
+import { AbstractImageEngine } from "./base-image-engine.js";
 
 /**
  * PDF-lib based image extraction engine
  */
-export class PdfLibEngine extends BaseImageEngine {
+export class PdfLibEngine extends AbstractImageEngine {
   readonly name = "pdf-lib";
   readonly description = "PDF-lib based extraction with full format support";
+
+  getName(): string {
+    return this.name;
+  }
 
   // Lazy import cache for performance
   private static pdfLibModule: any = null;
@@ -21,7 +25,7 @@ export class PdfLibEngine extends BaseImageEngine {
   // Worker pool for CPU-intensive operations
   private workerPool: AdaptiveWorkerPool | null = null;
 
-  async isAvailable(): Promise<boolean> {
+  override async isAvailable(): Promise<boolean> {
     try {
       await this.getPdfLibModule();
       return true;
@@ -452,7 +456,7 @@ export class PdfLibEngine extends BaseImageEngine {
                 console.log(
                   `   ✅ ${image.filename}: ${result.value.originalSize} → ${
                     result.value.optimizedSize
-                  } bytes (-${result.value.savedPercent.toFixed(1)}%) [${
+                  } bytes (-${result.value.savedPercent?.toFixed(1) ?? 0}%) [${
                     result.value.engine
                   }]`
                 );
@@ -482,7 +486,7 @@ export class PdfLibEngine extends BaseImageEngine {
                 console.log(
                   `   ✅ ${image.filename}: ${result.originalSize} → ${
                     result.optimizedSize
-                  } bytes (-${result.savedPercent.toFixed(1)}%) [${
+                  } bytes (-${result.savedPercent?.toFixed(1) ?? 0}%) [${
                     result.engine
                   }]`
                 );
@@ -639,7 +643,8 @@ export class PdfLibEngine extends BaseImageEngine {
     // Extract images from XObjects in parallel
     const imageResults = await ParallelProcessor.mapSettled(
       xObjectEntries,
-      async ([, xObjectRef], index) => {
+      async (entry: unknown, index: number) => {
+        const [, xObjectRef] = entry as [any, any];
         const xObject = pdfDoc.context.lookup(xObjectRef);
         if (!xObject) return null;
 
@@ -932,7 +937,7 @@ export class PdfLibEngine extends BaseImageEngine {
             }
 
             // Check if decompressed data is a valid image format
-            const detectedFormat = this.detectImageFormat(rawPixelData);
+            const detectedFormat = this.detectImageFormatDetailed(rawPixelData);
             if (detectedFormat.valid) {
               // It's already a valid image format
               imageData = rawPixelData;
@@ -1030,7 +1035,7 @@ export class PdfLibEngine extends BaseImageEngine {
             imageData = Buffer.from(rawData);
 
             // Try to detect format from decompressed data
-            const detectedFormat = this.detectImageFormat(imageData);
+            const detectedFormat = this.detectImageFormatDetailed(imageData);
             if (detectedFormat.valid) {
               mimeType = detectedFormat.mimeType!;
               extension = detectedFormat.extension!;
@@ -1065,7 +1070,7 @@ export class PdfLibEngine extends BaseImageEngine {
           imageData = Buffer.from(rawData);
 
           // Try to detect format
-          const detectedFormat = this.detectImageFormat(imageData);
+          const detectedFormat = this.detectImageFormatDetailed(imageData);
           if (detectedFormat.valid) {
             mimeType = detectedFormat.mimeType!;
             extension = detectedFormat.extension!;
@@ -1104,7 +1109,7 @@ export class PdfLibEngine extends BaseImageEngine {
   }
 
   // Additional helper methods would go here...
-  private detectImageFormat(data: Buffer): {
+  private detectImageFormatDetailed(data: Buffer): {
     valid: boolean;
     mimeType?: string;
     extension?: string;
