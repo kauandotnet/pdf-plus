@@ -14,31 +14,23 @@ export class StructuredDataGenerator {
    * Extract raw text without page markers, image references, or formatting
    */
   private extractRawText(text: string): string {
-    let rawText = text;
+    const withoutPageMarkers = text
+      .replace(/--- PAGE \d+ ---\s*/g, "")
+      .replace(/🎨 ART BASEL PAGE \d+ 🎨\s*/g, "")
+      .replace(/PAGE \d+\s*/g, "");
 
-    // Remove page markers (various formats)
-    rawText = rawText.replace(/--- PAGE \d+ ---\s*/g, "");
-    rawText = rawText.replace(/🎨 ART BASEL PAGE \d+ 🎨\s*/g, "");
-    rawText = rawText.replace(/PAGE \d+\s*/g, "");
+    const withoutImageRefs = withoutPageMarkers
+      .replace(/\[IMG:\w+\]\s*\w*\s*/g, "")
+      .replace(/\[IMG-\w+\]\s*[^[\n]*\s*/g, "")
+      .replace(/📷\s*[^-\n]*-\s*Page\s*\d+\s*-\s*Image\s*#\d+\s*/g, "")
+      .replace(/🎨\s*Art\s*Basel\s*Image\s*\d+\s*\(Page\s*\d+\)\s*/g, "");
 
-    // Remove image references (various formats)
-    rawText = rawText.replace(/\[IMG:\w+\]\s*\w*\s*/g, "");
-    rawText = rawText.replace(/\[IMG-\w+\]\s*[^[\n]*\s*/g, "");
-    rawText = rawText.replace(
-      /📷\s*[^-\n]*-\s*Page\s*\d+\s*-\s*Image\s*#\d+\s*/g,
-      ""
-    );
-    rawText = rawText.replace(
-      /🎨\s*Art\s*Basel\s*Image\s*\d+\s*\(Page\s*\d+\)\s*/g,
-      ""
-    );
+    const cleaned = withoutImageRefs
+      .replace(/\n\s*\n\s*\n/g, "\n\n") // Max 2 consecutive newlines
+      .replace(/^\s+|\s+$/g, "") // Trim start/end
+      .replace(/[ \t]+/g, " "); // Multiple spaces to single space
 
-    // Clean up extra whitespace and newlines
-    rawText = rawText.replace(/\n\s*\n\s*\n/g, "\n\n"); // Max 2 consecutive newlines
-    rawText = rawText.replace(/^\s+|\s+$/g, ""); // Trim start/end
-    rawText = rawText.replace(/[ \t]+/g, " "); // Multiple spaces to single space
-
-    return rawText;
+    return cleaned;
   }
   /**
    * Generate structured page data from extracted text and images
@@ -48,10 +40,18 @@ export class StructuredDataGenerator {
     text: string,
     images: ImageItem[],
     totalPages: number,
-    options: ExtractionOptions
+    options: ExtractionOptions,
+    pageImagesData?: Map<number, any> | null,
+    thumbnailsData?: Map<number, any> | null
   ): StructuredPageData {
     const pages = this.splitTextIntoPages(text, totalPages);
-    const pageDataArray = this.createPageDataArray(pages, images, totalPages);
+    const pageDataArray = this.createPageDataArray(
+      pages,
+      images,
+      totalPages,
+      pageImagesData,
+      thumbnailsData
+    );
 
     return {
       metadata: {
@@ -93,22 +93,15 @@ export class StructuredDataGenerator {
    */
   private splitByPageMarkers(text: string, pageMarkerRegex: RegExp): string[] {
     const parts = text.split(pageMarkerRegex);
-    const pages: string[] = [];
 
-    for (let i = 1; i < parts.length; i++) {
-      // Skip the first part (before first page marker)
-      const part = parts[i];
-      if (part) {
-        pages.push(part.trim());
-      }
-    }
+    // Skip the first part (before first page marker)
+    const pages = parts
+      .slice(1)
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
 
     // If no pages found, return the whole text
-    if (pages.length === 0) {
-      pages.push(text);
-    }
-
-    return pages;
+    return pages.length === 0 ? [text] : pages;
   }
 
   /**
@@ -117,14 +110,13 @@ export class StructuredDataGenerator {
   private splitByEstimatedLength(text: string, totalPages: number): string[] {
     const lines = text.split("\n");
     const linesPerPage = Math.ceil(lines.length / totalPages);
-    const pages: string[] = [];
 
-    for (let i = 0; i < totalPages; i++) {
+    const pageIndices = Array.from({ length: totalPages }, (_, i) => i);
+    const pages = pageIndices.map((i) => {
       const startLine = i * linesPerPage;
       const endLine = Math.min((i + 1) * linesPerPage, lines.length);
-      const pageText = lines.slice(startLine, endLine).join("\n");
-      pages.push(pageText);
-    }
+      return lines.slice(startLine, endLine).join("\n");
+    });
 
     return pages;
   }
@@ -135,18 +127,20 @@ export class StructuredDataGenerator {
   private createPageDataArray(
     pageTexts: string[],
     images: ImageItem[],
-    totalPages: number
+    totalPages: number,
+    pageImagesData?: Map<number, any> | null,
+    thumbnailsData?: Map<number, any> | null
   ): PageData[] {
-    const pageDataArray: PageData[] = [];
+    const pageIndices = Array.from({ length: totalPages }, (_, i) => i);
 
-    for (let i = 0; i < totalPages; i++) {
+    const pageDataArray = pageIndices.map((i) => {
       const pageNumber = i + 1;
       const pageText = pageTexts[i] || "";
       const pageImages = this.getImagesForPage(images, pageNumber);
 
       const rawText = this.extractRawText(pageText);
 
-      pageDataArray.push({
+      const pageData: PageData = {
         pageNumber,
         text: {
           content: pageText,
@@ -156,8 +150,28 @@ export class StructuredDataGenerator {
         },
         images: pageImages,
         imageCount: pageImages.length,
-      });
-    }
+      };
+
+      // Add page image if available
+      if (pageImagesData && pageImagesData.has(pageNumber)) {
+        pageData.pageImage = pageImagesData.get(pageNumber);
+      }
+
+      // Add thumbnail if available
+      if (thumbnailsData && thumbnailsData.has(pageNumber)) {
+        pageData.thumbnail = thumbnailsData.get(pageNumber);
+      }
+
+      // Add page image variants if available
+      if (pageImagesData && pageImagesData.has(pageNumber)) {
+        const pageImageData = pageImagesData.get(pageNumber);
+        if (pageImageData.variants && pageImageData.variants.length > 0) {
+          pageData.pageImageVariants = pageImageData.variants;
+        }
+      }
+
+      return pageData;
+    });
 
     return pageDataArray;
   }
@@ -179,11 +193,9 @@ export class StructuredDataGenerator {
           format: image.format || "unknown",
         };
 
-        if ("filename" in image) {
-          const filename = (image as { filename?: string }).filename;
-          if (filename !== undefined) {
-            result.filename = filename;
-          }
+        // Add optional fields if they exist
+        if ("filename" in image && image.filename !== undefined) {
+          result.filename = image.filename;
         }
 
         if ("path" in image) {
@@ -193,11 +205,29 @@ export class StructuredDataGenerator {
           }
         }
 
-        if ("size" in image) {
-          const size = (image as { size?: number }).size;
-          if (size !== undefined) {
-            result.size = size;
+        if ("filePath" in image) {
+          const filePath = (image as { filePath?: string }).filePath;
+          if (filePath !== undefined) {
+            result.path = filePath;
           }
+        }
+
+        if ("size" in image && image.size !== undefined) {
+          result.size = image.size;
+        }
+
+        // Add image dimensions
+        if ("width" in image && image.width !== undefined) {
+          result.width = image.width;
+        }
+
+        if ("height" in image && image.height !== undefined) {
+          result.height = image.height;
+        }
+
+        // Add MIME type
+        if ("mimeType" in image && image.mimeType !== undefined) {
+          result.mimeType = image.mimeType;
         }
 
         return result;

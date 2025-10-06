@@ -1,6 +1,10 @@
 import { BaseImageEngine } from "./base-image-engine.js";
 import type { ExtractionOptions, ImageItem } from "../../types/index.js";
+import { ParallelProcessor } from "../../utils/parallel-processor.js";
+import { AdaptiveWorkerPool } from "../../utils/worker-pool.js";
+import type { WorkerTask } from "../../types/worker-types.js";
 import fs from "node:fs";
+import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 /**
@@ -10,12 +14,212 @@ export class PdfLibEngine extends BaseImageEngine {
   readonly name = "pdf-lib";
   readonly description = "PDF-lib based extraction with full format support";
 
+  // Lazy import cache for performance
+  private static pdfLibModule: any = null;
+  private static imageOptimizerModule: any = null;
+
+  // Worker pool for CPU-intensive operations
+  private workerPool: AdaptiveWorkerPool | null = null;
+
   async isAvailable(): Promise<boolean> {
     try {
-      await import("pdf-lib");
+      await this.getPdfLibModule();
       return true;
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Get cached PDF-lib module or import it
+   */
+  private async getPdfLibModule() {
+    if (!PdfLibEngine.pdfLibModule) {
+      PdfLibEngine.pdfLibModule = await import("pdf-lib");
+    }
+    return PdfLibEngine.pdfLibModule;
+  }
+
+  /**
+   * Get cached ImageOptimizer module or import it
+   */
+  private async getImageOptimizerModule() {
+    if (!PdfLibEngine.imageOptimizerModule) {
+      PdfLibEngine.imageOptimizerModule = await import(
+        "../../optimizers/index.js"
+      );
+    }
+    return PdfLibEngine.imageOptimizerModule;
+  }
+
+  /**
+   * Initialize worker pool if needed
+   */
+  private async initializeWorkerPool(
+    options: ExtractionOptions
+  ): Promise<void> {
+    if (!options.useWorkerThreads || this.workerPool) return;
+
+    this.workerPool = new AdaptiveWorkerPool({
+      maxWorkerThreads: options.maxWorkerThreads,
+      minWorkerThreads: options.minWorkerThreads,
+      autoScaleWorkers: options.autoScaleWorkers,
+      memoryThreshold: options.memoryThreshold,
+      cpuThreshold: options.cpuThreshold,
+      workerTaskTimeout: options.workerTaskTimeout,
+      workerIdleTimeout: options.workerIdleTimeout,
+      workerMemoryLimit: options.workerMemoryLimit,
+      verbose: options.verbose,
+    });
+
+    if (options.verbose) {
+      console.log("🔧 Worker pool initialized");
+    }
+  }
+
+  /**
+   * Cleanup worker pool
+   */
+  private async cleanupWorkerPool(): Promise<void> {
+    if (this.workerPool) {
+      await this.workerPool.terminate();
+      this.workerPool = null;
+    }
+  }
+
+  /**
+   * Convert JP2 file to JPG using worker if available
+   */
+  private async convertJp2FileWithWorker(
+    jp2Path: string,
+    quality: number,
+    verbose: boolean
+  ): Promise<{ success: boolean; newPath?: string; error?: string }> {
+    const useWorker =
+      this.workerPool && this.workerPool.getStats().totalWorkers > 0;
+
+    if (!useWorker) {
+      // Fall back to main thread
+      const { ImageOptimizer } = await this.getImageOptimizerModule();
+      return ImageOptimizer.convertJp2ToJpg(jp2Path, { quality, verbose });
+    }
+
+    try {
+      // Read file
+      const buffer = await fsPromises.readFile(jp2Path);
+
+      // Convert using worker
+      const task: WorkerTask = {
+        type: "convert",
+        taskId: `convert-${Date.now()}-${Math.random()}`,
+        data: {
+          buffer,
+          options: { quality },
+        },
+      };
+
+      const result = await this.workerPool!.execute(task);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "JP2 conversion failed");
+      }
+
+      // Write converted file
+      const jpgPath = jp2Path.replace(/\.jp2$/i, ".jpg");
+      await fsPromises.writeFile(jpgPath, result.data);
+
+      // Delete original JP2 file
+      await fsPromises.unlink(jp2Path);
+
+      return {
+        success: true,
+        newPath: jpgPath,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
+   * Optimize image file using worker if available
+   */
+  private async optimizeFileWithWorker(
+    filepath: string,
+    options: {
+      engine?: string;
+      quality?: number;
+      progressive?: boolean;
+      verbose?: boolean;
+    }
+  ): Promise<{
+    success: boolean;
+    originalSize?: number;
+    optimizedSize?: number;
+    savedPercent?: number;
+    engine?: string;
+    error?: string;
+  }> {
+    const useWorker =
+      this.workerPool && this.workerPool.getStats().totalWorkers > 0;
+
+    if (!useWorker) {
+      // Fall back to main thread
+      const { ImageOptimizer } = await this.getImageOptimizerModule();
+      return ImageOptimizer.optimizeFile(filepath, options);
+    }
+
+    try {
+      // Read file
+      const buffer = await fsPromises.readFile(filepath);
+      const originalSize = buffer.length;
+
+      // Determine format from extension
+      const ext = path.extname(filepath).toLowerCase().slice(1);
+      const format = ext === "jpg" ? "jpeg" : ext;
+
+      // Optimize using worker
+      const task: WorkerTask = {
+        type: "optimize",
+        taskId: `optimize-${Date.now()}-${Math.random()}`,
+        data: {
+          buffer,
+          options: {
+            format,
+            quality: options.quality || 80,
+            progressive: options.progressive !== false,
+            engine: options.engine || "auto",
+          },
+        },
+      };
+
+      const result = await this.workerPool!.execute(task);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Optimization failed");
+      }
+
+      // Write optimized file
+      await fsPromises.writeFile(filepath, result.data);
+
+      const optimizedSize = result.data.length;
+      const savedBytes = originalSize - optimizedSize;
+      const savedPercent = (savedBytes / originalSize) * 100;
+
+      return {
+        success: true,
+        originalSize,
+        optimizedSize,
+        savedPercent,
+        engine: "worker",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 
@@ -37,72 +241,61 @@ export class PdfLibEngine extends BaseImageEngine {
     error?: string;
   }> {
     try {
-      const { PDFDocument, PDFName } = await import("pdf-lib");
-      // const zlib = await import("zlib"); // Imported but not used in this scope
+      // Initialize worker pool if enabled
+      await this.initializeWorkerPool(options);
 
-      if (!fs.existsSync(pdfPath)) {
+      // Use cached PDF-lib module
+      const { PDFDocument, PDFName } = await this.getPdfLibModule();
+
+      // Check if file exists (async)
+      try {
+        await fsPromises.access(pdfPath);
+      } catch {
+        await this.cleanupWorkerPool();
         return {
           success: false,
           error: `PDF file not found: ${pdfPath}`,
         };
       }
 
-      const pdfBytes = fs.readFileSync(pdfPath);
+      // Read PDF file asynchronously
+      const pdfBytes = await fsPromises.readFile(pdfPath);
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const pages = pdfDoc.getPages();
 
-      const images: ImageItem[] = [];
-      let globalImageIndex = 1;
+      // Determine if parallel processing is enabled
+      const useParallel = options.parallelProcessing !== false; // Default: true
+      const maxConcurrentPages = options.maxConcurrentPages || 10;
+      const maxConcurrentImages = options.maxConcurrentImages || 20;
 
       if (options.verbose) {
-        console.log(`📊 Processing ${pages.length} pages with PDF-lib engine`);
+        console.log(
+          `📊 Processing ${pages.length} pages with PDF-lib engine (${
+            useParallel ? "parallel" : "sequential"
+          })`
+        );
       }
 
-      for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-        const page = pages[pageIndex];
-        const pageNumber = pageIndex + 1;
+      let images: ImageItem[];
 
-        // Get page resources
-        const resources = page?.node.Resources;
-        if (!resources) continue;
-
-        const resourcesDict =
-          typeof resources === "function" ? resources() : resources;
-        const xObjects = resourcesDict?.get?.(PDFName.of("XObject"));
-        if (!xObjects) continue;
-
-        const xObjectEntries = (xObjects as any).entries?.() || [];
-        let _pageImageCount = 0;
-
-        if (options.verbose) {
-          console.log(
-            `   📄 Page ${pageNumber}: Found ${xObjectEntries.length} XObjects`
-          );
-        }
-
-        for (const [, xObjectRef] of xObjectEntries) {
-          const xObject = pdfDoc.context.lookup(xObjectRef);
-          if (!xObject) continue;
-
-          const subtype = (xObject as any).dict?.get?.(PDFName.of("Subtype"));
-          if (subtype?.toString() !== "/Image") continue;
-
-          _pageImageCount++;
-
-          // Extract image using the existing logic
-          const imageResult = await this.extractImageFromPdfObject(
-            xObject,
-            pageNumber,
-            globalImageIndex,
-            options
-          );
-
-          if (imageResult) {
-            images.push(imageResult);
-          }
-
-          globalImageIndex++;
-        }
+      if (useParallel) {
+        // PARALLEL PROCESSING
+        images = await this.extractImagesParallel(
+          pdfDoc,
+          pages,
+          PDFName,
+          options,
+          maxConcurrentPages,
+          maxConcurrentImages
+        );
+      } else {
+        // SEQUENTIAL PROCESSING (original behavior)
+        images = await this.extractImagesSequential(
+          pdfDoc,
+          pages,
+          PDFName,
+          options
+        );
       }
 
       if (options.verbose) {
@@ -111,11 +304,211 @@ export class PdfLibEngine extends BaseImageEngine {
         );
       }
 
+      // BATCH FILE WRITES: Write all image files in parallel
+      if (
+        options.extractImageFiles &&
+        options.imageOutputDir &&
+        images.length > 0
+      ) {
+        const imagesToWrite = images.filter(
+          (img: any) => img._imageData && img.filepath
+        );
+
+        if (imagesToWrite.length > 0) {
+          // Ensure output directory exists
+          const imagesDir = path.join(options.imageOutputDir, "images");
+          await fsPromises.mkdir(imagesDir, { recursive: true });
+
+          if (options.verbose) {
+            console.log(`   💾 Writing ${imagesToWrite.length} image files...`);
+          }
+
+          // Write all files in parallel
+          await Promise.all(
+            imagesToWrite.map((img: any) =>
+              fsPromises.writeFile(img.filepath, img._imageData)
+            )
+          );
+
+          // Clean up temporary data
+          imagesToWrite.forEach((img: any) => {
+            delete img._imageData;
+          });
+        }
+      }
+
+      // NEW: Convert JP2 to JPG if requested (default: true)
+      const shouldConvertJp2 = options.convertJp2ToJpg !== false;
+      if (shouldConvertJp2 && images.length > 0) {
+        const jp2Images = images.filter(
+          (img) => img.filepath && img.filepath.toLowerCase().endsWith(".jp2")
+        );
+
+        if (jp2Images.length > 0) {
+          if (options.verbose) {
+            console.log(
+              `🔄 Converting ${jp2Images.length} JP2 images to JPG...`
+            );
+          }
+
+          const maxConcurrentConversions =
+            options.maxConcurrentConversions || 5;
+          const quality =
+            options.imageQuality !== undefined ? options.imageQuality : 100;
+
+          if (useParallel) {
+            // PARALLEL JP2 CONVERSION (with optional worker support)
+            const conversionResults = await ParallelProcessor.mapSettled(
+              jp2Images,
+              async (image) => {
+                if (image.filepath && fs.existsSync(image.filepath)) {
+                  // Use worker-aware conversion method
+                  return this.convertJp2FileWithWorker(
+                    image.filepath,
+                    quality,
+                    options.verbose || false
+                  );
+                }
+                return { success: false, error: "File not found" };
+              },
+              {
+                maxConcurrency: maxConcurrentConversions,
+                verbose: options.verbose,
+              }
+            );
+
+            // Update image objects with conversion results
+            conversionResults.forEach((result, index) => {
+              if (
+                result.status === "fulfilled" &&
+                result.value.success &&
+                result.value.newPath
+              ) {
+                const image = jp2Images[index];
+                image.filepath = result.value.newPath;
+                image.filename = image.filename?.replace(/\.jp2$/i, ".jpg");
+                image.format = "jpg";
+                image.mimeType = "image/jpeg";
+              }
+            });
+          } else {
+            // SEQUENTIAL JP2 CONVERSION (with optional worker support)
+            for (const image of jp2Images) {
+              if (image.filepath && fs.existsSync(image.filepath)) {
+                // Use worker-aware conversion method
+                const result = await this.convertJp2FileWithWorker(
+                  image.filepath,
+                  quality,
+                  options.verbose || false
+                );
+
+                if (result.success && result.newPath) {
+                  // Update image object with new path
+                  image.filepath = result.newPath;
+                  image.filename = image.filename?.replace(/\.jp2$/i, ".jpg");
+                  image.format = "jpg";
+                  image.mimeType = "image/jpeg";
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // NEW: Optimize images if requested
+      if (options.optimizeImages && images.length > 0) {
+        if (options.verbose) {
+          console.log(`🎨 Optimizing ${images.length} images...`);
+        }
+
+        const maxConcurrentOptimizations =
+          options.maxConcurrentOptimizations || 5;
+
+        if (useParallel) {
+          // PARALLEL IMAGE OPTIMIZATION (with optional worker support)
+          const optimizationResults = await ParallelProcessor.mapSettled(
+            images,
+            async (image) => {
+              if (image.filepath && fs.existsSync(image.filepath)) {
+                // Use worker-aware optimization method
+                return this.optimizeFileWithWorker(image.filepath, {
+                  quality: options.imageQuality || 80,
+                  verbose: false, // Reduce noise in parallel mode
+                });
+              }
+              return { success: false, error: "File not found" };
+            },
+            {
+              maxConcurrency: maxConcurrentOptimizations,
+              verbose: options.verbose,
+            }
+          );
+
+          // Log results if verbose
+          if (options.verbose) {
+            optimizationResults.forEach((result, index) => {
+              const image = images[index];
+              if (result.status === "fulfilled" && result.value.success) {
+                console.log(
+                  `   ✅ ${image.filename}: ${result.value.originalSize} → ${
+                    result.value.optimizedSize
+                  } bytes (-${result.value.savedPercent.toFixed(1)}%) [${
+                    result.value.engine
+                  }]`
+                );
+              } else if (
+                result.status === "fulfilled" &&
+                !result.value.success
+              ) {
+                console.log(
+                  `   ⚠️  ${image.filename}: Optimization skipped (${
+                    result.value.error || "unknown error"
+                  })`
+                );
+              }
+            });
+          }
+        } else {
+          // SEQUENTIAL IMAGE OPTIMIZATION (with optional worker support)
+          for (const image of images) {
+            if (image.filepath && fs.existsSync(image.filepath)) {
+              // Use worker-aware optimization method
+              const result = await this.optimizeFileWithWorker(image.filepath, {
+                quality: options.imageQuality || 80,
+                verbose: options.verbose,
+              });
+
+              if (result.success && options.verbose) {
+                console.log(
+                  `   ✅ ${image.filename}: ${result.originalSize} → ${
+                    result.optimizedSize
+                  } bytes (-${result.savedPercent.toFixed(1)}%) [${
+                    result.engine
+                  }]`
+                );
+              } else if (!result.success && options.verbose) {
+                console.log(
+                  `   ⚠️  ${image.filename}: Optimization skipped (${
+                    result.error || "unknown error"
+                  })`
+                );
+              }
+            }
+          }
+        }
+      }
+
+      // Cleanup worker pool
+      await this.cleanupWorkerPool();
+
       return {
         success: true,
         images,
       };
     } catch (error) {
+      // Cleanup worker pool on error
+      await this.cleanupWorkerPool();
+
       return {
         success: false,
         error: `PDF-lib extraction failed: ${
@@ -125,6 +518,218 @@ export class PdfLibEngine extends BaseImageEngine {
     }
   }
 
+  /**
+   * Extract images from all pages in parallel
+   */
+  private async extractImagesParallel(
+    pdfDoc: any,
+    pages: any[],
+    PDFName: any,
+    options: ExtractionOptions,
+    maxConcurrentPages: number,
+    maxConcurrentImages: number
+  ): Promise<ImageItem[]> {
+    // First, count images per page to calculate proper indices
+    // We need to do this sequentially to maintain correct image numbering
+    const pageImageCounts: number[] = [];
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      const resources = page?.node.Resources;
+      if (!resources) {
+        pageImageCounts.push(0);
+        continue;
+      }
+
+      const resourcesDict =
+        typeof resources === "function" ? resources() : resources;
+      const xObjects = resourcesDict?.get?.(PDFName.of("XObject"));
+      if (!xObjects) {
+        pageImageCounts.push(0);
+        continue;
+      }
+
+      const xObjectEntries = (xObjects as any).entries?.() || [];
+      let imageCount = 0;
+      for (const [, xObjectRef] of xObjectEntries) {
+        const xObject = pdfDoc.context.lookup(xObjectRef);
+        if (!xObject) continue;
+        const subtype = (xObject as any).dict?.get?.(PDFName.of("Subtype"));
+        if (subtype?.toString() === "/Image") {
+          imageCount++;
+        }
+      }
+      pageImageCounts.push(imageCount);
+    }
+
+    // Calculate starting image index for each page
+    const startIndices: number[] = [];
+    let currentIndex = 1;
+    for (const count of pageImageCounts) {
+      startIndices.push(currentIndex);
+      currentIndex += count;
+    }
+
+    // Process pages in parallel with concurrency limit
+    const pageResults = await ParallelProcessor.mapSettled(
+      pages,
+      async (page, pageIndex) => {
+        const pageNumber = pageIndex + 1;
+        const startImageIndex = startIndices[pageIndex];
+        return this.extractImagesFromPage(
+          pdfDoc,
+          page,
+          pageNumber,
+          startImageIndex,
+          PDFName,
+          options,
+          maxConcurrentImages
+        );
+      },
+      {
+        maxConcurrency: maxConcurrentPages,
+        verbose: options.verbose,
+      }
+    );
+
+    // Flatten results and filter out failed pages
+    const allImages: ImageItem[] = [];
+
+    pageResults.forEach((result, pageIndex) => {
+      if (result.status === "fulfilled") {
+        allImages.push(...result.value);
+      } else if (options.verbose) {
+        console.log(
+          `   ⚠️  Failed to process page ${pageIndex + 1}: ${result.reason}`
+        );
+      }
+    });
+
+    return allImages;
+  }
+
+  /**
+   * Extract images from a single page (used by parallel processing)
+   */
+  private async extractImagesFromPage(
+    pdfDoc: any,
+    page: any,
+    pageNumber: number,
+    startImageIndex: number,
+    PDFName: any,
+    options: ExtractionOptions,
+    maxConcurrentImages: number
+  ): Promise<ImageItem[]> {
+    // Get page resources
+    const resources = page?.node.Resources;
+    if (!resources) return [];
+
+    const resourcesDict =
+      typeof resources === "function" ? resources() : resources;
+    const xObjects = resourcesDict?.get?.(PDFName.of("XObject"));
+    if (!xObjects) return [];
+
+    const xObjectEntries = (xObjects as any).entries?.() || [];
+
+    if (options.verbose) {
+      console.log(
+        `   📄 Page ${pageNumber}: Found ${xObjectEntries.length} XObjects`
+      );
+    }
+
+    // Extract images from XObjects in parallel
+    const imageResults = await ParallelProcessor.mapSettled(
+      xObjectEntries,
+      async ([, xObjectRef], index) => {
+        const xObject = pdfDoc.context.lookup(xObjectRef);
+        if (!xObject) return null;
+
+        const subtype = (xObject as any).dict?.get?.(PDFName.of("Subtype"));
+        if (subtype?.toString() !== "/Image") return null;
+
+        const imageIndex = startImageIndex + index;
+        return this.extractImageFromPdfObject(
+          xObject,
+          pageNumber,
+          imageIndex,
+          options
+        );
+      },
+      {
+        maxConcurrency: maxConcurrentImages,
+        verbose: false, // Don't log for each image to reduce noise
+      }
+    );
+
+    // Filter out null results and failed extractions
+    const images: ImageItem[] = [];
+    imageResults.forEach((result) => {
+      if (result.status === "fulfilled" && result.value) {
+        images.push(result.value);
+      }
+    });
+
+    return images;
+  }
+
+  /**
+   * Extract images from all pages sequentially (original behavior)
+   */
+  private async extractImagesSequential(
+    pdfDoc: any,
+    pages: any[],
+    PDFName: any,
+    options: ExtractionOptions
+  ): Promise<ImageItem[]> {
+    const images: ImageItem[] = [];
+    let globalImageIndex = 1;
+
+    for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+      const page = pages[pageIndex];
+      const pageNumber = pageIndex + 1;
+
+      // Get page resources
+      const resources = page?.node.Resources;
+      if (!resources) continue;
+
+      const resourcesDict =
+        typeof resources === "function" ? resources() : resources;
+      const xObjects = resourcesDict?.get?.(PDFName.of("XObject"));
+      if (!xObjects) continue;
+
+      const xObjectEntries = (xObjects as any).entries?.() || [];
+
+      if (options.verbose) {
+        console.log(
+          `   📄 Page ${pageNumber}: Found ${xObjectEntries.length} XObjects`
+        );
+      }
+
+      for (const [, xObjectRef] of xObjectEntries) {
+        const xObject = pdfDoc.context.lookup(xObjectRef);
+        if (!xObject) continue;
+
+        const subtype = (xObject as any).dict?.get?.(PDFName.of("Subtype"));
+        if (subtype?.toString() !== "/Image") continue;
+
+        // Extract image using the existing logic
+        const imageResult = await this.extractImageFromPdfObject(
+          xObject,
+          pageNumber,
+          globalImageIndex,
+          options
+        );
+
+        if (imageResult) {
+          images.push(imageResult);
+        }
+
+        globalImageIndex++;
+      }
+    }
+
+    return images;
+  }
+
   private async extractImageFromPdfObject(
     pdfObject: any,
     pageNumber: number,
@@ -132,8 +737,8 @@ export class PdfLibEngine extends BaseImageEngine {
     options: ExtractionOptions
   ): Promise<ImageItem | null> {
     try {
-      const { PDFName } = await import("pdf-lib");
-      // const zlib = await import("zlib"); // Imported but not used in this scope
+      // Use cached PDF-lib module
+      const { PDFName } = await this.getPdfLibModule();
 
       // Get image properties
       const width = pdfObject.dict.get(PDFName.of("Width"));
@@ -191,14 +796,10 @@ export class PdfLibEngine extends BaseImageEngine {
       let filepath: string | undefined;
       const size = extractionResult.imageData.length;
 
-      // Save image file if requested
+      // Prepare file path if requested (actual write happens in batch later)
       if (options.extractImageFiles && options.imageOutputDir) {
         const imagesDir = path.join(options.imageOutputDir, "images");
-        if (!fs.existsSync(imagesDir)) {
-          fs.mkdirSync(imagesDir, { recursive: true });
-        }
         filepath = path.join(imagesDir, filename);
-        fs.writeFileSync(filepath, extractionResult.imageData);
 
         if (options.verbose) {
           console.log(
@@ -218,7 +819,9 @@ export class PdfLibEngine extends BaseImageEngine {
         mimeType: extractionResult.mimeType || "",
         size,
         position: { x: 0, y: 0, width: widthVal, height: heightVal },
-      };
+        // Store image data for batch writing
+        _imageData: extractionResult.imageData,
+      } as any;
     } catch (error) {
       if (options.verbose) {
         console.log(

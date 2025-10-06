@@ -3,33 +3,56 @@
  *
  * Main entry point for the PDF content extraction library.
  * Provides both high-level convenience functions and low-level access to extractors.
+ *
+ * @packageDocumentation
  */
 
-// Core exports
+// ============================================================================
+// Core Exports
+// ============================================================================
+
 export { PDFExtractor, pdfExtractor } from "./core/extractor.js";
+export { StreamingPDFExtractor } from "./core/streaming-extractor.js";
 
-// Extractor classes
-export { TextExtractor } from "./extractors/text-extractor.js";
-export { ImageExtractor } from "./extractors/image-extractor.js";
+// ============================================================================
+// Extractor Classes
+// ============================================================================
 
-// Image extraction engines (coming soon)
-// export {
-//   BaseImageEngine,
-//   PdfLibEngine,
-//   PopplerEngine,
-//   ImageEngineFactory,
-// } from "./extractors/engines/index.js";
+export {
+  TextExtractor,
+  StructuredTextExtractor,
+} from "./extractors/text/index.js";
+export { ImageExtractor } from "./extractors/image/index.js";
+export { PageToImageConverter } from "./extractors/page-to-image/index.js";
 
-// Utilities
+// ============================================================================
+// Processors & Optimizers
+// ============================================================================
+
+export {
+  ImageOptimizer,
+  type OptimizationResult,
+  type OptimizationOptions,
+} from "./optimizers/index.js";
+
 export { FormatProcessor } from "./utils/format-processor.js";
+
+// ============================================================================
+// Utilities
+// ============================================================================
+
 export {
   validateConfig,
   validateImageRefFormat,
   validateFilePath,
 } from "./utils/validation.js";
 
-// Types
+// ============================================================================
+// Type Exports
+// ============================================================================
+
 export type {
+  // Core types
   Position,
   FontInfo,
   TextItem,
@@ -43,10 +66,13 @@ export type {
   ExtractorConfig,
   ValidationError,
   ExtractionError,
+
+  // Processing types
   FormatPlaceholder,
   FormatContext,
   ProcessingPhase,
-  ImageExtractionEngine,
+
+  // Advanced types
   MemoryUsage,
   StreamingOptions,
   OCROptions,
@@ -54,15 +80,72 @@ export type {
   TemplateOptions,
 } from "./types/index.js";
 
-// Convenience functions
-import { pdfExtractor } from "./core/extractor.js";
+// ============================================================================
+// Page to Image Types
+// ============================================================================
+
+export type {
+  PageToImageOptions,
+  PageToImageResult,
+  PageImageResult,
+  SinglePageOptions,
+  ThumbnailOptions,
+  PageImageFormat,
+} from "./types/page-to-image-types.js";
+
+// ============================================================================
+// Streaming Types
+// ============================================================================
+
+export type {
+  StreamingExtractionResult,
+  StreamEvent,
+  StreamEventType,
+  StartEvent,
+  PageEvent,
+  ImageEvent,
+  ProgressEvent,
+  CompleteEvent,
+  ErrorEvent,
+  StreamingStats,
+  StreamingState,
+  StreamEventCallbacks,
+} from "./types/streaming-types.js";
+
+// ============================================================================
+// Internal Imports (for convenience functions)
+// ============================================================================
+
+import type {
+  ExtractionOptions,
+  ExtractionResult,
+  ImageItem,
+} from "./types/index.js";
+import type { StreamingExtractionResult } from "./types/streaming-types.js";
+import { PDFExtractor, pdfExtractor } from "./core/extractor.js";
+import { StreamingPDFExtractor } from "./core/streaming-extractor.js";
+import { TextExtractor } from "./extractors/text/text-extractor.js";
+import { ImageExtractor } from "./extractors/image/image-extractor.js";
+import { ImageOptimizer } from "./optimizers/index.js";
+import { FormatProcessor } from "./utils/format-processor.js";
+import {
+  validateConfig,
+  validateImageRefFormat,
+  validateFilePath,
+} from "./utils/validation.js";
+
+// ============================================================================
+// Convenience Functions
+// ============================================================================
 
 /**
  * Extract content from a PDF file (convenience function)
  *
+ * Automatically switches to streaming mode for large PDFs if `autoStreamThreshold` is set.
+ *
  * @param pdfPath - Path to the PDF file
  * @param options - Extraction options
- * @returns Promise resolving to extraction result
+ * @returns Promise resolving to extraction result or streaming result
  *
  * @example
  * ```typescript
@@ -76,11 +159,49 @@ import { pdfExtractor } from "./core/extractor.js";
  *
  * console.log(`Extracted ${result.images.length} images from ${result.document.pages} pages`);
  * ```
+ *
+ * @example
+ * ```typescript
+ * // Auto-streaming for large PDFs
+ * const result = await extractPdfContent('large-document.pdf', {
+ *   extractImageFiles: true,
+ *   autoStreamThreshold: 100, // Auto-stream if > 100 pages
+ * });
+ * ```
  */
 export async function extractPdfContent(
   pdfPath: string,
-  options: import("./types/index.js").ExtractionOptions = {}
-) {
+  options: ExtractionOptions = {}
+): Promise<ExtractionResult | StreamingExtractionResult> {
+  // Check if auto-streaming should be enabled
+  // Only auto-enable if streamMode is not explicitly set to false
+  if (
+    options.autoStreamThreshold &&
+    options.streamMode !== false && // Allow auto-streaming unless explicitly disabled
+    options.autoStreamThreshold > 0
+  ) {
+    // Get page count to determine if we should stream
+    const quickResult = await pdfExtractor.extract(pdfPath, {
+      extractText: true, // Need at least one enabled for validation
+      extractImages: false,
+      extractImageFiles: false,
+      verbose: false,
+    });
+
+    const pageCount = quickResult.document.pages;
+
+    if (pageCount > options.autoStreamThreshold) {
+      if (options.verbose) {
+        console.log(
+          `📊 Auto-enabling streaming mode (${pageCount} pages > ${options.autoStreamThreshold} threshold)`
+        );
+      }
+      // Return streaming result
+      return extractPdfStream(pdfPath, { ...options, streamMode: true });
+    }
+  }
+
+  // Standard extraction
   return pdfExtractor.extract(pdfPath, options);
 }
 
@@ -101,8 +222,8 @@ export async function extractPdfContent(
  */
 export async function extractText(
   pdfPath: string,
-  options: Partial<import("./types/index.js").ExtractionOptions> = {}
-) {
+  options: Partial<ExtractionOptions> = {}
+): Promise<string> {
   return pdfExtractor.extractText(pdfPath, options);
 }
 
@@ -127,8 +248,8 @@ export async function extractText(
  */
 export async function extractImages(
   pdfPath: string,
-  options: Partial<import("./types/index.js").ExtractionOptions> = {}
-) {
+  options: Partial<ExtractionOptions> = {}
+): Promise<ImageItem[]> {
   return pdfExtractor.extractImages(pdfPath, options);
 }
 
@@ -154,38 +275,96 @@ export async function extractImages(
 export async function extractImageFiles(
   pdfPath: string,
   outputDir: string = "./extracted-images",
-  options: Partial<import("./types/index.js").ExtractionOptions> = {}
-) {
+  options: Partial<ExtractionOptions> = {}
+): Promise<string[]> {
   return pdfExtractor.extractImageFiles(pdfPath, outputDir, options);
 }
 
-// Version information
-export const version = "1.0.0";
+/**
+ * Extract PDF content in streaming mode (Phase 4 - NEW!)
+ *
+ * For large PDFs, this provides a streaming API that processes pages one at a time,
+ * reducing memory usage and providing real-time progress updates.
+ *
+ * @param pdfPath - Path to the PDF file
+ * @param options - Extraction and streaming options
+ * @returns StreamingExtractionResult with async iterator and event callbacks
+ *
+ * @example
+ * ```typescript
+ * // Using async iterator
+ * const stream = extractPdfStream('large-document.pdf', {
+ *   extractImageFiles: true,
+ *   imageOutputDir: './images',
+ *   streamMode: true
+ * });
+ *
+ * for await (const event of stream) {
+ *   if (event.type === 'page') {
+ *     console.log(`Processed page ${event.pageNumber}/${event.totalPages}`);
+ *   } else if (event.type === 'progress') {
+ *     console.log(`Progress: ${event.percentComplete.toFixed(1)}%`);
+ *   }
+ * }
+ *
+ * // Using event callbacks
+ * const stream = extractPdfStream('large-document.pdf', { streamMode: true })
+ *   .on('page', (event) => console.log(`Page ${event.pageNumber} done`))
+ *   .on('progress', (event) => console.log(`${event.percentComplete}% complete`))
+ *   .on('complete', (event) => console.log(`Done! ${event.totalImages} images`));
+ *
+ * for await (const event of stream) {
+ *   // Events are also available via iterator
+ * }
+ * ```
+ */
+export function extractPdfStream(
+  pdfPath: string,
+  options: Partial<ExtractionOptions> = {}
+): StreamingExtractionResult {
+  // Use static import instead of require
+  return new StreamingPDFExtractor(pdfPath, options);
+}
 
-// Import for default export
-import { PDFExtractor } from "./core/extractor.js";
-import { TextExtractor } from "./extractors/text-extractor.js";
-import { ImageExtractor } from "./extractors/image-extractor.js";
-import { FormatProcessor } from "./utils/format-processor.js";
-import {
-  validateConfig,
-  validateImageRefFormat,
-  validateFilePath,
-} from "./utils/validation.js";
+// ============================================================================
+// Version & Metadata
+// ============================================================================
 
-// Default export for CommonJS compatibility
+/**
+ * Library version
+ */
+export const version = "1.0.3";
+
+// ============================================================================
+// Default Export (CommonJS compatibility)
+// ============================================================================
+
+/**
+ * Default export containing all public APIs
+ * Useful for CommonJS: const pdfPlus = require('pdf-plus');
+ */
 export default {
+  // Classes
   PDFExtractor,
   pdfExtractor,
+  StreamingPDFExtractor,
   TextExtractor,
   ImageExtractor,
+  ImageOptimizer,
   FormatProcessor,
+
+  // Functions
   extractPdfContent,
   extractText,
   extractImages,
   extractImageFiles,
+  extractPdfStream,
+
+  // Utilities
   validateConfig,
   validateImageRefFormat,
   validateFilePath,
+
+  // Metadata
   version,
 };

@@ -12,8 +12,9 @@ import type {
   PageData,
 } from "../types/index.js";
 import { validateConfig } from "../utils/validation.js";
-import { TextExtractor } from "../extractors/text-extractor.js";
-import { ImageExtractor } from "../extractors/image-extractor.js";
+import { TextExtractor } from "../extractors/text/text-extractor.js";
+import { ImageExtractor } from "../extractors/image/image-extractor.js";
+import { PageToImageConverter } from "../extractors/page-to-image/page-to-image-converter.js";
 import { FormatProcessor } from "../utils/format-processor.js";
 import { StructuredDataGenerator } from "../utils/structured-data-generator.js";
 import { CacheManager } from "../utils/cache-manager.js";
@@ -41,6 +42,7 @@ import { CacheManager } from "../utils/cache-manager.js";
 export class PDFExtractor {
   private textExtractor: TextExtractor;
   private imageExtractor: ImageExtractor;
+  private pageToImageConverter: PageToImageConverter;
   private formatProcessor: FormatProcessor;
   private structuredDataGenerator: StructuredDataGenerator;
   private cacheManager: CacheManager;
@@ -53,6 +55,7 @@ export class PDFExtractor {
   constructor(cacheDir?: string) {
     this.textExtractor = new TextExtractor();
     this.imageExtractor = new ImageExtractor();
+    this.pageToImageConverter = new PageToImageConverter();
     this.formatProcessor = new FormatProcessor();
     this.structuredDataGenerator = new StructuredDataGenerator();
     this.cacheManager = new CacheManager(cacheDir);
@@ -101,6 +104,10 @@ export class PDFExtractor {
         useImagePaths: false,
         imageRefFormat: "[IMAGE:{id}]",
         verbose: false,
+        // Default includePageMarkers to true to ensure proper page boundary detection
+        // This prevents issues where pages appear "empty" when they're actually part of continuous text
+        includePageMarkers: true,
+        pageMarkerFormat: "--- PAGE {page} ---",
         ...options,
       },
     };
@@ -150,18 +157,12 @@ export class PDFExtractor {
             pageOffset: number;
             includeImageRefs: boolean;
             imageRefFormat: string;
-            imageEngine?: import("../types/index.js").ImageExtractionEngine;
           } = {
             pageOffset,
             includeImageRefs: config.options.includeImageRefs ?? false,
             imageRefFormat:
               config.options.imageRefFormat ?? "[IMG:{id}] {name}",
           };
-
-          // Only add imageEngine if it's defined
-          if (config.options.imageEngine) {
-            extractOptions.imageEngine = config.options.imageEngine;
-          }
 
           textDataWithMarkers = await this.textExtractor.extractWithPageMarkers(
             pdfPath,
@@ -192,6 +193,38 @@ export class PDFExtractor {
         imageData = await this.imageExtractor.extract(pdfPath, config.options);
       }
 
+      // Generate page images and thumbnails if requested
+      let pageImagesData: Map<number, any> | null = null;
+      let thumbnailsData: Map<number, any> | null = null;
+
+      if (
+        config.options.generatePageImages ||
+        config.options.generateThumbnails
+      ) {
+        const totalPages = imageData?.totalPages || textData?.numPages || 0;
+        const pageNumbers =
+          config.options.pageNumbers ||
+          Array.from({ length: totalPages }, (_, i) => i + 1);
+
+        // Generate page images with quality variants
+        if (config.options.generatePageImages) {
+          pageImagesData = await this.generatePageImagesWithVariants(
+            pdfPath,
+            pageNumbers,
+            config.options
+          );
+        }
+
+        // Generate thumbnails
+        if (config.options.generateThumbnails) {
+          thumbnailsData = await this.generatePageThumbnails(
+            pdfPath,
+            pageNumbers,
+            config.options
+          );
+        }
+      }
+
       // Process and format results
       const result = await this.processResults(
         pdfPath,
@@ -200,7 +233,9 @@ export class PDFExtractor {
         imageData,
         textItems,
         config.options,
-        startTime
+        startTime,
+        pageImagesData,
+        thumbnailsData
       );
 
       this.reportProgress(config.options, {
@@ -299,7 +334,9 @@ export class PDFExtractor {
     imageData: { images: ImageItem[]; totalPages?: number } | null,
     textItems: TextItem[],
     options: ExtractionOptions,
-    startTime: number
+    startTime: number,
+    pageImagesData?: Map<number, any> | null,
+    thumbnailsData?: Map<number, any> | null
   ): Promise<ExtractionResult> {
     const filename = path.basename(pdfPath);
     const processingTime = Date.now() - startTime;
@@ -372,7 +409,9 @@ export class PDFExtractor {
           textForStructured,
           result.images,
           result.document.pages,
-          options
+          options,
+          pageImagesData,
+          thumbnailsData
         );
 
       if (options.verbose) {
@@ -595,6 +634,153 @@ export class PDFExtractor {
    */
   getCacheStats() {
     return this.cacheManager.getCacheStats();
+  }
+
+  /**
+   * Generate page images with multiple quality variants
+   */
+  private async generatePageImagesWithVariants(
+    pdfPath: string,
+    pageNumbers: number[],
+    options: ExtractionOptions
+  ): Promise<Map<number, any>> {
+    const pageImagesMap = new Map<number, any>();
+    const outputDir = options.imageOutputDir || "./page-images";
+    const format = options.pageImageFormat || "png";
+    const dpi = options.pageImageDpi || 150;
+    const qualities = options.pageImageQualities || [
+      options.pageImageQuality || 90,
+    ];
+
+    if (options.verbose) {
+      console.log(
+        `📸 Generating page images for ${pageNumbers.length} pages...`
+      );
+    }
+
+    // Generate default quality page images
+    const defaultQuality = qualities[0];
+    const convertOptions: any = {
+      outputDir: path.join(outputDir, format),
+      format,
+      quality: defaultQuality,
+      dpi,
+      pages: pageNumbers,
+      verbose: options.verbose ?? false,
+    };
+    const result = await this.pageToImageConverter.convertToImages(
+      pdfPath,
+      convertOptions
+    );
+
+    // Store default quality images
+    for (const pageImage of result.images) {
+      const stats = fs.statSync(pageImage.filepath);
+      pageImagesMap.set(pageImage.page, {
+        path: pageImage.filepath,
+        format: pageImage.format,
+        width: pageImage.width,
+        height: pageImage.height,
+        size: stats.size,
+        dpi,
+        quality: defaultQuality,
+        variants: [],
+      });
+    }
+
+    // Generate quality variants if requested
+    if (qualities.length > 1) {
+      for (const quality of qualities.slice(1)) {
+        const variantOptions: any = {
+          outputDir: path.join(outputDir, `${format}-q${quality}`),
+          format,
+          quality,
+          dpi,
+          pages: pageNumbers,
+          verbose: false,
+        };
+        const variantResult = await this.pageToImageConverter.convertToImages(
+          pdfPath,
+          variantOptions
+        );
+
+        for (const pageImage of variantResult.images) {
+          const stats = fs.statSync(pageImage.filepath);
+          const pageData = pageImagesMap.get(pageImage.page);
+          if (pageData) {
+            pageData.variants.push({
+              path: pageImage.filepath,
+              format: pageImage.format,
+              width: pageImage.width,
+              height: pageImage.height,
+              size: stats.size,
+              quality,
+              dpi,
+            });
+          }
+        }
+      }
+    }
+
+    if (options.verbose) {
+      console.log(
+        `✅ Generated ${pageImagesMap.size} page images with ${qualities.length} quality variant(s)`
+      );
+    }
+
+    return pageImagesMap;
+  }
+
+  /**
+   * Generate thumbnails for pages
+   */
+  private async generatePageThumbnails(
+    pdfPath: string,
+    pageNumbers: number[],
+    options: ExtractionOptions
+  ): Promise<Map<number, any>> {
+    const thumbnailsMap = new Map<number, any>();
+    const outputDir = options.imageOutputDir || "./page-images";
+    const thumbnailQuality = options.thumbnailQuality || 80;
+
+    if (options.verbose) {
+      console.log(
+        `🖼️  Generating thumbnails for ${pageNumbers.length} pages...`
+      );
+    }
+
+    const thumbnailOptions: any = {
+      outputDir: path.join(outputDir, "thumbnails"),
+      format: "jpg",
+      quality: thumbnailQuality,
+      dpi: 72,
+      scale: 0.25, // 25% scale for thumbnails
+      pages: pageNumbers,
+      verbose: options.verbose ?? false,
+      filenamePattern: "thumb-{page}.{ext}",
+    };
+    const result = await this.pageToImageConverter.convertToImages(
+      pdfPath,
+      thumbnailOptions
+    );
+
+    for (const thumbnail of result.images) {
+      const stats = fs.statSync(thumbnail.filepath);
+      thumbnailsMap.set(thumbnail.page, {
+        path: thumbnail.filepath,
+        format: thumbnail.format,
+        width: thumbnail.width,
+        height: thumbnail.height,
+        size: stats.size,
+        quality: thumbnailQuality,
+      });
+    }
+
+    if (options.verbose) {
+      console.log(`✅ Generated ${thumbnailsMap.size} thumbnails`);
+    }
+
+    return thumbnailsMap;
   }
 
   private reportProgress(

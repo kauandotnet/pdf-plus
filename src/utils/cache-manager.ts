@@ -21,7 +21,7 @@ export class CacheManager {
     const absolutePath = path.resolve(pdfPath);
     const stats = fs.statSync(absolutePath);
     const content = `${absolutePath}:${stats.mtime.getTime()}:${stats.size}`;
-    return crypto.createHash('md5').update(content).digest('hex');
+    return crypto.createHash("md5").update(content).digest("hex");
   }
 
   /**
@@ -47,7 +47,7 @@ export class CacheManager {
   isCached(pdfPath: string): boolean {
     try {
       const cacheDir = this.getCacheDir(pdfPath);
-      const infoPath = path.join(cacheDir, 'cache-info.json');
+      const infoPath = path.join(cacheDir, "cache-info.json");
       return fs.existsSync(infoPath);
     } catch {
       return false;
@@ -60,13 +60,13 @@ export class CacheManager {
   getCacheInfo(pdfPath: string): CacheInfo | null {
     try {
       const cacheDir = this.getCacheDir(pdfPath);
-      const infoPath = path.join(cacheDir, 'cache-info.json');
-      
+      const infoPath = path.join(cacheDir, "cache-info.json");
+
       if (!fs.existsSync(infoPath)) {
         return null;
       }
 
-      const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
+      const info = JSON.parse(fs.readFileSync(infoPath, "utf-8"));
       return info as CacheInfo;
     } catch {
       return null;
@@ -78,7 +78,7 @@ export class CacheManager {
    */
   createCache(pdfPath: string, totalPages: number): string {
     const cacheDir = this.getCacheDir(pdfPath);
-    
+
     if (!fs.existsSync(cacheDir)) {
       fs.mkdirSync(cacheDir, { recursive: true });
     }
@@ -89,10 +89,10 @@ export class CacheManager {
       lastModified: stats.mtime.getTime(),
       totalPages,
       cacheDir,
-      created: new Date().toISOString()
+      created: new Date().toISOString(),
     };
 
-    const infoPath = path.join(cacheDir, 'cache-info.json');
+    const infoPath = path.join(cacheDir, "cache-info.json");
     fs.writeFileSync(infoPath, JSON.stringify(cacheInfo, null, 2));
 
     return cacheDir;
@@ -101,7 +101,11 @@ export class CacheManager {
   /**
    * Cache page extraction result
    */
-  cachePageResult(pdfPath: string, pageNumber: number, result: PageExtractionResult): void {
+  cachePageResult(
+    pdfPath: string,
+    pageNumber: number,
+    result: PageExtractionResult
+  ): void {
     try {
       const cacheDir = this.getCacheDir(pdfPath);
       const pageFile = path.join(cacheDir, `page-${pageNumber}.json`);
@@ -114,16 +118,19 @@ export class CacheManager {
   /**
    * Get cached page result
    */
-  getCachedPageResult(pdfPath: string, pageNumber: number): PageExtractionResult | null {
+  getCachedPageResult(
+    pdfPath: string,
+    pageNumber: number
+  ): PageExtractionResult | null {
     try {
       const cacheDir = this.getCacheDir(pdfPath);
       const pageFile = path.join(cacheDir, `page-${pageNumber}.json`);
-      
+
       if (!fs.existsSync(pageFile)) {
         return null;
       }
 
-      const result = JSON.parse(fs.readFileSync(pageFile, 'utf-8'));
+      const result = JSON.parse(fs.readFileSync(pageFile, "utf-8"));
       return result as PageExtractionResult;
     } catch {
       return null;
@@ -137,18 +144,20 @@ export class CacheManager {
     try {
       const cacheDir = this.getCacheDir(pdfPath);
       const results: PageExtractionResult[] = [];
-      
+
       if (!fs.existsSync(cacheDir)) {
         return results;
       }
 
       const files = fs.readdirSync(cacheDir);
-      const pageFiles = files.filter(f => f.startsWith('page-') && f.endsWith('.json'));
-      
+      const pageFiles = files.filter(
+        (f) => f.startsWith("page-") && f.endsWith(".json")
+      );
+
       for (const file of pageFiles) {
         try {
           const filePath = path.join(cacheDir, file);
-          const result = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+          const result = JSON.parse(fs.readFileSync(filePath, "utf-8"));
           results.push(result as PageExtractionResult);
         } catch {
           // Skip corrupted cache files
@@ -201,42 +210,55 @@ export class CacheManager {
     cacheDir: string;
   } {
     try {
-      let totalCachedPdfs = 0;
-      let totalCachedPages = 0;
-      let totalCacheSize = 0;
-
-      if (fs.existsSync(this.cacheDir)) {
-        const pdfDirs = fs.readdirSync(this.cacheDir);
-        totalCachedPdfs = pdfDirs.length;
-
-        for (const pdfDir of pdfDirs) {
-          const pdfCacheDir = path.join(this.cacheDir, pdfDir);
-          if (fs.statSync(pdfCacheDir).isDirectory()) {
-            const files = fs.readdirSync(pdfCacheDir);
-            const pageFiles = files.filter(f => f.startsWith('page-') && f.endsWith('.json'));
-            totalCachedPages += pageFiles.length;
-
-            // Calculate size
-            for (const file of files) {
-              const filePath = path.join(pdfCacheDir, file);
-              totalCacheSize += fs.statSync(filePath).size;
-            }
-          }
-        }
+      if (!fs.existsSync(this.cacheDir)) {
+        return {
+          totalCachedPdfs: 0,
+          totalCachedPages: 0,
+          totalCacheSize: 0,
+          cacheDir: this.cacheDir,
+        };
       }
+
+      const pdfDirs = fs.readdirSync(this.cacheDir);
+      const totalCachedPdfs = pdfDirs.length;
+
+      const { totalCachedPages, totalCacheSize } = pdfDirs.reduce(
+        (acc, pdfDir) => {
+          const pdfCacheDir = path.join(this.cacheDir, pdfDir);
+          if (!fs.statSync(pdfCacheDir).isDirectory()) {
+            return acc;
+          }
+
+          const files = fs.readdirSync(pdfCacheDir);
+          const pageFiles = files.filter(
+            (f) => f.startsWith("page-") && f.endsWith(".json")
+          );
+
+          const dirSize = files.reduce((sum, file) => {
+            const filePath = path.join(pdfCacheDir, file);
+            return sum + fs.statSync(filePath).size;
+          }, 0);
+
+          return {
+            totalCachedPages: acc.totalCachedPages + pageFiles.length,
+            totalCacheSize: acc.totalCacheSize + dirSize,
+          };
+        },
+        { totalCachedPages: 0, totalCacheSize: 0 }
+      );
 
       return {
         totalCachedPdfs,
         totalCachedPages,
         totalCacheSize,
-        cacheDir: this.cacheDir
+        cacheDir: this.cacheDir,
       };
     } catch {
       return {
         totalCachedPdfs: 0,
         totalCachedPages: 0,
         totalCacheSize: 0,
-        cacheDir: this.cacheDir
+        cacheDir: this.cacheDir,
       };
     }
   }

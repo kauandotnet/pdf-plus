@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ExtractionOptions, ImageItem } from "../types/index.js";
+import sizeOf from "image-size";
+import type { ExtractionOptions, ImageItem } from "../../types/index.js";
 
 /**
  * Image extraction from PDF files using pdf-lib (clean implementation based on NestJS)
@@ -36,13 +37,12 @@ export class ImageExtractor {
     const opts: ExtractionOptions = {
       verbose: false,
       extractImageFiles: false,
-      imageEngine: "auto",
       ...options,
     };
 
     if (opts.verbose) {
       console.log(`🖼️  Extracting images from: ${pdfPath}`);
-      console.log(`🔧 Using engine: ${opts.imageEngine}`);
+      console.log(`🔧 Using engine: pdf-lib`);
     }
 
     // Ensure output directory exists if extracting files
@@ -56,8 +56,8 @@ export class ImageExtractor {
       // Import engine factory
       const { ImageEngineFactory } = await import("./engines/engine-factory");
 
-      // Get the appropriate engine
-      const engine = await ImageEngineFactory.getEngine(opts.imageEngine!);
+      // Get the PDF-lib engine
+      const engine = await ImageEngineFactory.getEngine();
 
       if (opts.verbose) {
         console.log(`   ✅ Selected engine: ${engine.name}`);
@@ -281,6 +281,55 @@ export class ImageExtractor {
         );
       }
 
+      // Convert JP2 to JPG if requested
+      if (!options.preserveJp2 && options.extractImageFiles) {
+        const jp2Images = images.filter(
+          (img) =>
+            img.filePath?.endsWith(".jp2") || img.filepath?.endsWith(".jp2")
+        );
+
+        if (jp2Images.length > 0) {
+          if (options.verbose) {
+            console.log(
+              `\n🔄 Converting ${jp2Images.length} JP2 files to JPG...`
+            );
+            console.log(`   🔍 options.useSharp = ${options.useSharp}`);
+          }
+
+          const { ImageOptimizer } = await import(
+            "../../optimizers/image-optimizer.js"
+          );
+
+          for (const img of jp2Images) {
+            const imagePath = img.filePath || img.filepath;
+            if (!imagePath) continue;
+
+            const result = await ImageOptimizer.convertJp2ToJpg(imagePath, {
+              quality: 100,
+              verbose: options.verbose,
+              useSharp: options.useSharp,
+            });
+
+            if (result.success && result.newPath) {
+              // Update image path to the new JPG file
+              img.filePath = result.newPath;
+              img.filepath = result.newPath;
+              img.format = "jpg";
+            }
+          }
+
+          if (options.verbose) {
+            const successful = jp2Images.filter(
+              (img) =>
+                img.filePath?.endsWith(".jpg") || img.filepath?.endsWith(".jpg")
+            ).length;
+            console.log(
+              `   ✅ Converted ${successful}/${jp2Images.length} JP2 → JPG\n`
+            );
+          }
+        }
+      }
+
       return {
         images,
         totalPages,
@@ -381,6 +430,36 @@ export class ImageExtractor {
         }
       }
 
+      // Get actual image dimensions from the extracted data
+      // If PDF dimensions are wrong (often 100x100), use image-size to read from actual image data
+      let actualWidth = widthVal;
+      let actualHeight = heightVal;
+
+      if (imageData) {
+        try {
+          const dimensions = sizeOf(Buffer.from(imageData));
+          if (dimensions.width && dimensions.height) {
+            actualWidth = dimensions.width;
+            actualHeight = dimensions.height;
+
+            if (
+              options.verbose &&
+              (widthVal !== actualWidth || heightVal !== actualHeight)
+            ) {
+              console.log(
+                `   📐 Corrected dimensions from ${widthVal}x${heightVal} to ${actualWidth}x${actualHeight}`
+              );
+            }
+          }
+        } catch (err) {
+          if (options.verbose) {
+            console.log(
+              `   ⚠️  Could not read dimensions from image data, using PDF metadata: ${widthVal}x${heightVal}`
+            );
+          }
+        }
+      }
+
       // Create image item
       const imageItem: ImageItem = {
         id: `img_${imageIndex}`,
@@ -389,11 +468,11 @@ export class ImageExtractor {
         position: {
           x: 0,
           y: 0,
-          width: widthVal,
-          height: heightVal,
+          width: actualWidth,
+          height: actualHeight,
         },
-        width: widthVal,
-        height: heightVal,
+        width: actualWidth,
+        height: actualHeight,
         format:
           mimeType === "image/jpeg"
             ? "JPEG"
@@ -588,6 +667,9 @@ export class ImageExtractor {
             if (options.verbose) {
               console.log(
                 `   ✅ Extracted JPEG 2000 data: ${imageData.length} bytes`
+              );
+              console.log(
+                `   ⚠️  JP2 format has limited compatibility. Consider using preserveJp2: false with Sharp for conversion.`
               );
             }
           } catch (jpxError) {

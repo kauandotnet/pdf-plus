@@ -19,34 +19,40 @@ export class FormatProcessor {
 
     const textLines = text.split("\n");
     const linesPerPage = Math.ceil(textLines.length / totalPages);
-    let result = "";
 
-    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-      const startLine = (pageNum - 1) * linesPerPage;
-      const endLine = Math.min(startLine + linesPerPage, textLines.length);
-      const pageText = textLines.slice(startLine, endLine).join("\n");
+    const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-      // Add page text
-      if (pageText.trim()) {
-        result += pageText;
-      }
+    const result = pageNumbers
+      .map((pageNum) => {
+        const startLine = (pageNum - 1) * linesPerPage;
+        const endLine = Math.min(startLine + linesPerPage, textLines.length);
+        const pageText = textLines.slice(startLine, endLine).join("\n");
 
-      // Add image references for this page
-      const pageImages = images.filter((img) => img.page === pageNum);
-      for (const image of pageImages) {
-        const imageRef = this.formatImageReference(
-          image,
-          format,
-          images.indexOf(image) + 1
-        );
-        result += `\n${imageRef}\n`;
-      }
+        // Get page text
+        const textPart = pageText.trim() ? pageText : "";
 
-      // Add page separator (except for last page)
-      if (pageNum < totalPages && pageText.trim()) {
-        result += "\n";
-      }
-    }
+        // Add image references for this page
+        const pageImages = images.filter((img) => img.page === pageNum);
+        const imageRefs = pageImages
+          .map((image) => {
+            const imageRef = this.formatImageReference(
+              image,
+              format,
+              images.indexOf(image) + 1
+            );
+            return `\n${imageRef}\n`;
+          })
+          .join("");
+
+        // Combine text and image refs
+        const combined = textPart + imageRefs;
+
+        // Add page separator (except for last page)
+        const separator = pageNum < totalPages && pageText.trim() ? "\n" : "";
+
+        return combined + separator;
+      })
+      .join("");
 
     return result.trim();
   }
@@ -98,17 +104,14 @@ export class FormatProcessor {
    */
   extractPlaceholders(format: string): string[] {
     const placeholderPattern = /\{([^}]+)\}/g;
-    const placeholders: string[] = [];
-    let match: RegExpExecArray | null = null;
 
-    // Extract placeholders from format string
-    match = placeholderPattern.exec(format);
-    while (match !== null) {
-      if (match[1]) {
-        placeholders.push(match[1]);
-      }
-      match = placeholderPattern.exec(format);
-    }
+    // Extract placeholders from format string using matchAll
+    const matches = Array.from(format.matchAll(placeholderPattern));
+    const placeholders = matches
+      .map((match) => match[1])
+      .filter(
+        (placeholder): placeholder is string => placeholder !== undefined
+      );
 
     return [...new Set(placeholders)]; // Remove duplicates
   }
@@ -201,15 +204,21 @@ export class FormatProcessor {
    */
   formatFileSize(bytes: number): string {
     const units = ["B", "KB", "MB", "GB"];
-    let size = bytes;
-    let unitIndex = 0;
 
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
+    const result = units.reduce<{ size: number; unitIndex: number }>(
+      (acc, _, index) => {
+        if (acc.size >= 1024 && index < units.length - 1) {
+          return {
+            size: acc.size / 1024,
+            unitIndex: index + 1,
+          };
+        }
+        return acc;
+      },
+      { size: bytes, unitIndex: 0 }
+    );
 
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
+    return `${result.size.toFixed(1)} ${units[result.unitIndex]}`;
   }
 
   /**

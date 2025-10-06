@@ -1,11 +1,16 @@
 /**
- * Combined PDF processor using both pdf-lib and pdf-parse for accurate page-by-page extraction
- * This ensures text extraction page numbers match actual PDF page structure
+ * Structured text extractor using both pdf-lib and pdf.js for accurate page-by-page extraction
+ *
+ * Extracts text with rich metadata including page dimensions, rotation, word counts, and character counts.
+ * Uses pdf-lib for accurate page structure and pdf.js for text content.
  */
 
 import * as fs from "node:fs";
+import path from "node:path";
+import { createRequire } from "node:module";
 import { PDFDocument } from "pdf-lib";
-import pdfParse from "pdf-parse";
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { ImageExtractor } from "../image/image-extractor.js";
 
 export interface PageData {
   pageNumber: number;
@@ -19,10 +24,32 @@ export interface PageData {
   characterCount: number;
 }
 
-export class CombinedPageExtractor {
+export class StructuredTextExtractor {
   private pdfLibDoc: PDFDocument | null = null;
   private pdfLibPages: any[] = [];
   private textData: PageData[] = [];
+
+  constructor() {
+    this.initializePdfjs();
+  }
+
+  /**
+   * Initialize pdf.js worker
+   */
+  private initializePdfjs(): void {
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      const require = createRequire(import.meta.url);
+      const pdfjsPath = path.dirname(
+        require.resolve("pdfjs-dist/package.json")
+      );
+      pdfjs.GlobalWorkerOptions.workerSrc = path.join(
+        pdfjsPath,
+        "legacy",
+        "build",
+        "pdf.worker.mjs"
+      );
+    }
+  }
 
   /**
    * Process PDF with accurate page-by-page extraction
@@ -35,13 +62,13 @@ export class CombinedPageExtractor {
     const pdfBuffer = fs.readFileSync(pdfPath);
 
     // Process with both libraries simultaneously
-    const [pdfLibResult, pdfParseResult] = await Promise.all([
+    const [pdfLibResult, pdfjsResult] = await Promise.all([
       this.processPDFLib(pdfBuffer),
-      this.processPDFParse(pdfBuffer),
+      this.processPDFjs(pdfBuffer),
     ]);
 
     // Combine the results
-    this.textData = this.combineResults(pdfLibResult, pdfParseResult);
+    this.textData = this.combineResults(pdfLibResult, pdfjsResult);
 
     // Generate full text
     const fullText = this.textData
@@ -71,27 +98,38 @@ export class CombinedPageExtractor {
         pageNumber: index + 1,
         width,
         height,
-        rotation: page.getRotation(),
+        rotation: page.getRotation().angle,
         mediaBox: page.getMediaBox(),
       };
     });
   }
 
   /**
-   * Process with pdf-parse to extract text page by page
+   * Process with pdf.js to extract text page by page
    */
-  private async processPDFParse(pdfBuffer: Buffer) {
+  private async processPDFjs(pdfBuffer: Buffer) {
+    const data = new Uint8Array(pdfBuffer);
+    const loadingTask = pdfjs.getDocument({
+      data,
+      verbosity: pdfjs.VerbosityLevel.ERRORS,
+    });
+
+    const doc = await loadingTask.promise;
     const pages: any[] = [];
 
-    const options = {
-      pagerender: async (pageData: any) => {
+    try {
+      for (let i = 1; i <= doc.numPages; i++) {
         try {
-          const textContent = await pageData.getTextContent();
-          const viewport = pageData.getViewport({ scale: 1 });
+          const page = await doc.getPage(i);
+          const textContent = await page.getTextContent({
+            includeMarkedContent: false,
+            disableNormalization: false,
+          });
+          const viewport = page.getViewport({ scale: 1 });
 
           // Extract text from text items, preserving line breaks
           const textItems = textContent.items.filter(
-            (item: any) => typeof item.str === "string"
+            (item: any) => "str" in item && typeof item.str === "string"
           );
 
           // Sort items by Y position (top to bottom) then X position (left to right)
@@ -106,10 +144,11 @@ export class CombinedPageExtractor {
 
           // Group items by line and reconstruct text with proper line breaks
           let text = "";
-          let currentY = null;
+          let currentY: number | null = null;
           let lineText = "";
 
           for (const item of textItems) {
+            if (!("str" in item)) continue;
             const y = item.transform[5];
 
             if (currentY === null) {
@@ -134,7 +173,7 @@ export class CombinedPageExtractor {
           text = text.trim();
 
           const pageInfo = {
-            pageNumber: pageData.pageIndex + 1,
+            pageNumber: i,
             text,
             textItems: textContent.items,
             pdfParseWidth: viewport.width,
@@ -142,29 +181,25 @@ export class CombinedPageExtractor {
           };
 
           pages.push(pageInfo);
-          return text;
+          page.cleanup();
         } catch (error) {
-          console.warn(
-            `⚠️  Warning: Error processing page ${pageData.pageIndex + 1}:`,
-            error
-          );
+          console.warn(`⚠️  Warning: Error processing page ${i}:`, error);
 
           // Add empty page to maintain page numbering
           pages.push({
-            pageNumber: pageData.pageIndex + 1,
+            pageNumber: i,
             text: "",
             textItems: [],
             pdfParseWidth: 0,
             pdfParseHeight: 0,
           });
-
-          return "";
         }
-      },
-    };
+      }
 
-    await pdfParse(pdfBuffer, options);
-    return pages.sort((a, b) => a.pageNumber - b.pageNumber); // Ensure correct order
+      return pages.sort((a, b) => a.pageNumber - b.pageNumber); // Ensure correct order
+    } finally {
+      await doc.destroy();
+    }
   }
 
   /**
@@ -203,7 +238,6 @@ export class CombinedPageExtractor {
     options: {
       includeImageRefs?: boolean;
       imageRefFormat?: string;
-      imageEngine?: import("../types/index.js").ImageExtractionEngine;
     } = {}
   ): Promise<{
     text: string;
@@ -217,12 +251,10 @@ export class CombinedPageExtractor {
     let imageData: any[] = [];
     if (options.includeImageRefs) {
       try {
-        const { ImageExtractor } = await import("./image-extractor.js");
         const imageExtractor = new ImageExtractor();
         const imageResult = await imageExtractor.extract(pdfPath, {
           extractImageFiles: false, // Just get metadata
           verbose: false,
-          imageEngine: options.imageEngine || "auto", // Use specified engine
         });
         imageData = imageResult.images || [];
       } catch (error) {
@@ -385,34 +417,36 @@ export class CombinedPageExtractor {
       }
       const { width, height } = page.getSize();
 
-      // Create single page PDF
-      const singlePagePDF = await PDFDocument.create();
-      const [copiedPage] = await singlePagePDF.copyPages(sourcePDF, [
-        pageNumber - 1,
-      ]);
-      singlePagePDF.addPage(copiedPage);
+      // Extract text with pdf.js
+      const data = new Uint8Array(pdfBuffer);
+      const loadingTask = pdfjs.getDocument({
+        data,
+        verbosity: pdfjs.VerbosityLevel.ERRORS,
+      });
 
-      // Extract text with pdf-parse
-      const singlePageBuffer = await singlePagePDF.save();
-
+      const doc = await loadingTask.promise;
       let textItems: any[] = [];
-      const options = {
-        pagerender: async (pageData: any) => {
-          try {
-            const textContent = await pageData.getTextContent();
-            textItems = textContent.items;
-            return textContent.items
-              .map((item: any) => item.str || "")
-              .join(" ");
-          } catch {
-            return "";
-          }
-        },
-      };
+      let text = "";
 
-      const singlePageBufferNode = Buffer.from(singlePageBuffer);
-      const parseResult = await pdfParse(singlePageBufferNode, options);
-      const text = parseResult.text.replace(/\s+/g, " ").trim();
+      try {
+        const pdfjsPage = await doc.getPage(pageNumber);
+        const textContent = await pdfjsPage.getTextContent({
+          includeMarkedContent: false,
+          disableNormalization: false,
+        });
+
+        textItems = textContent.items;
+        text = textContent.items
+          .filter((item: any) => "str" in item)
+          .map((item: any) => item.str || "")
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        pdfjsPage.cleanup();
+      } finally {
+        await doc.destroy();
+      }
 
       return {
         pageNumber,

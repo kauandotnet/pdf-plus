@@ -1,4 +1,4 @@
-import type { ExtractionOptions, ImageItem } from "../../types/index.js";
+import type { ExtractionOptions, ImageItem } from "../../../types/index.js";
 
 /**
  * Abstract base class for image extraction engines

@@ -1,13 +1,26 @@
 import fs from "node:fs";
-import pdfParse from "pdf-parse";
-import { CombinedPageExtractor } from "./combined-page-extractor.js";
-import type { ExtractionOptions, TextItem, PageData } from "../types/index.js";
+import path from "node:path";
+import { createRequire } from "node:module";
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import type {
+  PDFDocumentProxy,
+  PDFPageProxy,
+} from "pdfjs-dist/legacy/build/pdf.mjs";
+import { StructuredTextExtractor } from "./structured-text-extractor.js";
+import type {
+  ExtractionOptions,
+  TextItem,
+  PageData,
+} from "../../types/index.js";
 
 /**
- * Text extraction from PDF files
+ * Text extraction from PDF files using pdf.js
  *
- * Handles text extraction using pdf-parse library with support for
- * page-by-page extraction and metadata retrieval.
+ * Direct pdf.js-based text extraction with support for:
+ * - Page-by-page extraction with accurate boundaries
+ * - Text positioning and font information
+ * - Metadata retrieval
+ * - No external dependencies (uses pdf.js directly)
  *
  * @example
  * ```typescript
@@ -17,6 +30,65 @@ import type { ExtractionOptions, TextItem, PageData } from "../types/index.js";
  * ```
  */
 export class TextExtractor {
+  constructor() {
+    this.initializePdfjs();
+  }
+
+  /**
+   * Initialize pdf.js worker
+   */
+  private initializePdfjs(): void {
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      const require = createRequire(import.meta.url);
+      const pdfjsPath = path.dirname(
+        require.resolve("pdfjs-dist/package.json")
+      );
+      pdfjs.GlobalWorkerOptions.workerSrc = path.join(
+        pdfjsPath,
+        "legacy",
+        "build",
+        "pdf.worker.mjs"
+      );
+    }
+  }
+
+  /**
+   * Load PDF document
+   */
+  private async loadDocument(pdfPath: string): Promise<PDFDocumentProxy> {
+    const dataBuffer = fs.readFileSync(pdfPath);
+    const data = new Uint8Array(dataBuffer);
+
+    const loadingTask = pdfjs.getDocument({
+      data,
+      verbosity: pdfjs.VerbosityLevel.ERRORS,
+    });
+
+    return await loadingTask.promise;
+  }
+
+  /**
+   * Extract text from a single page
+   */
+  private async getPageText(page: PDFPageProxy): Promise<string> {
+    const textContent = await page.getTextContent({
+      includeMarkedContent: false,
+      disableNormalization: false,
+    });
+
+    const textItems: string[] = [];
+
+    for (const item of textContent.items) {
+      if (!("str" in item)) continue;
+      textItems.push(item.str);
+      if (item.hasEOL) {
+        textItems.push("\n");
+      }
+    }
+
+    return textItems.join("");
+  }
+
   /**
    * Extract text content from PDF
    *
@@ -25,46 +97,32 @@ export class TextExtractor {
    * @throws {Error} When PDF extraction fails
    */
   async extract(pdfPath: string): Promise<any> {
-    try {
-      const dataBuffer = fs.readFileSync(pdfPath);
+    let doc: PDFDocumentProxy | null = null;
 
-      // Use custom render function to fix pdf-parse text extraction bug
+    try {
+      doc = await this.loadDocument(pdfPath);
+      const metadata = await doc.getMetadata();
       const pageTexts: string[] = [];
 
-      const options = {
-        pagerender: async (pageData: any) => {
-          try {
-            const textContent = await pageData.getTextContent();
-            const text = textContent.items
-              .map((item: any) => item.str)
-              .join(" ");
+      // Extract text from all pages
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const text = await this.getPageText(page);
+        pageTexts.push(text);
+        page.cleanup();
+      }
 
-            // Store the page text
-            pageTexts[pageData.pageNumber - 1] = text;
-
-            return text;
-          } catch (error) {
-            // Store empty text for failed pages
-            pageTexts[pageData.pageNumber - 1] = "";
-            return "";
-          }
-        },
-      };
-
-      const data = await pdfParse(dataBuffer, options);
-
-      // Manually combine the page texts since pdf-parse has a bug where it doesn't
-      // properly combine page results into data.text
+      // Combine page texts
       const combinedText = pageTexts
         .filter((text) => text && text.length > 0)
         .join("\n\n");
 
       return {
-        text: combinedText, // Use our manually combined text instead of data.text
-        numPages: data.numpages,
-        info: data.info,
-        metadata: data.metadata,
-        version: data.version,
+        text: combinedText,
+        numPages: doc.numPages,
+        info: metadata.info,
+        metadata: metadata.metadata,
+        version: (metadata.info as any)?.PDFFormatVersion || "1.0",
       };
     } catch (error) {
       throw new Error(
@@ -72,7 +130,34 @@ export class TextExtractor {
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
+    } finally {
+      if (doc) {
+        await doc.destroy();
+      }
     }
+  }
+
+  /**
+   * Extract text with metadata
+   *
+   * @param pdfPath - Path to the PDF file
+   * @returns Promise resolving to extraction result with text and metadata
+   * @throws {Error} When PDF extraction fails
+   */
+  async extractWithMetadata(pdfPath: string): Promise<{
+    text: string;
+    metadata: any;
+  }> {
+    const result = await this.extract(pdfPath);
+    return {
+      text: result.text,
+      metadata: {
+        numPages: result.numPages,
+        info: result.info,
+        metadata: result.metadata,
+        version: result.version,
+      },
+    };
   }
 
   /**
@@ -83,30 +168,33 @@ export class TextExtractor {
    * @throws {Error} When PDF extraction fails
    */
   async extractWithPages(pdfPath: string): Promise<any> {
+    let doc: PDFDocumentProxy | null = null;
+
     try {
-      const dataBuffer = fs.readFileSync(pdfPath);
+      doc = await this.loadDocument(pdfPath);
+      const metadata = await doc.getMetadata();
+      const pages: string[] = [];
 
-      // Custom render function to get page-by-page text
-      const options = {
-        pagerender: (pageData: any) => {
-          // Return text content for each page
-          return pageData.getTextContent().then((textContent: any) => {
-            return textContent.items.map((item: any) => item.str).join(" ");
-          });
-        },
-      };
+      // Extract text from each page separately
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const text = await this.getPageText(page);
+        pages.push(text);
+        page.cleanup();
+      }
 
-      const data = await pdfParse(dataBuffer, options);
+      // Combine all pages
+      const combinedText = pages
+        .filter((text) => text && text.length > 0)
+        .join("\n\n");
 
       return {
-        text: data.text,
-        numPages: data.numpages,
-        info: data.info,
-        metadata: data.metadata,
-        version: data.version,
-        pages: data.text
-          ? this.splitTextIntoPages(data.text, data.numpages)
-          : [],
+        text: combinedText,
+        numPages: doc.numPages,
+        info: metadata.info,
+        metadata: metadata.metadata,
+        version: (metadata.info as any)?.PDFFormatVersion || "1.0",
+        pages: pages,
       };
     } catch (error) {
       throw new Error(
@@ -114,92 +202,79 @@ export class TextExtractor {
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
+    } finally {
+      if (doc) {
+        await doc.destroy();
+      }
     }
   }
 
   /**
-   * Split text into approximate pages
-   */
-  private splitTextIntoPages(text: string, numPages: number): string[] {
-    const lines = text.split("\n");
-    const linesPerPage = Math.ceil(lines.length / numPages);
-    const pages: string[] = [];
-
-    for (let i = 0; i < numPages; i++) {
-      const startLine = i * linesPerPage;
-      const endLine = Math.min(startLine + linesPerPage, lines.length);
-      const pageText = lines.slice(startLine, endLine).join("\n");
-      pages.push(pageText);
-    }
-
-    return pages;
-  }
-
-  /**
-   * Extract text items with position and metadata
+   * Extract text items with position and metadata using pdf.js
    */
   async extractTextItems(
     pdfPath: string,
     options: ExtractionOptions = {}
   ): Promise<TextItem[]> {
+    let doc: PDFDocumentProxy | null = null;
+
     try {
-      const data = await this.extract(pdfPath);
-      const text = data.text;
-      const totalPages = data.numpages || 1;
-
-      // Split text into lines and create text items
-      const lines = text.split("\n");
+      doc = await this.loadDocument(pdfPath);
       const textItems: TextItem[] = [];
-      let currentPage = 1;
-      const linesPerPage = Math.ceil(lines.length / totalPages);
+      let itemIndex = 0;
 
-      lines.forEach((line: string, index: number) => {
-        if (line.trim()) {
-          // Calculate page number
-          currentPage = Math.ceil((index + 1) / linesPerPage);
+      // Extract text items from each page with actual positioning
+      for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+        const page = await doc.getPage(pageNum);
+        const textContent = await page.getTextContent({
+          includeMarkedContent: false,
+          disableNormalization: false,
+        });
 
-          // Determine text type based on content
+        for (const item of textContent.items) {
+          if (!("str" in item) || !item.str.trim()) continue;
+
+          // Determine text type based on content and font size
           let textType: "text" | "heading" | "paragraph" | "caption" = "text";
-          if (line.length < 50 && line.trim().match(/^[A-Z\s]+$/)) {
+          const fontSize = item.height || 12;
+
+          if (fontSize > 14) {
             textType = "heading";
-          } else if (line.length > 100) {
+          } else if (item.str.length > 100) {
             textType = "paragraph";
-          } else if (line.length < 30) {
+          } else if (item.str.length < 30) {
             textType = "caption";
           }
 
-          // Estimate font size based on text type
-          let fontSize = 12;
-          if (textType === "heading") fontSize = 16;
-          else if (textType === "caption") fontSize = 10;
-
           const textItem: TextItem = {
-            id: `text_${index + 1}`,
-            content: line.trim(),
+            id: `text_${++itemIndex}`,
+            content: item.str,
             position: {
-              x: 0, // Estimated position
-              y: (index % linesPerPage) * 15, // Estimated line height
-              width: line.length * 8, // Estimated character width
-              height: fontSize,
+              x: item.transform[4],
+              y: item.transform[5],
+              width: item.width,
+              height: item.height,
             },
             font: {
-              name: "Unknown",
+              name: item.fontName || "Unknown",
               size: fontSize,
-              style: textType === "heading" ? "bold" : "normal",
+              style: "normal",
             },
-            page: currentPage,
+            page: pageNum,
             type: textType,
-            fontSize,
+            fontSize: fontSize,
             color: "#000000",
           };
 
           textItems.push(textItem);
         }
-      });
+
+        page.cleanup();
+      }
 
       if (options.verbose) {
         console.log(
-          `📝 Extracted ${textItems.length} text items from ${totalPages} pages`
+          `📝 Extracted ${textItems.length} text items from ${doc.numPages} pages`
         );
       }
 
@@ -210,6 +285,10 @@ export class TextExtractor {
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
+    } finally {
+      if (doc) {
+        await doc.destroy();
+      }
     }
   }
 
@@ -343,33 +422,26 @@ export class TextExtractor {
       pageOffset?: number;
       includeImageRefs?: boolean;
       imageRefFormat?: string;
-      imageEngine?: import("../types/index.js").ImageExtractionEngine;
     } = {}
   ): Promise<{ text: string; pages: PageData[] }> {
     try {
-      // Use the CombinedPageExtractor for accurate page boundaries and image refs
-      const combinedExtractor = new CombinedPageExtractor();
+      // Use the StructuredTextExtractor for accurate page boundaries and image refs
+      const structuredExtractor = new StructuredTextExtractor();
       const extractOptions: {
         includeImageRefs: boolean;
         imageRefFormat: string;
-        imageEngine?: import("../types/index.js").ImageExtractionEngine;
       } = {
         includeImageRefs: options.includeImageRefs ?? true, // Default to true
         imageRefFormat: options.imageRefFormat || "[IMG:{id}] {name}",
       };
 
-      // Only add imageEngine if it's defined
-      if (options.imageEngine) {
-        extractOptions.imageEngine = options.imageEngine;
-      }
-
-      const result = await combinedExtractor.extractWithPageMarkers(
+      const result = await structuredExtractor.extractWithPageMarkers(
         pdfPath,
         pageMarkerFormat,
         extractOptions
       );
 
-      // Convert CombinedPageExtractor format to TextExtractor format
+      // Convert StructuredTextExtractor format to TextExtractor format
       const pages: PageData[] = result.pages.map((page) => ({
         pageNumber: page.pageNumber + (options.pageOffset || 0),
         text: {
@@ -403,11 +475,11 @@ export class TextExtractor {
     pages: PageData[];
     totalPages: number;
   }> {
-    // Use the CombinedPageExtractor for accurate page boundaries
-    const combinedExtractor = new CombinedPageExtractor();
-    const result = await combinedExtractor.processPDF(pdfPath);
+    // Use the StructuredTextExtractor for accurate page boundaries
+    const structuredExtractor = new StructuredTextExtractor();
+    const result = await structuredExtractor.processPDF(pdfPath);
 
-    // Convert CombinedPageExtractor format to TextExtractor format
+    // Convert StructuredTextExtractor format to TextExtractor format
     const pages: PageData[] = result.pages.map((page) => ({
       pageNumber: page.pageNumber,
       text: {

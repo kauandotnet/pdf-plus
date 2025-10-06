@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2025-10-02
+
+### Fixed
+
+- **Critical Fix**: Pages 27+ appearing "empty" when not explicitly setting `includePageMarkers` option
+  - **Root cause**: Without page markers, text was returned as one continuous block, making it impossible to identify page boundaries
+  - **Solution**: Default `includePageMarkers` to `true` to ensure clear page separation
+  - **Impact**: All pages are now properly accessible by default
+  - Users can still opt-out by explicitly setting `includePageMarkers: false`
+
+### Changed
+
+- **Breaking Change**: `includePageMarkers` now defaults to `true` (was `undefined`/`false`)
+  - This ensures page boundaries are clear by default
+  - Text output now includes page markers like `--- PAGE 1 ---` by default
+  - To get continuous text without markers, explicitly set `includePageMarkers: false`
+
+### Added
+
+- Comprehensive test suite for page extraction verification
+- Tests for all extraction modes: text-only, images-only, combined, and structured data
+- Verification that all pages (including 27+) are properly populated
+
+## [1.0.2] - 2025-10-01
+
 ### Added
 
 - Initial release of pdf-plus
