@@ -205,6 +205,12 @@ export class StructuredDataGenerator {
           }
         }
 
+        // Check for filepath (lowercase 'p') - primary property
+        if ("filepath" in image && image.filepath !== undefined) {
+          result.path = image.filepath;
+        }
+
+        // Check for filePath (camelCase) - legacy compatibility
         if ("filePath" in image) {
           const filePath = (image as { filePath?: string }).filePath;
           if (filePath !== undefined) {
