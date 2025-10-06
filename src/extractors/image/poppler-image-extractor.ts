@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { ExtractionOptions } from "../../types/index.js";
-import type { ImageItem } from "../../types/image-types.js";
+import type { ImageItem } from "../../types/index.js";
 
 export class PopplerImageExtractor {
   private poppler: any = null;
@@ -24,7 +24,7 @@ export class PopplerImageExtractor {
       try {
         const { Poppler } = await import("node-poppler");
         this.poppler = new Poppler();
-      } catch (error) {
+      } catch (_error) {
         throw new Error(
           "node-poppler not installed. Install with: npm install node-poppler\n" +
             "Also requires system poppler-utils:\n" +
@@ -112,15 +112,20 @@ export class PopplerImageExtractor {
         const stats = fs.statSync(finalPath);
 
         images.push({
+          id: `img_${imageNum}`,
           name: `image_img_${imageNum}`,
-          format: format.toUpperCase(),
+          page: pageNum,
+          position: {
+            x: 0,
+            y: 0,
+            width: width || 0,
+            height: height || 0,
+          },
           width: width || 0,
           height: height || 0,
-          colorSpace: metadata.colorSpace || "unknown",
-          bitsPerComponent: metadata.bpc || 8,
-          path: finalPath,
+          format: format.toUpperCase(),
+          filePath: finalPath,
           size: stats.size,
-          pageNumber: pageNum,
         });
 
         if (verbose) {
@@ -170,14 +175,14 @@ export class PopplerImageExtractor {
       if (parts.length < 10) continue;
 
       images.push({
-        page: parseInt(parts[0]) || 1,
-        num: parseInt(parts[1]) || 0,
+        page: parseInt(parts[0], 10) || 1,
+        num: parseInt(parts[1], 10) || 0,
         type: parts[2],
-        width: parseInt(parts[3]) || 0,
-        height: parseInt(parts[4]) || 0,
+        width: parseInt(parts[3], 10) || 0,
+        height: parseInt(parts[4], 10) || 0,
         colorSpace: parts[5],
-        components: parseInt(parts[6]) || 0,
-        bpc: parseInt(parts[7]) || 8,
+        components: parseInt(parts[6], 10) || 0,
+        bpc: parseInt(parts[7], 10) || 8,
         encoding: parts[8],
       });
     }
@@ -205,4 +210,3 @@ export class PopplerImageExtractor {
     return formatMap[ext.toLowerCase()] || ext.toLowerCase();
   }
 }
-
