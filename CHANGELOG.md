@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-10-06
+
+### Added
+
+- **Poppler Fallback Support**: New `usePopplerFallback` option for comprehensive image extraction
+  - Automatically falls back to Poppler's `pdfimages` when standard extraction finds no images
+  - Can extract images embedded as Form XObjects, inline images, and other non-standard formats
+  - Requires `poppler-utils` system dependency (optional fallback)
+  - Maintains full backward compatibility with existing extraction methods
+
+### Features
+
+- **PopplerImageExtractor**: New dedicated class for Poppler-based image extraction
+  - Supports all native image formats (JPEG, JP2, PNG, TIFF, etc.)
+  - Preserves original image quality and metadata
+  - Intelligent file naming with page and image numbering
+  - Comprehensive error handling and cleanup
+
+### Technical Details
+
+- Lazy-loaded Poppler integration to avoid breaking existing installations
+- Graceful fallback when Poppler is not available
+- Temporary file management with automatic cleanup
+- Enhanced verbose logging for debugging extraction issues
+
 ## [1.0.3] - 2025-10-02
 
 ### Fixed
