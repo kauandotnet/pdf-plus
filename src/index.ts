@@ -24,6 +24,7 @@ export {
 } from "./extractors/text/index.js";
 export { ImageExtractor } from "./extractors/image/index.js";
 export { PageToImageConverter } from "./extractors/page-to-image/index.js";
+export { PopplerConverter } from "./extractors/page-to-image/poppler-converter.js";
 
 // ============================================================================
 // Processors & Optimizers

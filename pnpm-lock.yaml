@@ -26,6 +26,9 @@ importers:
       jimp:
         specifier: 0.22.12
         version: 0.22.12
+      node-poppler:
+        specifier: ^8.0.4
+        version: 8.0.4
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
@@ -936,6 +939,10 @@ packages:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
     engines: {node: '>=8'}
 
+  camelcase@6.3.0:
+    resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
+    engines: {node: '>=10'}
+
   canvas-5-polyfill@0.1.5:
     resolution: {integrity: sha512-Qn21QN94Oe3CnI+P57nHz97gEQiTvZrrtxlJ8rozIEtaKjtwAloF14uMTWrNXtgbthF0Fy1suZ+F69XF/XvKrw==}
 
@@ -1291,6 +1298,10 @@ packages:
     peerDependenciesMeta:
       encoding:
         optional: true
+
+  node-poppler@8.0.4:
+    resolution: {integrity: sha512-8bp200rELOX72mHv0cfnuDs7LWmd3jr3Y9pxgaysjeSxnUiZxhTA0Pg+SaXkTplIK+r4CfIVAfrla4omNq6UtA==}
+    engines: {node: '>=20'}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -2570,6 +2581,8 @@ snapshots:
 
   cac@6.7.14: {}
 
+  camelcase@6.3.0: {}
+
   canvas-5-polyfill@0.1.5: {}
 
   canvas@3.2.0:
@@ -2929,6 +2942,11 @@ snapshots:
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
+
+  node-poppler@8.0.4:
+    dependencies:
+      camelcase: 6.3.0
+      semver: 7.7.2
 
   object-assign@4.1.1: {}
 

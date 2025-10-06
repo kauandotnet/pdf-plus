@@ -146,6 +146,12 @@ export interface ExtractionOptions {
   pageImageFormat?: "png" | "jpg";
   /** Quality for JPG page images (default: 90) */
   pageImageQuality?: number;
+  /**
+   * Page rendering engine: 'pdfjs' | 'poppler' (default: 'pdfjs')
+   * - pdfjs: Pure JavaScript, no dependencies, but NO JP2 support
+   * - poppler: Requires system poppler-utils, but HAS full JP2 support
+   */
+  pageRenderEngine?: "pdfjs" | "poppler";
   /** Thumbnail width (default: 200) */
   thumbnailWidth?: number;
   /** Thumbnail quality for JPG (default: 80) */

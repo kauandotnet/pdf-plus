@@ -35,6 +35,15 @@ export class PageToImageConverter {
   /**
    * Get or load pdf.js module with proper worker configuration
    * Based on pdf-to-img library approach
+   *
+   * NOTE: pdf.js does not support JPEG2000 (JP2) images by default.
+   * Pages with JP2 images will have blank spaces where the images should be.
+   * The embedded images are still extracted correctly via extractImages option.
+   *
+   * For complete page rendering with JP2 support, consider using:
+   * - Poppler (pdf-poppler npm package) - requires system dependency
+   * - ImageMagick - requires system dependency
+   * - Ghostscript - requires system dependency
    */
   private async getPdfjs() {
     if (!this.pdfjs) {

@@ -96,6 +96,13 @@ export interface PageToImageOptions {
    * @default false
    */
   verbose?: boolean;
+
+  /**
+   * Number of pages to process in parallel (Poppler only)
+   * Higher values = faster but more CPU/memory usage
+   * @default 10
+   */
+  maxConcurrentPages?: number;
 }
 
 /**
@@ -221,4 +228,3 @@ export interface ThumbnailOptions extends SinglePageOptions {
    */
   maintainAspectRatio?: boolean;
 }
-

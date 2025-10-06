@@ -15,6 +15,7 @@ import { validateConfig } from "../utils/validation.js";
 import { TextExtractor } from "../extractors/text/text-extractor.js";
 import { ImageExtractor } from "../extractors/image/image-extractor.js";
 import { PageToImageConverter } from "../extractors/page-to-image/page-to-image-converter.js";
+import { PopplerConverter } from "../extractors/page-to-image/poppler-converter.js";
 import { FormatProcessor } from "../utils/format-processor.js";
 import { StructuredDataGenerator } from "../utils/structured-data-generator.js";
 import { CacheManager } from "../utils/cache-manager.js";
@@ -43,6 +44,7 @@ export class PDFExtractor {
   private textExtractor: TextExtractor;
   private imageExtractor: ImageExtractor;
   private pageToImageConverter: PageToImageConverter;
+  private popplerConverter: PopplerConverter;
   private formatProcessor: FormatProcessor;
   private structuredDataGenerator: StructuredDataGenerator;
   private cacheManager: CacheManager;
@@ -56,6 +58,7 @@ export class PDFExtractor {
     this.textExtractor = new TextExtractor();
     this.imageExtractor = new ImageExtractor();
     this.pageToImageConverter = new PageToImageConverter();
+    this.popplerConverter = new PopplerConverter();
     this.formatProcessor = new FormatProcessor();
     this.structuredDataGenerator = new StructuredDataGenerator();
     this.cacheManager = new CacheManager(cacheDir);
@@ -651,12 +654,17 @@ export class PDFExtractor {
     const qualities = options.pageImageQualities || [
       options.pageImageQuality || 90,
     ];
+    const engine = options.pageRenderEngine || "pdfjs";
 
     if (options.verbose) {
       console.log(
-        `📸 Generating page images for ${pageNumbers.length} pages...`
+        `📸 Generating page images for ${pageNumbers.length} pages using ${engine}...`
       );
     }
+
+    // Select converter based on engine
+    const converter =
+      engine === "poppler" ? this.popplerConverter : this.pageToImageConverter;
 
     // Generate default quality page images
     const defaultQuality = qualities[0];
@@ -668,10 +676,7 @@ export class PDFExtractor {
       pages: pageNumbers,
       verbose: options.verbose ?? false,
     };
-    const result = await this.pageToImageConverter.convertToImages(
-      pdfPath,
-      convertOptions
-    );
+    const result = await converter.convertToImages(pdfPath, convertOptions);
 
     // Store default quality images
     for (const pageImage of result.images) {
@@ -699,7 +704,7 @@ export class PDFExtractor {
           pages: pageNumbers,
           verbose: false,
         };
-        const variantResult = await this.pageToImageConverter.convertToImages(
+        const variantResult = await converter.convertToImages(
           pdfPath,
           variantOptions
         );

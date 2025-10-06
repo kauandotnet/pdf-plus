@@ -73,6 +73,7 @@
     "file-type": "^21.0.0",
     "image-size": "^1.1.1",
     "jimp": "0.22.12",
+    "node-poppler": "^8.0.4",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.4.149",
     "pngjs": "^7.0.0",
