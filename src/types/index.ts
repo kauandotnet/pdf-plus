@@ -214,6 +214,21 @@ export interface ExtractionOptions {
    */
   useSharp?: boolean;
 
+  /**
+   * Use Poppler's pdfimages as fallback when standard extraction finds no images.
+   * Poppler can extract images that are embedded in non-standard ways (Form XObjects, inline images, etc.)
+   * that the standard XObject-based extraction might miss.
+   *
+   * Requires poppler-utils to be installed on the system.
+   *
+   * Installation:
+   * - Linux: sudo apt-get install poppler-utils
+   * - macOS: brew install poppler
+   *
+   * (default: false)
+   */
+  usePopplerFallback?: boolean;
+
   // Performance options
   /** Enable parallel processing for better performance (default: true) */
   parallelProcessing?: boolean;

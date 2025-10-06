@@ -70,6 +70,53 @@ export class ImageExtractor {
         throw new Error(result.error || "Engine extraction failed");
       }
 
+      // Check if we should use Poppler fallback
+      const shouldUsePopplerFallback =
+        opts.usePopplerFallback && result.images && result.images.length === 0;
+
+      if (shouldUsePopplerFallback) {
+        if (opts.verbose) {
+          console.log(
+            "   ⚠️  No images found with standard extraction, trying Poppler fallback..."
+          );
+        }
+
+        try {
+          const { PopplerImageExtractor } = await import(
+            "./poppler-image-extractor.js"
+          );
+          const popplerExtractor = new PopplerImageExtractor();
+          const popplerResult = await popplerExtractor.extractImages(
+            pdfPath,
+            opts
+          );
+
+          if (popplerResult.images.length > 0) {
+            if (opts.verbose) {
+              console.log(
+                `   ✅ Poppler found ${popplerResult.images.length} images!`
+              );
+            }
+            return {
+              success: true,
+              images: popplerResult.images,
+              metadata: popplerResult.metadata,
+            };
+          }
+        } catch (popplerError) {
+          if (opts.verbose) {
+            console.log(
+              `   ⚠️  Poppler fallback failed: ${
+                popplerError instanceof Error
+                  ? popplerError.message
+                  : "Unknown error"
+              }`
+            );
+          }
+          // Continue with original result (0 images)
+        }
+      }
+
       return {
         success: true,
         images: result.images || [],
