@@ -72,7 +72,7 @@ export class ImageOptimizer {
 
     // Try Sharp first if enabled and available
     if (options.useSharp) {
-      const sharpResult = await this.optimizeWithSharp(filePath, options);
+      const sharpResult = await ImageOptimizer.optimizeWithSharp(filePath, options);
       if (sharpResult.success) {
         return {
           ...sharpResult,
@@ -92,7 +92,7 @@ export class ImageOptimizer {
     }
 
     // Use Jimp (pure JavaScript, no native dependencies)
-    const result = await this.optimizeWithJimp(filePath, options);
+    const result = await ImageOptimizer.optimizeWithJimp(filePath, options);
     if (result.success) {
       return {
         ...result,

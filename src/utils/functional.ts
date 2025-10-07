@@ -134,7 +134,7 @@ export const retry = async <T>(
       lastError = error instanceof Error ? error : new Error(String(error));
       
       if (attempt < maxAttempts) {
-        const delay = initialDelay * Math.pow(backoff, attempt - 1);
+        const delay = initialDelay * backoff ** (attempt - 1);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }

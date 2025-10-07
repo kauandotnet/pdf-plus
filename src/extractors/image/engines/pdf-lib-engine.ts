@@ -1410,7 +1410,7 @@ export class PdfLibEngine extends BaseImageEngine {
 
       // If the data size doesn't match, try to recalculate dimensions
       let actualWidth = width;
-      let actualHeight = height;
+      const actualHeight = height;
 
       if (Math.abs(pixelRatio - 1.0) > 0.1) {
         // Data size doesn't match - might have predictor bytes or wrong dimensions

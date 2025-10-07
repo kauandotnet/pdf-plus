@@ -172,7 +172,7 @@ export class ParallelProcessor {
     options: ParallelProcessorOptions = {}
   ): Promise<R[]> {
     const tasks = items.map((item, index) => () => mapper(item, index));
-    return this.executeWithLimit(tasks, options);
+    return ParallelProcessor.executeWithLimit(tasks, options);
   }
 
   /**
@@ -189,7 +189,7 @@ export class ParallelProcessor {
     options: ParallelProcessorOptions = {}
   ): Promise<PromiseSettledResult<R>[]> {
     const tasks = items.map((item, index) => () => mapper(item, index));
-    return this.executeWithLimitSettled(tasks, options);
+    return ParallelProcessor.executeWithLimitSettled(tasks, options);
   }
 
   /**
@@ -205,7 +205,7 @@ export class ParallelProcessor {
     predicate: (item: T, index: number) => Promise<boolean>,
     options: ParallelProcessorOptions = {}
   ): Promise<T[]> {
-    const results = await this.map(items, predicate, options);
+    const results = await ParallelProcessor.map(items, predicate, options);
     return items.filter((_, index) => results[index]);
   }
 
@@ -233,6 +233,6 @@ export class ParallelProcessor {
     });
 
     const tasks = chunks.map((chunk, index) => () => processor(chunk, index));
-    return this.executeWithLimit(tasks, options);
+    return ParallelProcessor.executeWithLimit(tasks, options);
   }
 }

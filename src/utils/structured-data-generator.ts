@@ -92,13 +92,18 @@ export class StructuredDataGenerator {
    * Split text by existing page markers
    */
   private splitByPageMarkers(text: string, pageMarkerRegex: RegExp): string[] {
+    // Split by page markers (e.g., "--- PAGE 4 ---")
+    // The format is: "--- PAGE {number} ---\n\n{page text}\n"
     const parts = text.split(pageMarkerRegex);
 
-    // Skip the first part (before first page marker)
-    const pages = parts
-      .slice(1)
-      .map((part) => part.trim())
-      .filter((part) => part.length > 0);
+    // The first part is before any page marker (usually empty or intro text)
+    // After split, we get: [before, text1, text2, ...]
+    // where text1 is the content after PAGE 1 marker, text2 after PAGE 2, etc.
+
+    // Skip the first part (before first page marker) and take the rest
+    // IMPORTANT: Don't filter out empty pages! Trim each part but keep empty strings
+    // to preserve page numbering (e.g., image-only pages have empty text)
+    const pages = parts.slice(1).map((part) => part.trim());
 
     // If no pages found, return the whole text
     return pages.length === 0 ? [text] : pages;
