@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2025-10-07
+
+### Fixed
+
+- **Dependency Management**: Fixed and optimized project dependencies
+  - Fixed `pdfjs-dist` version to `5.4.149` (removed caret to prevent automatic updates)
+  - Removed unused `canvas-5-polyfill` dependency (not used anywhere in codebase)
+  - Kept `pdf-lib` (actively used in PDF processing engines)
+  - Kept `canvas` (required for page-to-image conversion functionality)
+
+### Technical Improvements
+
+- **Bundle Size Optimization**: Reduced package size by removing unused dependencies
+- **Version Stability**: Fixed pdfjs-dist to specific version to prevent breaking changes from automatic updates
+- **Dependency Audit**: Comprehensive review and cleanup of all dependencies
+
 ## [1.2.1] - 2025-10-07
 
 ### Fixed

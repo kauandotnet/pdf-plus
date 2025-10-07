@@ -14,9 +14,6 @@ importers:
       canvas:
         specifier: ^3.2.0
         version: 3.2.0
-      canvas-5-polyfill:
-        specifier: ^0.1.5
-        version: 0.1.5
       file-type:
         specifier: ^21.0.0
         version: 21.0.0
@@ -33,7 +30,7 @@ importers:
         specifier: ^1.17.1
         version: 1.17.1
       pdfjs-dist:
-        specifier: ^5.4.149
+        specifier: 5.4.149
         version: 5.4.149
       pngjs:
         specifier: ^7.0.0
@@ -942,9 +939,6 @@ packages:
   camelcase@6.3.0:
     resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
     engines: {node: '>=10'}
-
-  canvas-5-polyfill@0.1.5:
-    resolution: {integrity: sha512-Qn21QN94Oe3CnI+P57nHz97gEQiTvZrrtxlJ8rozIEtaKjtwAloF14uMTWrNXtgbthF0Fy1suZ+F69XF/XvKrw==}
 
   canvas@3.2.0:
     resolution: {integrity: sha512-jk0GxrLtUEmW/TmFsk2WghvgHe8B0pxGilqCL21y8lHkPUGa6FTsnCNtHPOzT8O3y+N+m3espawV80bbBlgfTA==}
@@ -2582,8 +2576,6 @@ snapshots:
   cac@6.7.14: {}
 
   camelcase@6.3.0: {}
-
-  canvas-5-polyfill@0.1.5: {}
 
   canvas@3.2.0:
     dependencies:

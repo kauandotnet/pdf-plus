@@ -1,6 +1,6 @@
 {
   "name": "pdf-plus",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A comprehensive PDF content extraction library with support for text, images, and structured data",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -69,13 +69,12 @@
   "dependencies": {
     "@cornerstonejs/codec-openjpeg": "^1.2.4",
     "canvas": "^3.2.0",
-    "canvas-5-polyfill": "^0.1.5",
     "file-type": "^21.0.0",
     "image-size": "^1.1.1",
     "jimp": "0.22.12",
     "node-poppler": "^8.0.4",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^5.4.149",
+    "pdfjs-dist": "5.4.149",
     "pngjs": "^7.0.0",
     "utif": "^3.1.0"
   },
