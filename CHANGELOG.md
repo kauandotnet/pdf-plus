@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2025-10-07
+
+### Fixed
+
+- **Code Quality Improvements**: Enhanced code maintainability and performance
+  - Changed `actualHeight` to `const` in pdf-lib-engine for better immutability
+  - Converted instance methods to static methods in ImageOptimizer and ParallelProcessor classes
+  - Replaced `Math.pow()` with modern exponentiation operator (`**`) in functional utilities
+  - Fixed page splitting logic to preserve empty pages for correct page numbering
+  - Added comprehensive comments for page marker splitting algorithm
+
+### Technical Improvements
+
+- **Static Method Optimization**: Improved memory usage by converting appropriate instance methods to static
+- **Modern JavaScript**: Updated to use ES2016+ exponentiation operator for better performance
+- **Page Processing**: Enhanced structured data generation to handle image-only pages correctly
+
 ## [1.2.0] - 2025-10-06
 
 ### Added
