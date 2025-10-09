@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-10-09
+
+### Added
+
+- **New `generatePageImages()` Function**: Simplified convenience function for rendering PDF pages to images
+  - Top-level function `generatePageImages(pdfPath, outputDir, options)` for easy page-to-image conversion
+  - Instance method `PDFExtractor.generatePageImages()` for class-based usage
+  - Returns array of absolute paths to generated page images
+  - Supports JPG, PNG, and WebP formats
+  - Configurable DPI (72, 150, 300, 600)
+  - Choice of rendering engines (Poppler or PDF.js)
+  - Parallel processing support for fast multi-page rendering
+
+### Changed
+
+- **Updated README**: Comprehensive documentation for the new `generatePageImages()` API
+  - Simplified examples showing basic usage
+  - Advanced examples with all configuration options
+  - Clear distinction between extracting embedded images vs. rendering pages
+  - Updated API reference section
+
+### Documentation
+
+- Enhanced API documentation with detailed examples
+- Added output structure examples
+- Improved clarity between `extractImageFiles()` and `generatePageImages()`
+
 ## [1.2.2] - 2025-10-07
 
 ### Fixed
