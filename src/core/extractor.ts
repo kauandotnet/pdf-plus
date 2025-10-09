@@ -321,6 +321,57 @@ export class PDFExtractor {
       .map((img) => img.filePath as string);
   }
 
+  /**
+   * Generate page images (render PDF pages to image files)
+   *
+   * This is a simplified method to only render PDF pages to images
+   * without extracting embedded images or text.
+   *
+   * @param pdfPath - Path to the PDF file
+   * @param outputDir - Directory to save page images
+   * @param options - Optional configuration (pageImageFormat, pageImageDpi, pageRenderEngine, etc.)
+   * @returns Promise resolving to array of generated image file paths
+   *
+   * @example
+   * ```typescript
+   * const extractor = new PDFExtractor();
+   * const imagePaths = await extractor.generatePageImages('document.pdf', './page-images', {
+   *   pageImageFormat: 'jpg',
+   *   pageImageDpi: 150,
+   *   pageRenderEngine: 'poppler'
+   * });
+   * console.log(`Generated ${imagePaths.length} page images`);
+   * ```
+   */
+  async generatePageImages(
+    pdfPath: string,
+    outputDir: string = "./page-images",
+    options: Partial<ExtractionOptions> = {}
+  ): Promise<string[]> {
+    const result = await this.extract(pdfPath, {
+      ...options,
+      extractText: true, // Required for validation
+      extractImages: false,
+      extractImageFiles: false,
+      generatePageImages: true,
+      generateStructuredData: true,
+      includePageImagesInStructuredData: true,
+      imageOutputDir: outputDir,
+    });
+
+    // Extract page image paths from structured data
+    const pageImagePaths: string[] = [];
+    if (result.structuredData?.pages) {
+      for (const page of result.structuredData.pages) {
+        if (page.pageImage?.path) {
+          pageImagePaths.push(page.pageImage.path);
+        }
+      }
+    }
+
+    return pageImagePaths;
+  }
+
   private validateConfiguration(config: ExtractorConfig): ValidationError[] {
     return validateConfig(config);
   }

@@ -282,6 +282,39 @@ export async function extractImageFiles(
 }
 
 /**
+ * Generate page images from a PDF (render pages to image files)
+ *
+ * This is a convenience function to render PDF pages to images without
+ * extracting embedded images or text. Perfect for creating page previews
+ * or thumbnails.
+ *
+ * @param pdfPath - Path to the PDF file
+ * @param outputDir - Directory to save page images
+ * @param options - Page rendering options
+ * @returns Promise resolving to array of generated image file paths
+ *
+ * @example
+ * ```typescript
+ * import { generatePageImages } from 'pdf-plus';
+ *
+ * const imagePaths = await generatePageImages('document.pdf', './page-images', {
+ *   pageImageFormat: 'jpg',
+ *   pageImageDpi: 150,
+ *   pageRenderEngine: 'poppler'
+ * });
+ *
+ * console.log(`Generated ${imagePaths.length} page images`);
+ * ```
+ */
+export async function generatePageImages(
+  pdfPath: string,
+  outputDir: string = "./page-images",
+  options: Partial<ExtractionOptions> = {}
+): Promise<string[]> {
+  return pdfExtractor.generatePageImages(pdfPath, outputDir, options);
+}
+
+/**
  * Extract PDF content in streaming mode (Phase 4 - NEW!)
  *
  * For large PDFs, this provides a streaming API that processes pages one at a time,
@@ -359,6 +392,7 @@ export default {
   extractText,
   extractImages,
   extractImageFiles,
+  generatePageImages,
   extractPdfStream,
 
   // Utilities

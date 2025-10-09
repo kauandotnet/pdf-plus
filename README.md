@@ -82,33 +82,55 @@ for await (const event of stream) {
 
 See [PHASE4-STREAMING.md](./PHASE4-STREAMING.md) for complete streaming API documentation.
 
-### Convert PDF Pages to Images (NEW! - Phase 5)
+### Generate Page Images (NEW! - Phase 5)
 
-Convert PDF pages to high-quality images (PNG, JPG, WebP):
+Render PDF pages to high-quality images with a simple function call:
 
 ```typescript
-import { PageToImageConverter } from "pdf-plus";
+import { generatePageImages } from "pdf-plus";
 
-const converter = new PageToImageConverter();
+// Simple - render all pages to JPG images
+const imagePaths = await generatePageImages(
+  "document.pdf", // PDF file path
+  "./page-images" // Output directory where images will be saved
+);
 
-// Convert all pages to PNG
-const result = await converter.convertToImages("document.pdf", {
-  outputDir: "./page-images",
-  format: "png",
-  dpi: 150,
-  verbose: true,
+console.log(`Generated ${imagePaths.length} page images`);
+// Returns: ['/path/to/page-images/jpg/page-001.jpg', '/path/to/page-images/jpg/page-002.jpg', ...]
+```
+
+**With Options:**
+
+```typescript
+const imagePaths = await generatePageImages("document.pdf", "./page-images", {
+  pageImageFormat: "jpg", // 'jpg', 'png', or 'webp'
+  pageImageDpi: 150, // DPI quality (72, 150, 300, 600)
+  pageRenderEngine: "poppler", // 'poppler' (recommended) or 'pdfjs'
+  specificPages: [1, 2, 3], // Optional: only render specific pages
+  parallelProcessing: true, // Parallel rendering (default: true)
+  maxConcurrentPages: 10, // Max parallel pages (default: 10)
+  verbose: true, // Show progress
 });
-
-console.log(`Converted ${result.totalPages} pages`);
 ```
 
 **Features:**
 
-- 🎨 **Multiple formats** - PNG, JPG, WebP
-- 📐 **Quality control** - Adjustable DPI (72, 150, 300, 600) and quality
-- 📄 **Page selection** - Convert specific pages or ranges
-- 🖼️ **Thumbnails** - Generate low-res previews
-- 💾 **Buffer/Base64** - In-memory conversion for web apps
+- 🎨 **Multiple formats** - JPG, PNG, WebP
+- 📐 **Quality control** - Adjustable DPI (72, 150, 300, 600)
+- 📄 **Page selection** - Render specific pages or all pages
+- 🚀 **Parallel rendering** - Fast multi-page processing
+- 📁 **Returns file paths** - Array of absolute paths to generated images
+- 🔧 **Two engines** - Poppler (best quality) or PDF.js
+
+**Output Structure:**
+
+```
+page-images/
+└── jpg/
+    ├── page-001.jpg
+    ├── page-002.jpg
+    └── page-003.jpg
+```
 
 See [PAGE-TO-IMAGE-FEATURE.md](./PAGE-TO-IMAGE-FEATURE.md) for complete page-to-image documentation.
 
@@ -123,17 +145,33 @@ const text = await extractText("document.pdf");
 console.log(`Extracted ${text.length} characters`);
 ```
 
-### Images-Only Extraction
+### Extract Embedded Images
 
 ```typescript
-import { extractImages } from "pdf-plus";
+import { extractImageFiles } from "pdf-plus";
 
-const images = await extractImages("document.pdf", {
-  extractImageFiles: true,
-  imageOutputDir: "./my-images",
-});
+// Extract and save embedded images from PDF
+const imagePaths = await extractImageFiles(
+  "document.pdf",
+  "./extracted-images" // Output directory for embedded images
+);
 
-console.log(`Found ${images.length} images`);
+console.log(`Extracted ${imagePaths.length} embedded images`);
+```
+
+### Generate Page Images (Render Pages)
+
+```typescript
+import { generatePageImages } from "pdf-plus";
+
+// Render PDF pages to image files
+const imagePaths = await generatePageImages(
+  "document.pdf",
+  "./page-images" // Output directory for page images
+);
+
+console.log(`Generated ${imagePaths.length} page images`);
+// Each page becomes an image: page-001.jpg, page-002.jpg, etc.
 ```
 
 ### Image Extraction with Optimization
@@ -364,9 +402,42 @@ Extract only image references.
 
 #### `extractImageFiles(pdfPath, outputDir, options)`
 
-Extract and save actual image files.
+Extract and save embedded image files from PDF.
+
+**Parameters:**
+
+- `pdfPath` - Path to the PDF file
+- `outputDir` - Output directory path where embedded images will be saved
+- `options` - Optional extraction options
 
 **Returns:** `Promise<string[]>` - Array of saved file paths
+
+#### `generatePageImages(pdfPath, outputDir, options)`
+
+Render PDF pages to image files (page-to-image conversion).
+
+**Parameters:**
+
+- `pdfPath` - Path to the PDF file
+- `outputDir` - Output directory path where page images will be saved
+- `options` - Optional rendering options (pageImageFormat, pageImageDpi, pageRenderEngine, etc.)
+
+**Returns:** `Promise<string[]>` - Array of absolute paths to generated page images
+
+**Example:**
+
+```typescript
+import { generatePageImages } from "pdf-plus";
+
+const imagePaths = await generatePageImages("document.pdf", "./page-images", {
+  pageImageFormat: "jpg",
+  pageImageDpi: 150,
+  pageRenderEngine: "poppler",
+});
+
+console.log(`Generated ${imagePaths.length} page images`);
+// Returns: ['/absolute/path/to/page-images/jpg/page-001.jpg', ...]
+```
 
 ### Options
 
