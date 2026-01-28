@@ -11,7 +11,7 @@ import type {
   PageInfo,
   MetadataOptions,
 } from "./types.js";
-import { loadPDF } from "./document.js";
+import { loadPDF, getPDFJS } from "./document.js";
 
 /**
  * Check if source is already a loaded PDF document
@@ -28,66 +28,6 @@ async function resolveDocument(
     return source;
   }
   return loadPDF(source);
-}
-
-/**
- * Parse PDF date string to Date object
- *
- * PDF dates follow the format: D:YYYYMMDDHHmmSSOHH'mm'
- * Example: D:20231215143052+00'00'
- */
-function parsePDFDate(dateString: unknown): Date | string | null {
-  if (typeof dateString !== "string") return null;
-
-  // Remove the 'D:' prefix if present
-  const cleaned = dateString.startsWith("D:") ? dateString.slice(2) : dateString;
-
-  // PDF date format: YYYYMMDDHHmmSSOHH'mm'
-  // At minimum we need YYYY
-  const match = cleaned.match(
-    /^(\d{4})(\d{2})?(\d{2})?(\d{2})?(\d{2})?(\d{2})?([+-Z])?(\d{2})?'?(\d{2})?'?$/
-  );
-
-  if (!match) {
-    return dateString; // Return original if can't parse
-  }
-
-  const [
-    ,
-    year,
-    month = "01",
-    day = "01",
-    hour = "00",
-    minute = "00",
-    second = "00",
-    tzSign,
-    tzHour = "00",
-    tzMinute = "00",
-  ] = match;
-
-  // Build ISO date string
-  let isoString = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
-
-  // Add timezone
-  if (tzSign === "Z") {
-    isoString += "Z";
-  } else if (tzSign === "+" || tzSign === "-") {
-    isoString += `${tzSign}${tzHour}:${tzMinute}`;
-  } else {
-    // No timezone specified, assume UTC
-    isoString += "Z";
-  }
-
-  try {
-    const date = new Date(isoString);
-    // Validate the date is valid
-    if (isNaN(date.getTime())) {
-      return dateString;
-    }
-    return date;
-  } catch {
-    return dateString;
-  }
 }
 
 /**
@@ -123,11 +63,18 @@ export async function getMetadata(
     // Process dates if requested
     let info = { ...rawInfo };
     if (options.parseDates) {
-      const dateFields = ["CreationDate", "ModDate"];
-      for (const field of dateFields) {
-        if (field in info) {
-          info[field] = parsePDFDate(info[field]);
-        }
+      // Use pdfjs built-in PDFDateString for robust date parsing
+      const pdfjs = await getPDFJS();
+      const { PDFDateString } = pdfjs;
+
+      // Primary date properties from /Info dictionary
+      if (info.CreationDate) {
+        const parsed = PDFDateString.toDateObject(info.CreationDate as string);
+        if (parsed) info.CreationDate = parsed;
+      }
+      if (info.ModDate) {
+        const parsed = PDFDateString.toDateObject(info.ModDate as string);
+        if (parsed) info.ModDate = parsed;
       }
     }
 

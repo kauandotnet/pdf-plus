@@ -108,10 +108,14 @@ export interface LinkExtractionResult {
  * Options for page rendering
  */
 export interface RenderOptions {
-  /** Scale factor (default: 1) */
+  /** Scale factor (default: 1). Ignored if width or height is set. */
   scale?: number;
   /** DPI for rendering (default: 72, affects scale) */
   dpi?: number;
+  /** Target width in pixels. Auto-calculates scale to fit. */
+  width?: number;
+  /** Target height in pixels. Auto-calculates scale to fit. */
+  height?: number;
   /** Output format: 'png' | 'jpeg' | 'webp' (default: 'png') */
   format?: "png" | "jpeg" | "webp";
   /** Quality for JPEG/WebP (0-100, default: 90) */
@@ -120,6 +124,20 @@ export interface RenderOptions {
   backgroundColor?: string;
   /** Transparent background (default: false) */
   transparent?: boolean;
+}
+
+/**
+ * Result of rendering a page as data URL
+ */
+export interface RenderDataURLResult {
+  /** Data URL string (e.g., "data:image/png;base64,...") */
+  dataURL: string;
+  /** Image width in pixels */
+  width: number;
+  /** Image height in pixels */
+  height: number;
+  /** Output format */
+  format: "png" | "jpeg" | "webp";
 }
 
 /**

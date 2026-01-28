@@ -63,6 +63,7 @@ export { extractLinks } from "./links.js";
 // Rendering
 export {
   renderPage,
+  renderPageAsDataURL,
   renderPages,
   renderPageToBase64,
   renderPageToDataURL,
@@ -85,6 +86,7 @@ export type {
   LinkExtractionResult,
   RenderOptions,
   RenderResult,
+  RenderDataURLResult,
   PDFMetadata,
   PageInfo,
 } from "./types.js";

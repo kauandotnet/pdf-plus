@@ -10,6 +10,7 @@ import type {
   PDFSource,
   RenderOptions,
   RenderResult,
+  RenderDataURLResult,
 } from "./types.js";
 import { loadPDF } from "./document.js";
 import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
@@ -24,10 +25,15 @@ import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
  *
  * @example
  * ```typescript
- * const result = await renderPage('document.pdf', 1, {
- *   scale: 2,
- *   format: 'png'
- * });
+ * // Using scale
+ * const result = await renderPage('document.pdf', 1, { scale: 2 });
+ *
+ * // Using target width (auto-calculates scale)
+ * const result = await renderPage('document.pdf', 1, { width: 800 });
+ *
+ * // Using target height (auto-calculates scale)
+ * const result = await renderPage('document.pdf', 1, { height: 600 });
+ *
  * fs.writeFileSync('page1.png', result.buffer);
  * ```
  */
@@ -41,8 +47,10 @@ export async function renderPage(
 
   try {
     const {
-      scale = 1,
+      scale: userScale = 1,
       dpi = 72,
+      width: targetWidth,
+      height: targetHeight,
       format = "png",
       quality = 90,
       backgroundColor = "#FFFFFF",
@@ -51,9 +59,23 @@ export async function renderPage(
 
     const page = await doc.getPage(pageNum);
 
-    // Calculate effective scale (DPI affects scale)
+    // Get default viewport to calculate dimensions
+    const defaultViewport = page.getViewport({ scale: 1.0 });
+
+    // Calculate scale based on options
+    let scale = userScale;
+
+    if (targetWidth) {
+      // Calculate scale to fit target width
+      scale = targetWidth / defaultViewport.width;
+    } else if (targetHeight) {
+      // Calculate scale to fit target height
+      scale = targetHeight / defaultViewport.height;
+    }
+
+    // Apply DPI adjustment
     const effectiveScale = scale * (dpi / 72);
-    const viewport = page.getViewport({ scale: effectiveScale });
+    const viewport = page.getViewport({ scale: Math.max(0, effectiveScale) });
 
     // Create canvas using our factory
     const { canvas, context } = napiCanvasFactory.create(
@@ -68,8 +90,6 @@ export async function renderPage(
     }
 
     // Render PDF page to canvas
-    // Note: pdf.js RenderParameters type requires canvas, but at runtime it works
-    // with just canvasContext. We use 'as any' for the type assertion.
     await page.render({
       canvasContext: context,
       viewport,
@@ -92,6 +112,36 @@ export async function renderPage(
       await doc.destroy();
     }
   }
+}
+
+/**
+ * Render a PDF page directly to a data URL
+ *
+ * @param source - PDF document, file path, or buffer
+ * @param pageNum - Page number (1-based)
+ * @param options - Render options
+ * @returns Render result with data URL and dimensions
+ *
+ * @example
+ * ```typescript
+ * const result = await renderPageAsDataURL('document.pdf', 1, { width: 800 });
+ * // result.dataURL = "data:image/png;base64,..."
+ * ```
+ */
+export async function renderPageAsDataURL(
+  source: PDFSource | PDFDocumentProxy,
+  pageNum: number,
+  options: RenderOptions = {}
+): Promise<RenderDataURLResult> {
+  const result = await renderPage(source, pageNum, options);
+  const mimeType = getMimeType(result.format);
+
+  return {
+    dataURL: `data:${mimeType};base64,${result.buffer.toString("base64")}`,
+    width: result.width,
+    height: result.height,
+    format: result.format,
+  };
 }
 
 /**
@@ -145,21 +195,22 @@ export async function renderPageToBase64(
 }
 
 /**
- * Render a page as a data URL
+ * Render a page as a data URL (legacy function, use renderPageAsDataURL instead)
  *
  * @param source - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @param options - Render options
  * @returns Data URL string
+ *
+ * @deprecated Use renderPageAsDataURL which returns more info
  */
 export async function renderPageToDataURL(
   source: PDFSource | PDFDocumentProxy,
   pageNum: number,
   options: RenderOptions = {}
 ): Promise<string> {
-  const result = await renderPage(source, pageNum, options);
-  const mimeType = getMimeType(result.format);
-  return `data:${mimeType};base64,${result.buffer.toString("base64")}`;
+  const result = await renderPageAsDataURL(source, pageNum, options);
+  return result.dataURL;
 }
 
 // Helper functions
