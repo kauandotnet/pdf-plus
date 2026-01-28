@@ -15,6 +15,16 @@ export type { PDFDocumentProxy, PDFPageProxy };
 export type PDFSource = string | Uint8Array | Buffer;
 
 /**
+ * Input type for PDF operations - accepts either raw data or an already loaded document
+ */
+export type PDFInput = PDFSource | PDFDocumentProxy;
+
+/**
+ * Supported image formats for rendering
+ */
+export type ImageFormat = "png" | "jpeg" | "webp";
+
+/**
  * Options for loading a PDF document
  */
 export interface PDFLoadOptions {
@@ -47,7 +57,7 @@ export interface PDFTextItem {
   /** Whether this item ends with EOL */
   hasEOL: boolean;
   /** Text direction (ltr or rtl) */
-  dir: string;
+  dir: "ltr" | "rtl" | "ttb" | "btt";
 }
 
 /**
@@ -116,28 +126,14 @@ export interface RenderOptions {
   width?: number;
   /** Target height in pixels. Auto-calculates scale to fit. */
   height?: number;
-  /** Output format: 'png' | 'jpeg' | 'webp' (default: 'png') */
-  format?: "png" | "jpeg" | "webp";
+  /** Output format (default: 'png') */
+  format?: ImageFormat;
   /** Quality for JPEG/WebP (0-100, default: 90) */
   quality?: number;
   /** Background color (default: '#FFFFFF') */
   backgroundColor?: string;
   /** Transparent background (default: false) */
   transparent?: boolean;
-}
-
-/**
- * Result of rendering a page as data URL
- */
-export interface RenderDataURLResult {
-  /** Data URL string (e.g., "data:image/png;base64,...") */
-  dataURL: string;
-  /** Image width in pixels */
-  width: number;
-  /** Image height in pixels */
-  height: number;
-  /** Output format */
-  format: "png" | "jpeg" | "webp";
 }
 
 /**
@@ -151,7 +147,21 @@ export interface RenderResult {
   /** Image height in pixels */
   height: number;
   /** Output format */
-  format: "png" | "jpeg" | "webp";
+  format: ImageFormat;
+}
+
+/**
+ * Result of rendering a page as data URL
+ */
+export interface RenderDataURLResult {
+  /** Data URL string (e.g., "data:image/png;base64,...") */
+  dataURL: string;
+  /** Image width in pixels */
+  width: number;
+  /** Image height in pixels */
+  height: number;
+  /** Output format */
+  format: ImageFormat;
 }
 
 /**

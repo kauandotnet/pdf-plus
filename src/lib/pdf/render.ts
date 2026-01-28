@@ -6,19 +6,19 @@
 
 import type { Canvas } from "@napi-rs/canvas";
 import type {
-  PDFDocumentProxy,
-  PDFSource,
+  PDFInput,
   RenderOptions,
   RenderResult,
   RenderDataURLResult,
+  ImageFormat,
 } from "./types.js";
-import { loadPDF } from "./document.js";
+import { getDocumentProxy, isPDFDocumentProxy, validatePageNumber } from "./document.js";
 import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
 
 /**
  * Render a PDF page to an image buffer
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @param options - Render options
  * @returns Render result with buffer and dimensions
@@ -38,14 +38,17 @@ import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
  * ```
  */
 export async function renderPage(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNum: number,
   options: RenderOptions = {}
 ): Promise<RenderResult> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
+    // Validate page number
+    validatePageNumber(pageNum, doc.numPages);
+
     const {
       scale: userScale = 1,
       dpi = 72,
@@ -117,7 +120,7 @@ export async function renderPage(
 /**
  * Render a PDF page directly to a data URL
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @param options - Render options
  * @returns Render result with data URL and dimensions
@@ -129,11 +132,11 @@ export async function renderPage(
  * ```
  */
 export async function renderPageAsDataURL(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNum: number,
   options: RenderOptions = {}
 ): Promise<RenderDataURLResult> {
-  const result = await renderPage(source, pageNum, options);
+  const result = await renderPage(input, pageNum, options);
   const mimeType = getMimeType(result.format);
 
   return {
@@ -147,18 +150,18 @@ export async function renderPageAsDataURL(
 /**
  * Render multiple pages to image buffers
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNums - Array of page numbers (1-based), or undefined for all pages
  * @param options - Render options
  * @returns Array of render results
  */
 export async function renderPages(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNums?: number[],
   options: RenderOptions = {}
 ): Promise<RenderResult[]> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
     const pages = pageNums || Array.from({ length: doc.numPages }, (_, i) => i + 1);
@@ -180,24 +183,24 @@ export async function renderPages(
 /**
  * Render a page and return as base64 string
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @param options - Render options
  * @returns Base64-encoded image string
  */
 export async function renderPageToBase64(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNum: number,
   options: RenderOptions = {}
 ): Promise<string> {
-  const result = await renderPage(source, pageNum, options);
+  const result = await renderPage(input, pageNum, options);
   return result.buffer.toString("base64");
 }
 
 /**
  * Render a page as a data URL (legacy function, use renderPageAsDataURL instead)
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @param options - Render options
  * @returns Data URL string
@@ -205,36 +208,21 @@ export async function renderPageToBase64(
  * @deprecated Use renderPageAsDataURL which returns more info
  */
 export async function renderPageToDataURL(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNum: number,
   options: RenderOptions = {}
 ): Promise<string> {
-  const result = await renderPageAsDataURL(source, pageNum, options);
+  const result = await renderPageAsDataURL(input, pageNum, options);
   return result.dataURL;
 }
 
-// Helper functions
-
-/**
- * Check if source is already a loaded PDF document
- * Uses internal pdfjs property for reliable detection
- */
-function isPDFDocumentProxy(data: unknown): data is PDFDocumentProxy {
-  return typeof data === "object" && data !== null && "_pdfInfo" in data;
-}
-
-async function resolveDocument(
-  source: PDFSource | PDFDocumentProxy
-): Promise<PDFDocumentProxy> {
-  if (isPDFDocumentProxy(source)) {
-    return source;
-  }
-  return loadPDF(source);
-}
+// ============================================================================
+// Helper Functions
+// ============================================================================
 
 async function canvasToBuffer(
   canvas: Canvas,
-  format: "png" | "jpeg" | "webp",
+  format: ImageFormat,
   quality: number
 ): Promise<Buffer> {
   if (format === "png") {
@@ -247,8 +235,8 @@ async function canvasToBuffer(
   throw new Error(`Unsupported format: ${format}`);
 }
 
-function getMimeType(format: "png" | "jpeg" | "webp"): string {
-  const mimeTypes = {
+function getMimeType(format: ImageFormat): string {
+  const mimeTypes: Record<ImageFormat, string> = {
     png: "image/png",
     jpeg: "image/jpeg",
     webp: "image/webp",

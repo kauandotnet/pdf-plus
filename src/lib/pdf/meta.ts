@@ -5,35 +5,17 @@
  */
 
 import type {
-  PDFDocumentProxy,
-  PDFSource,
+  PDFInput,
   PDFMetadata,
   PageInfo,
   MetadataOptions,
 } from "./types.js";
-import { loadPDF, getPDFJS } from "./document.js";
-
-/**
- * Check if source is already a loaded PDF document
- * Uses internal pdfjs property for reliable detection
- */
-function isPDFDocumentProxy(data: unknown): data is PDFDocumentProxy {
-  return typeof data === "object" && data !== null && "_pdfInfo" in data;
-}
-
-async function resolveDocument(
-  source: PDFSource | PDFDocumentProxy
-): Promise<PDFDocumentProxy> {
-  if (isPDFDocumentProxy(source)) {
-    return source;
-  }
-  return loadPDF(source);
-}
+import { getDocumentProxy, isPDFDocumentProxy, getPDFJS } from "./document.js";
 
 /**
  * Extract metadata from a PDF document
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param options - Metadata extraction options
  * @returns PDF metadata
  *
@@ -50,11 +32,11 @@ async function resolveDocument(
  * ```
  */
 export async function getMetadata(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   options: MetadataOptions = {}
 ): Promise<PDFMetadata> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
     const metadata = await doc.getMetadata();
@@ -96,16 +78,16 @@ export async function getMetadata(
 /**
  * Get information about a specific page
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @returns Page information
  */
 export async function getPageInfo(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNum: number
 ): Promise<PageInfo> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
     const page = await doc.getPage(pageNum);
@@ -135,14 +117,14 @@ export async function getPageInfo(
 /**
  * Get information about all pages
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @returns Array of page information
  */
 export async function getAllPagesInfo(
-  source: PDFSource | PDFDocumentProxy
+  input: PDFInput
 ): Promise<PageInfo[]> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
     // Build page numbers array

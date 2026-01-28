@@ -6,27 +6,10 @@
 
 import type {
   PDFDocumentProxy,
-  PDFSource,
+  PDFInput,
   LinkExtractionResult,
 } from "./types.js";
-import { loadPDF } from "./document.js";
-
-/**
- * Check if source is already a loaded PDF document
- * Uses internal pdfjs property for reliable detection
- */
-function isPDFDocumentProxy(data: unknown): data is PDFDocumentProxy {
-  return typeof data === "object" && data !== null && "_pdfInfo" in data;
-}
-
-async function resolveDocument(
-  source: PDFSource | PDFDocumentProxy
-): Promise<PDFDocumentProxy> {
-  if (isPDFDocumentProxy(source)) {
-    return source;
-  }
-  return loadPDF(source);
-}
+import { getDocumentProxy, isPDFDocumentProxy } from "./document.js";
 
 /**
  * Extract links from a single page
@@ -65,7 +48,7 @@ async function getPageLinks(
  *
  * Extracts hyperlinks from PDF annotations across all pages.
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @returns Object with totalPages and unique links array
  *
  * @example
@@ -78,10 +61,10 @@ async function getPageLinks(
  * ```
  */
 export async function extractLinks(
-  source: PDFSource | PDFDocumentProxy
+  input: PDFInput
 ): Promise<LinkExtractionResult> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
     const totalPages = doc.numPages;

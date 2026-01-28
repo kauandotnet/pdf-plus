@@ -9,30 +9,31 @@
  * - Single source of truth for pdf.js configuration
  * - Lazy loading of pdf.js for better startup performance
  * - Full text positioning support (our value-add over unpdf)
- * - Clean, simple API
+ * - Clean, simple API with full TypeScript support
  *
  * @example
  * ```typescript
- * import { loadPDF, extractText, extractTextItems, renderPage, getMetadata } from './lib/pdf';
+ * import { pdfUtils } from 'pdf-plus';
  *
  * // Load and work with a PDF
- * const doc = await loadPDF('document.pdf');
+ * const doc = await pdfUtils.loadPDF('document.pdf');
  *
  * // Extract text (simple)
- * const pages = await extractText(doc);
+ * const result = await pdfUtils.extractText(doc);
+ * console.log(result.totalPages, result.text);
  *
  * // Extract text with positions (our value-add)
- * const items = await extractTextItems(doc);
- * for (const item of items[0]) {
+ * const items = await pdfUtils.extractTextItems(doc);
+ * for (const item of items.items[0]) {
  *   console.log(`"${item.str}" at (${item.x}, ${item.y})`);
  * }
  *
- * // Render page to image
- * const result = await renderPage(doc, 1, { scale: 2 });
- * fs.writeFileSync('page1.png', result.buffer);
+ * // Render page to image with target width
+ * const render = await pdfUtils.renderPage(doc, 1, { width: 800 });
+ * fs.writeFileSync('page1.png', render.buffer);
  *
- * // Get metadata
- * const meta = await getMetadata(doc);
+ * // Get metadata with date parsing
+ * const meta = await pdfUtils.getMetadata(doc, { parseDates: true });
  * console.log(`${meta.numPages} pages`);
  *
  * // Clean up
@@ -42,10 +43,31 @@
  * @packageDocumentation
  */
 
-// Document loading
-export { loadPDF, getPDFJS, getVerbosityLevel, getPageCount, isPDF } from "./document.js";
+// ============================================================================
+// Document loading & utilities
+// ============================================================================
 
+export {
+  // Loading
+  loadPDF,
+  getPDFJS,
+  getVerbosityLevel,
+  getPageCount,
+  isPDF,
+  getDocumentProxy,
+  // Validation
+  validatePageNumber,
+  // Type guards
+  isPDFDocumentProxy,
+  // Environment detection
+  isNode,
+  isBrowser,
+} from "./document.js";
+
+// ============================================================================
 // Text extraction
+// ============================================================================
+
 export {
   extractText,
   extractTextItems,
@@ -54,13 +76,22 @@ export {
   extractFullText,
 } from "./text.js";
 
+// ============================================================================
 // Metadata
+// ============================================================================
+
 export { getMetadata, getPageInfo, getAllPagesInfo } from "./meta.js";
 
+// ============================================================================
 // Links
+// ============================================================================
+
 export { extractLinks } from "./links.js";
 
+// ============================================================================
 // Rendering
+// ============================================================================
+
 export {
   renderPage,
   renderPageAsDataURL,
@@ -69,26 +100,39 @@ export {
   renderPageToDataURL,
 } from "./render.js";
 
+// ============================================================================
 // Image extraction
+// ============================================================================
+
 export { extractImages, getImageCount } from "./images.js";
 
+// ============================================================================
 // Types
+// ============================================================================
+
 export type {
+  // Core types
   PDFDocumentProxy,
   PDFPageProxy,
   PDFSource,
+  PDFInput,
   PDFLoadOptions,
+  // Text types
   PDFTextItem,
   TextExtractionOptions,
   TextExtractionResult,
   TextItemsExtractionResult,
+  // Metadata types
   MetadataOptions,
+  PDFMetadata,
+  PageInfo,
+  // Link types
   LinkExtractionResult,
+  // Render types
+  ImageFormat,
   RenderOptions,
   RenderResult,
   RenderDataURLResult,
-  PDFMetadata,
-  PageInfo,
 } from "./types.js";
 
 export type { ImageExtractionOptions, ImageExtractionResult } from "./images.js";

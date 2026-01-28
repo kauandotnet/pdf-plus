@@ -7,30 +7,13 @@
 
 import type {
   PDFDocumentProxy,
-  PDFSource,
+  PDFInput,
   PDFTextItem,
   TextExtractionOptions,
   TextExtractionResult,
   TextItemsExtractionResult,
 } from "./types.js";
-import { loadPDF } from "./document.js";
-
-/**
- * Check if source is already a loaded PDF document
- * Uses internal pdfjs property for reliable detection
- */
-function isPDFDocumentProxy(data: unknown): data is PDFDocumentProxy {
-  return typeof data === "object" && data !== null && "_pdfInfo" in data;
-}
-
-async function resolveDocument(
-  source: PDFSource | PDFDocumentProxy
-): Promise<PDFDocumentProxy> {
-  if (isPDFDocumentProxy(source)) {
-    return source;
-  }
-  return loadPDF(source);
-}
+import { getDocumentProxy, isPDFDocumentProxy } from "./document.js";
 
 /**
  * Extract text from a single page
@@ -92,7 +75,7 @@ async function getPageTextItems(
       fontSize: Math.abs(transform[0]) || Math.abs(transform[3]) || 12,
       transform,
       hasEOL: item.hasEOL || false,
-      dir: item.dir || "ltr",
+      dir: (item.dir as PDFTextItem["dir"]) || "ltr",
     });
   }
 
@@ -103,7 +86,7 @@ async function getPageTextItems(
 /**
  * Extract text from all pages
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param options - Extraction options
  * @returns Object with totalPages and text array
  *
@@ -119,21 +102,21 @@ async function getPageTextItems(
  * ```
  */
 export function extractText(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   options?: TextExtractionOptions & { mergePages?: false }
 ): Promise<TextExtractionResult<string[]>>;
 
 export function extractText(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   options: TextExtractionOptions & { mergePages: true }
 ): Promise<TextExtractionResult<string>>;
 
 export async function extractText(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   options: TextExtractionOptions = {}
 ): Promise<TextExtractionResult<string | string[]>> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
     const {
@@ -183,7 +166,7 @@ export async function extractText(
  * This is the main value-add function - provides detailed text items
  * with x, y, width, height, font info, etc.
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param options - Extraction options
  * @returns Object with totalPages and items array per page
  *
@@ -196,11 +179,11 @@ export async function extractText(
  * ```
  */
 export async function extractTextItems(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   options: Omit<TextExtractionOptions, "mergePages"> = {}
 ): Promise<TextItemsExtractionResult> {
-  const doc = await resolveDocument(source);
-  const shouldDestroy = !isPDFDocumentProxy(source);
+  const doc = await getDocumentProxy(input);
+  const shouldDestroy = !isPDFDocumentProxy(input);
 
   try {
     const {
@@ -239,17 +222,17 @@ export async function extractTextItems(
 /**
  * Extract text from a single page
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @param options - Extraction options
  * @returns Text string for the page
  */
 export async function extractPageText(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNum: number,
   options: Omit<TextExtractionOptions, "firstPage" | "lastPage" | "mergePages"> = {}
 ): Promise<string> {
-  const result = await extractText(source, {
+  const result = await extractText(input, {
     ...options,
     firstPage: pageNum,
     lastPage: pageNum,
@@ -260,17 +243,17 @@ export async function extractPageText(
 /**
  * Extract text items from a single page
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param pageNum - Page number (1-based)
  * @param options - Extraction options
  * @returns Array of text items
  */
 export async function extractPageTextItems(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   pageNum: number,
   options: Omit<TextExtractionOptions, "firstPage" | "lastPage" | "mergePages"> = {}
 ): Promise<PDFTextItem[]> {
-  const result = await extractTextItems(source, {
+  const result = await extractTextItems(input, {
     ...options,
     firstPage: pageNum,
     lastPage: pageNum,
@@ -281,7 +264,7 @@ export async function extractPageTextItems(
 /**
  * Extract all text as a single string
  *
- * @param source - PDF document, file path, or buffer
+ * @param input - PDF document, file path, or buffer
  * @param options - Extraction options
  * @param pageSeparator - String to join pages (default: "\n\n")
  * @returns Combined text from all pages
@@ -289,10 +272,10 @@ export async function extractPageTextItems(
  * @deprecated Use extractText with { mergePages: true } instead
  */
 export async function extractFullText(
-  source: PDFSource | PDFDocumentProxy,
+  input: PDFInput,
   options: Omit<TextExtractionOptions, "mergePages"> = {},
   pageSeparator: string = "\n\n"
 ): Promise<string> {
-  const result = await extractText(source, options);
+  const result = await extractText(input, options);
   return result.text.filter((p) => p.trim()).join(pageSeparator);
 }
