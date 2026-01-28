@@ -53,6 +53,7 @@ temp/
 
 # Optional npm cache directory
 .npm
+.npm-cache/
 
 # Optional REPL history
 .node_repl_history
@@ -73,6 +74,9 @@ temp/
 extracted-images/
 test-output/
 npm-package-test
+
+# Reference files
+references/
 
 # TypeScript cache
 *.tsbuildinfo
