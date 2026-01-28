@@ -2,6 +2,7 @@ import type { ExtractionOptions, ImageItem } from "../../types/index.js";
 import { ParallelProcessor } from "../../utils/parallel-processor.js";
 import { AdaptiveWorkerPool } from "../../utils/worker-pool.js";
 import type { WorkerTask } from "../../types/worker-types.js";
+import { rawPixelsToPng } from "../../utils/napi-canvas-factory.js";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
@@ -1173,31 +1174,27 @@ export class PdfLibEngine extends AbstractImageEngine {
     options: ExtractionOptions
   ): Promise<{ success: boolean; pngData?: Buffer; error?: string }> {
     try {
-      const { PNG } = await import("pngjs");
-
       // Determine color space from PDF metadata
       const colorSpaceStr = colorSpace?.toString() || "";
       let componentsPerPixel = 3; // Default RGB
-      let colorType = 2; // RGB
+      let isCmyk = false;
 
       if (
         colorSpaceStr.includes("DeviceGray") ||
         colorSpaceStr.includes("Gray")
       ) {
         componentsPerPixel = 1;
-        colorType = 0; // Grayscale
       } else if (
         colorSpaceStr.includes("DeviceRGB") ||
         colorSpaceStr.includes("RGB")
       ) {
         componentsPerPixel = 3;
-        colorType = 2; // RGB
       } else if (
         colorSpaceStr.includes("DeviceCMYK") ||
         colorSpaceStr.includes("CMYK")
       ) {
         componentsPerPixel = 4;
-        colorType = 2; // Will convert CMYK to RGB
+        isCmyk = true;
       }
 
       // Calculate expected data size
@@ -1206,7 +1203,7 @@ export class PdfLibEngine extends AbstractImageEngine {
       const actualSize = rawData.length;
 
       if (options.verbose) {
-        console.log(`   🔧 PDF Metadata PNG creation:`);
+        console.log(`   🔧 PDF Metadata PNG creation (@napi-rs/canvas):`);
         console.log(
           `   📊 ColorSpace: ${colorSpaceStr}, Components: ${componentsPerPixel}, Bits: ${bitsPerComponent}`
         );
@@ -1224,67 +1221,21 @@ export class PdfLibEngine extends AbstractImageEngine {
         };
       }
 
-      // Create PNG with proper color type
-      const png = new PNG({
+      // Convert to PNG using @napi-rs/canvas
+      const pngBuffer = rawPixelsToPng(
+        rawData,
         width,
         height,
-        colorType: colorType === 0 ? 0 : 6, // Grayscale or RGBA for output
-        bitDepth: 8, // Always output 8-bit
-      });
+        componentsPerPixel,
+        isCmyk
+      );
 
-      // Convert pixel data based on color space
-      let outputData: Buffer;
-
-      if (componentsPerPixel === 1) {
-        // Grayscale to RGBA
-        outputData = Buffer.alloc(width * height * 4);
-        for (let i = 0; i < width * height; i++) {
-          const gray = rawData[i] || 0;
-          const outputOffset = i * 4;
-          outputData[outputOffset] = gray; // R
-          outputData[outputOffset + 1] = gray; // G
-          outputData[outputOffset + 2] = gray; // B
-          outputData[outputOffset + 3] = 255; // A
-        }
-      } else if (componentsPerPixel === 3) {
-        // RGB to RGBA
-        outputData = Buffer.alloc(width * height * 4);
-        for (let i = 0; i < width * height; i++) {
-          const inputOffset = i * 3;
-          const outputOffset = i * 4;
-          outputData[outputOffset] = rawData[inputOffset] || 0; // R
-          outputData[outputOffset + 1] = rawData[inputOffset + 1] || 0; // G
-          outputData[outputOffset + 2] = rawData[inputOffset + 2] || 0; // B
-          outputData[outputOffset + 3] = 255; // A
-        }
-      } else if (componentsPerPixel === 4) {
-        // CMYK to RGB (simplified conversion)
-        outputData = Buffer.alloc(width * height * 4);
-        for (let i = 0; i < width * height; i++) {
-          const inputOffset = i * 4;
-          const c = (rawData[inputOffset] || 0) / 255;
-          const m = (rawData[inputOffset + 1] || 0) / 255;
-          const y = (rawData[inputOffset + 2] || 0) / 255;
-          const k = (rawData[inputOffset + 3] || 0) / 255;
-
-          const outputOffset = i * 4;
-          outputData[outputOffset] = Math.round(255 * (1 - c) * (1 - k)); // R
-          outputData[outputOffset + 1] = Math.round(255 * (1 - m) * (1 - k)); // G
-          outputData[outputOffset + 2] = Math.round(255 * (1 - y) * (1 - k)); // B
-          outputData[outputOffset + 3] = 255; // A
-        }
-      } else {
+      if (!pngBuffer) {
         return {
           success: false,
           error: `Unsupported color space with ${componentsPerPixel} components`,
         };
       }
-
-      // Set PNG data
-      png.data = outputData;
-
-      // Pack PNG
-      const pngBuffer = PNG.sync.write(png);
 
       if (options.verbose) {
         console.log(

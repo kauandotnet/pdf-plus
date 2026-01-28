@@ -2,12 +2,12 @@
  * JP2 to JPG Converter
  *
  * Converts JPEG 2000 (JP2) images to JPEG format using OpenJPEG WASM decoder.
- * Supports both pure JavaScript (Jimp) and Sharp for better color preservation.
+ * Supports @napi-rs/canvas (default) and Sharp (optional, better color preservation).
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import Jimp from "jimp";
+import { rawRgbaToJpeg, rgbToRgba } from "./napi-canvas-factory.js";
 import { getSharp, isSharpAvailable } from "./sharp-detector.js";
 
 /**
@@ -54,7 +54,7 @@ async function getOpenjpeg(): Promise<any> {
 }
 
 /**
- * Convert JP2 image to JPG using OpenJPEG WASM decoder + Jimp (Pure JavaScript)
+ * Convert JP2 image to JPG using OpenJPEG WASM decoder + @napi-rs/canvas
  *
  * @param jp2Path - Path to the JP2 file
  * @param options - Conversion options
@@ -95,7 +95,7 @@ export async function convertJp2ToJpgWasm(
     const openjpeg = await getOpenjpeg();
 
     if (verbose) {
-      console.log(`   📦 Using OpenJPEG WASM decoder`);
+      console.log(`   📦 Using OpenJPEG WASM decoder + @napi-rs/canvas`);
     }
 
     // Create decoder instance
@@ -118,15 +118,40 @@ export async function convertJp2ToJpgWasm(
       );
     }
 
-    // Create Jimp image from decoded buffer
-    const image = new Jimp({
-      data: Buffer.from(decodedBuffer),
-      width: frameInfo.width,
-      height: frameInfo.height,
-    });
+    // Convert to RGBA if needed (OpenJPEG returns RGB for 3-component images)
+    let rgbaData: Buffer;
+    if (frameInfo.componentCount === 3) {
+      rgbaData = rgbToRgba(
+        Buffer.from(decodedBuffer),
+        frameInfo.width,
+        frameInfo.height
+      );
+    } else if (frameInfo.componentCount === 4) {
+      // Already RGBA
+      rgbaData = Buffer.from(decodedBuffer);
+    } else {
+      // Grayscale - expand to RGBA
+      const grayData = Buffer.from(decodedBuffer);
+      rgbaData = Buffer.alloc(frameInfo.width * frameInfo.height * 4);
+      for (let i = 0; i < frameInfo.width * frameInfo.height; i++) {
+        const gray = grayData[i] || 0;
+        rgbaData[i * 4] = gray;
+        rgbaData[i * 4 + 1] = gray;
+        rgbaData[i * 4 + 2] = gray;
+        rgbaData[i * 4 + 3] = 255;
+      }
+    }
 
-    // Save as JPEG
-    await image.quality(quality).writeAsync(jpgPath);
+    // Convert to JPEG using @napi-rs/canvas
+    const jpegBuffer = await rawRgbaToJpeg(
+      rgbaData,
+      frameInfo.width,
+      frameInfo.height,
+      quality
+    );
+
+    // Write JPEG file
+    fs.writeFileSync(jpgPath, jpegBuffer);
 
     const newSize = fs.statSync(jpgPath).size;
 
@@ -286,7 +311,7 @@ export async function convertJp2ToJpgSharp(
 /**
  * Convert JP2 image to JPG (Main Entry Point)
  *
- * Automatically chooses between Sharp (better quality) and Jimp (pure JS)
+ * Automatically chooses between Sharp (better quality) and @napi-rs/canvas (default)
  * based on availability and user preference.
  *
  * @param jp2Path - Path to the JP2 file
@@ -325,12 +350,12 @@ export async function convertJp2ToJpg(
       console.log(
         "   ⚠️  Sharp requested but not available. Install with: npm install sharp"
       );
-      console.log("   ⚠️  Falling back to Jimp (pure JavaScript)");
+      console.log("   ⚠️  Falling back to @napi-rs/canvas");
     }
   } else if (verbose) {
-    console.log("   ℹ️  useSharp not enabled, using Jimp (pure JavaScript)");
+    console.log("   ℹ️  useSharp not enabled, using @napi-rs/canvas");
   }
 
-  // Default: use pure JS Jimp
+  // Default: use @napi-rs/canvas
   return convertJp2ToJpgWasm(jp2Path, options);
 }

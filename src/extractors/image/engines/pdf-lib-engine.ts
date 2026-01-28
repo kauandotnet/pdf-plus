@@ -5,6 +5,7 @@ import { AdaptiveWorkerPool } from "../../../utils/worker-pool.js";
 import type { WorkerTask } from "../../../types/worker-types.js";
 import { PixelConverter } from "../utils/pixel-converter.js";
 import { decodePredictor } from "../../../utils/predictor-decoder.js";
+import { rawRgbaToPng } from "../../../utils/napi-canvas-factory.js";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
@@ -1369,11 +1370,9 @@ export class PdfLibEngine extends BaseImageEngine {
     options: ExtractionOptions
   ): Promise<{ success: boolean; pngData?: Buffer; error?: string }> {
     try {
-      const { PNG } = await import("pngjs");
-
       // Determine color space from PDF metadata using PixelConverter utility
       const colorSpaceStr = colorSpace?.toString() || "";
-      const { componentsPerPixel, colorType } =
+      const { componentsPerPixel } =
         PixelConverter.detectColorSpace(colorSpaceStr);
 
       // Calculate expected data size (without predictor bytes)
@@ -1382,7 +1381,7 @@ export class PdfLibEngine extends BaseImageEngine {
       const actualSize = rawData.length;
 
       if (options.verbose) {
-        console.log(`   🔧 PDF Metadata PNG creation:`);
+        console.log(`   🔧 PDF Metadata PNG creation (@napi-rs/canvas):`);
         console.log(
           `   📊 ColorSpace: ${colorSpaceStr}, Components: ${componentsPerPixel}, Bits: ${bitsPerComponent}`
         );
@@ -1436,14 +1435,6 @@ export class PdfLibEngine extends BaseImageEngine {
         }
       }
 
-      // Create PNG with proper color type using actual dimensions
-      const png = new PNG({
-        width: actualWidth,
-        height: actualHeight,
-        colorType: colorType === 0 ? 0 : 6, // Grayscale or RGBA for output
-        bitDepth: 8, // Always output 8-bit
-      });
-
       // Convert pixel data using PixelConverter utility class
       const converter = new PixelConverter(width, height);
       const outputData = converter.convertToRGBA(rawData, componentsPerPixel);
@@ -1455,11 +1446,8 @@ export class PdfLibEngine extends BaseImageEngine {
         };
       }
 
-      // Set PNG data
-      png.data = outputData;
-
-      // Pack PNG
-      const pngBuffer = PNG.sync.write(png);
+      // Convert to PNG using @napi-rs/canvas
+      const pngBuffer = rawRgbaToPng(outputData, actualWidth, actualHeight);
 
       if (options.verbose) {
         console.log(

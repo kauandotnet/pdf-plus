@@ -7,6 +7,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import type { Canvas } from "@napi-rs/canvas";
 import type {
   PageToImageOptions,
   PageToImageResult,
@@ -15,6 +16,7 @@ import type {
   ThumbnailOptions,
   PageImageFormat,
 } from "../../types/page-to-image-types.js";
+import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
 
 /**
  * Page to Image Converter
@@ -108,6 +110,7 @@ export class PageToImageConverter {
       useWorkerFetch: false,
       isEvalSupported: false,
       useSystemFonts: true,
+      canvasFactory: napiCanvasFactory,
     });
     const pdfDocument = await loadingTask.promise;
 
@@ -240,7 +243,10 @@ export class PageToImageConverter {
     const format = options.format || "png";
     const pdfjs = await this.getPdfjs();
     const data = new Uint8Array(fs.readFileSync(pdfPath));
-    const loadingTask = pdfjs.getDocument({ data });
+    const loadingTask = pdfjs.getDocument({
+      data,
+      canvasFactory: napiCanvasFactory,
+    });
     const pdfDocument = await loadingTask.promise;
     const page = await pdfDocument.getPage(pageNumber);
     const viewport = page.getViewport({
@@ -272,7 +278,10 @@ export class PageToImageConverter {
   ): Promise<Buffer> {
     const pdfjs = await this.getPdfjs();
     const data = new Uint8Array(fs.readFileSync(pdfPath));
-    const loadingTask = pdfjs.getDocument({ data });
+    const loadingTask = pdfjs.getDocument({
+      data,
+      canvasFactory: napiCanvasFactory,
+    });
     const pdfDocument = await loadingTask.promise;
     const page = await pdfDocument.getPage(pageNumber);
 
@@ -332,13 +341,12 @@ export class PageToImageConverter {
   /**
    * Render a PDF page to image buffer
    *
-   * Based on pdf-to-img library approach - let pdf.js handle canvas creation
-   * @see https://github.com/k-yle/pdf-to-img
+   * Uses @napi-rs/canvas via custom canvas factory for high-performance rendering
    */
   private async renderPageToBuffer(
     page: any,
     options: SinglePageOptions,
-    pdfDocument: any
+    _pdfDocument: any
   ): Promise<Buffer> {
     const {
       format = "png",
@@ -352,42 +360,51 @@ export class PageToImageConverter {
     // Calculate viewport with DPI and scale
     const viewport = page.getViewport({ scale: scale * (dpi / 72) });
 
-    // Use pdf.js's built-in canvas factory (automatically uses Node.js canvas package)
-    // This is the key - pdf.js creates its own canvas factory that properly handles inline images
-    const { canvas } = pdfDocument.canvasFactory.create(
+    // Create canvas using our @napi-rs/canvas factory
+    const { canvas, context } = napiCanvasFactory.create(
       viewport.width,
-      viewport.height,
-      transparent
+      viewport.height
     );
 
-    // Render PDF page to canvas using simple render context
-    // pdf.js will handle inline images automatically through its canvas factory
+    // Fill background if not transparent
+    if (!transparent) {
+      context.fillStyle = backgroundColor;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Render PDF page to canvas
+    // pdf.js uses the canvas and context directly
     await page.render({
-      canvas,
+      canvasContext: context,
       viewport,
       background: transparent ? "transparent" : backgroundColor,
     }).promise;
 
-    // Convert canvas to buffer
+    // Convert canvas to buffer (async for JPEG/WebP quality control)
     return this.canvasToBuffer(canvas, format, quality);
   }
 
   /**
    * Convert canvas to image buffer
+   *
+   * Uses @napi-rs/canvas async encode() for JPEG/WebP quality control
    */
-  private canvasToBuffer(
-    canvas: any,
+  private async canvasToBuffer(
+    canvas: Canvas,
     format: PageImageFormat,
     quality: number
-  ): Buffer {
+  ): Promise<Buffer> {
     const normalizedFormat = format === "jpg" ? "jpeg" : format;
 
     if (normalizedFormat === "png") {
+      // PNG doesn't support quality parameter, use sync toBuffer
       return canvas.toBuffer("image/png");
     } else if (normalizedFormat === "jpeg") {
-      return canvas.toBuffer("image/jpeg", { quality: quality / 100 });
+      // Use async encode for JPEG with quality (0-100)
+      return Buffer.from(await canvas.encode("jpeg", quality));
     } else if (normalizedFormat === "webp") {
-      return canvas.toBuffer("image/webp", { quality: quality / 100 });
+      // Use async encode for WebP with quality (0-100)
+      return Buffer.from(await canvas.encode("webp", quality));
     }
 
     throw new Error(`Unsupported format: ${format}`);

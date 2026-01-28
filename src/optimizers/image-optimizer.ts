@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import Jimp from "jimp";
+import { createCanvas, loadImage } from "@napi-rs/canvas";
 
 /**
  * Result of image optimization
@@ -11,7 +11,7 @@ export interface OptimizationResult {
   optimizedSize: number;
   savedBytes: number;
   savedPercent: number;
-  engine: "jimp" | "sharp" | "none";
+  engine: "canvas" | "sharp" | "none";
   error?: string;
 }
 
@@ -25,10 +25,10 @@ export interface OptimizationOptions {
 }
 
 /**
- * Image optimizer using Jimp (pure JavaScript)
+ * Image optimizer using @napi-rs/canvas
  *
- * This class provides image optimization capabilities using Jimp, a pure JavaScript
- * image processing library with no native dependencies. It supports JPEG and PNG
+ * This class provides image optimization capabilities using @napi-rs/canvas,
+ * a high-performance Skia-based canvas library. It supports JPEG, PNG, and WebP
  * optimization with quality control.
  *
  * @example
@@ -83,16 +83,16 @@ export class ImageOptimizer {
           engine: "sharp",
         };
       }
-      // If Sharp fails, fall back to Jimp
+      // If Sharp fails, fall back to canvas
       if (options.verbose) {
         console.log(
-          `   ⚠️  Sharp optimization failed, falling back to Jimp: ${sharpResult.error}`
+          `   ⚠️  Sharp optimization failed, falling back to @napi-rs/canvas: ${sharpResult.error}`
         );
       }
     }
 
-    // Use Jimp (pure JavaScript, no native dependencies)
-    const result = await ImageOptimizer.optimizeWithJimp(filePath, options);
+    // Use @napi-rs/canvas (Skia-based, high performance)
+    const result = await ImageOptimizer.optimizeWithCanvas(filePath, options);
     if (result.success) {
       return {
         ...result,
@@ -100,7 +100,7 @@ export class ImageOptimizer {
         savedBytes: originalSize - result.optimizedSize,
         savedPercent:
           ((originalSize - result.optimizedSize) / originalSize) * 100,
-        engine: "jimp",
+        engine: "canvas",
       };
     }
 
@@ -178,39 +178,57 @@ export class ImageOptimizer {
   }
 
   /**
-   * Optimize using Jimp (pure JavaScript)
+   * Optimize using @napi-rs/canvas (Skia-based)
    */
-  private static async optimizeWithJimp(
+  private static async optimizeWithCanvas(
     filePath: string,
     options: OptimizationOptions
   ): Promise<{ success: boolean; optimizedSize: number; error?: string }> {
     try {
       const ext = path.extname(filePath).toLowerCase();
 
-      // Only support JPEG and PNG
-      if (ext !== ".jpg" && ext !== ".jpeg" && ext !== ".png") {
+      // Support JPEG, PNG, and WebP
+      if (
+        ext !== ".jpg" &&
+        ext !== ".jpeg" &&
+        ext !== ".png" &&
+        ext !== ".webp"
+      ) {
         return {
           success: false,
           optimizedSize: 0,
-          error: `Unsupported format for Jimp: ${ext}`,
+          error: `Unsupported format for canvas: ${ext}`,
         };
       }
 
-      // Read image with Jimp
-      const image = await Jimp.read(filePath);
+      // Load image with @napi-rs/canvas
+      const image = await loadImage(filePath);
 
-      // Configure based on format
-      if (ext === ".jpg" || ext === ".jpeg") {
-        image.quality(options.quality || 80);
-      } else if (ext === ".png") {
-        // PNG compression level (0-9)
-        image.deflateLevel(9);
-      }
+      // Create canvas and draw image
+      const canvas = createCanvas(image.width, image.height);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0);
 
       // Write to temporary file
-      const tempPath = filePath + ".tmp";
-      await image.writeAsync(tempPath);
+      const tempPath = `${filePath}.tmp`;
+      const quality = options.quality || 80;
+      let buffer: Buffer;
 
+      if (ext === ".jpg" || ext === ".jpeg") {
+        buffer = Buffer.from(await canvas.encode("jpeg", quality));
+      } else if (ext === ".png") {
+        buffer = canvas.toBuffer("image/png");
+      } else if (ext === ".webp") {
+        buffer = Buffer.from(await canvas.encode("webp", quality));
+      } else {
+        return {
+          success: false,
+          optimizedSize: 0,
+          error: `Unsupported format: ${ext}`,
+        };
+      }
+
+      fs.writeFileSync(tempPath, buffer);
       const optimizedSize = fs.statSync(tempPath).size;
 
       // Replace original with optimized
@@ -221,7 +239,7 @@ export class ImageOptimizer {
     } catch (error) {
       if (options.verbose) {
         console.log(
-          `   ⚠️  Jimp optimization failed: ${
+          `   ⚠️  Canvas optimization failed: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );
@@ -241,7 +259,7 @@ export class ImageOptimizer {
    * This method converts them to standard JPG format for better compatibility.
    *
    * Supports two conversion engines:
-   * - Jimp (default): Pure JavaScript, works everywhere
+   * - @napi-rs/canvas (default): High-performance Skia-based canvas
    * - Sharp (optional): Better color preservation, requires native compilation
    *
    * @param jp2Path - Path to the JPEG 2000 file (jp2, jpx, j2c, or jpm)
