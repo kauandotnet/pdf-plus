@@ -17,6 +17,7 @@ import type {
   PageImageFormat,
 } from "../../types/page-to-image-types.js";
 import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
+import { loadPDF } from "../../lib/pdf/index.js";
 
 /**
  * Page to Image Converter
@@ -30,45 +31,12 @@ import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
  *   dpi: 150
  * });
  * ```
+ *
+ * NOTE: pdf.js does not support JPEG2000 (JP2) images by default.
+ * Pages with JP2 images will have blank spaces where the images should be.
+ * The embedded images are still extracted correctly via extractImages option.
  */
 export class PageToImageConverter {
-  private pdfjs: any = null;
-
-  /**
-   * Get or load pdf.js module with proper worker configuration
-   * Based on pdf-to-img library approach
-   *
-   * NOTE: pdf.js does not support JPEG2000 (JP2) images by default.
-   * Pages with JP2 images will have blank spaces where the images should be.
-   * The embedded images are still extracted correctly via extractImages option.
-   *
-   * For complete page rendering with JP2 support, consider using:
-   * - Poppler (pdf-poppler npm package) - requires system dependency
-   * - ImageMagick - requires system dependency
-   * - Ghostscript - requires system dependency
-   */
-  private async getPdfjs() {
-    if (!this.pdfjs) {
-      // Dynamic import to load pdf.js
-      this.pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-
-      // Configure worker path for Node.js environment (same as pdf-to-img)
-      const { createRequire } = await import("node:module");
-      const require = createRequire(import.meta.url);
-      const pdfjsPath = path.dirname(
-        require.resolve("pdfjs-dist/package.json")
-      );
-
-      // Set worker source and other required paths
-      this.pdfjs.GlobalWorkerOptions.workerSrc = path.join(
-        pdfjsPath,
-        "legacy",
-        "build",
-        "pdf.worker.mjs"
-      );
-    }
-    return this.pdfjs;
-  }
 
   /**
    * Convert all pages of a PDF to images
@@ -102,17 +70,8 @@ export class PageToImageConverter {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    // Load PDF
-    const pdfjs = await this.getPdfjs();
-    const data = new Uint8Array(fs.readFileSync(pdfPath));
-    const loadingTask = pdfjs.getDocument({
-      data,
-      useWorkerFetch: false,
-      isEvalSupported: false,
-      useSystemFonts: true,
-      canvasFactory: napiCanvasFactory,
-    });
-    const pdfDocument = await loadingTask.promise;
+    // Load PDF using internal utils
+    const pdfDocument = await loadPDF(pdfPath);
 
     const totalPages = pdfDocument.numPages;
 
@@ -241,19 +200,13 @@ export class PageToImageConverter {
     fs.writeFileSync(outputPath, buffer);
 
     const format = options.format || "png";
-    const pdfjs = await this.getPdfjs();
-    const data = new Uint8Array(fs.readFileSync(pdfPath));
-    const loadingTask = pdfjs.getDocument({
-      data,
-      canvasFactory: napiCanvasFactory,
-    });
-    const pdfDocument = await loadingTask.promise;
+    const pdfDocument = await loadPDF(pdfPath);
     const page = await pdfDocument.getPage(pageNumber);
     const viewport = page.getViewport({
       scale: (options.scale || 1) * ((options.dpi || 72) / 72),
     });
 
-    return {
+    const result = {
       page: pageNumber,
       filepath: outputPath,
       width: Math.floor(viewport.width),
@@ -261,6 +214,9 @@ export class PageToImageConverter {
       fileSize: buffer.length,
       format,
     };
+
+    await pdfDocument.destroy();
+    return result;
   }
 
   /**
@@ -276,13 +232,7 @@ export class PageToImageConverter {
     pageNumber: number,
     options: SinglePageOptions = {}
   ): Promise<Buffer> {
-    const pdfjs = await this.getPdfjs();
-    const data = new Uint8Array(fs.readFileSync(pdfPath));
-    const loadingTask = pdfjs.getDocument({
-      data,
-      canvasFactory: napiCanvasFactory,
-    });
-    const pdfDocument = await loadingTask.promise;
+    const pdfDocument = await loadPDF(pdfPath);
     const page = await pdfDocument.getPage(pageNumber);
 
     return this.renderPageToBuffer(page, options, pdfDocument);

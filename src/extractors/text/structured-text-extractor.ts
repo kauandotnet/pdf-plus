@@ -6,10 +6,8 @@
  */
 
 import * as fs from "node:fs";
-import path from "node:path";
-import { createRequire } from "node:module";
 import { PDFDocument } from "pdf-lib";
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { loadPDF } from "../../lib/pdf/index.js";
 import { ImageExtractor } from "../image/image-extractor.js";
 
 export interface PageData {
@@ -28,28 +26,6 @@ export class StructuredTextExtractor {
   private pdfLibDoc: PDFDocument | null = null;
   private pdfLibPages: any[] = [];
   private textData: PageData[] = [];
-
-  constructor() {
-    this.initializePdfjs();
-  }
-
-  /**
-   * Initialize pdf.js worker
-   */
-  private initializePdfjs(): void {
-    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-      const require = createRequire(import.meta.url);
-      const pdfjsPath = path.dirname(
-        require.resolve("pdfjs-dist/package.json")
-      );
-      pdfjs.GlobalWorkerOptions.workerSrc = path.join(
-        pdfjsPath,
-        "legacy",
-        "build",
-        "pdf.worker.mjs"
-      );
-    }
-  }
 
   /**
    * Process PDF with accurate page-by-page extraction
@@ -108,13 +84,7 @@ export class StructuredTextExtractor {
    * Process with pdf.js to extract text page by page
    */
   private async processPDFjs(pdfBuffer: Buffer) {
-    const data = new Uint8Array(pdfBuffer);
-    const loadingTask = pdfjs.getDocument({
-      data,
-      verbosity: pdfjs.VerbosityLevel.ERRORS,
-    });
-
-    const doc = await loadingTask.promise;
+    const doc = await loadPDF(pdfBuffer);
     const pages: any[] = [];
 
     try {
@@ -418,13 +388,7 @@ export class StructuredTextExtractor {
       const { width, height } = page.getSize();
 
       // Extract text with pdf.js
-      const data = new Uint8Array(pdfBuffer);
-      const loadingTask = pdfjs.getDocument({
-        data,
-        verbosity: pdfjs.VerbosityLevel.ERRORS,
-      });
-
-      const doc = await loadingTask.promise;
+      const doc = await loadPDF(pdfBuffer);
       let textItems: any[] = [];
       let text = "";
 

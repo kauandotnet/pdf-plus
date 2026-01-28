@@ -24,7 +24,6 @@ export {
 } from "./extractors/text/index.js";
 export { ImageExtractor } from "./extractors/image/index.js";
 export { PageToImageConverter } from "./extractors/page-to-image/index.js";
-export { PopplerConverter } from "./extractors/page-to-image/poppler-converter.js";
 
 // ============================================================================
 // Processors & Optimizers
@@ -37,6 +36,12 @@ export {
 } from "./optimizers/index.js";
 
 export { FormatProcessor } from "./utils/format-processor.js";
+
+// ============================================================================
+// Internal PDF Utils Library
+// ============================================================================
+
+export * as pdfUtils from "./lib/pdf/index.js";
 
 // ============================================================================
 // Utilities

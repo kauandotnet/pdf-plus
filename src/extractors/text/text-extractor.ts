@@ -1,11 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
-import { createRequire } from "node:module";
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
-import type {
-  PDFDocumentProxy,
-  PDFPageProxy,
-} from "pdfjs-dist/legacy/build/pdf.mjs";
+import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { loadPDF } from "../../lib/pdf/index.js";
 import { StructuredTextExtractor } from "./structured-text-extractor.js";
 import type {
   ExtractionOptions,
@@ -30,41 +24,11 @@ import type {
  * ```
  */
 export class TextExtractor {
-  constructor() {
-    this.initializePdfjs();
-  }
-
   /**
-   * Initialize pdf.js worker
-   */
-  private initializePdfjs(): void {
-    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-      const require = createRequire(import.meta.url);
-      const pdfjsPath = path.dirname(
-        require.resolve("pdfjs-dist/package.json")
-      );
-      pdfjs.GlobalWorkerOptions.workerSrc = path.join(
-        pdfjsPath,
-        "legacy",
-        "build",
-        "pdf.worker.mjs"
-      );
-    }
-  }
-
-  /**
-   * Load PDF document
+   * Load PDF document using internal pdf utils
    */
   private async loadDocument(pdfPath: string): Promise<PDFDocumentProxy> {
-    const dataBuffer = fs.readFileSync(pdfPath);
-    const data = new Uint8Array(dataBuffer);
-
-    const loadingTask = pdfjs.getDocument({
-      data,
-      verbosity: pdfjs.VerbosityLevel.ERRORS,
-    });
-
-    return await loadingTask.promise;
+    return loadPDF(pdfPath);
   }
 
   /**
