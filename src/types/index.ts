@@ -75,7 +75,12 @@ export interface ExtractionResult {
   cleanText: string;
   summary?: DocumentSummary;
   structuredData?: StructuredPageData;
+  /** Detected tables (only populated when extractTables: true) */
+  tables?: Table[];
 }
+
+// Import Table type for ExtractionResult
+import type { Table, TableExtractionOptions } from "./table-types.js";
 
 export interface DocumentSummary {
   totalPages: number;
@@ -283,6 +288,15 @@ export interface ExtractionOptions {
   thumbnailWidth?: number;
   /** Thumbnail quality for JPG (default: 80) */
   thumbnailQuality?: number;
+
+  // Table extraction options
+  /**
+   * Enable table extraction (default: false)
+   * When enabled, tables will be detected and included in the result
+   */
+  extractTables?: boolean;
+  /** Options for table extraction */
+  tableOptions?: TableExtractionOptions;
 }
 
 export interface ProgressInfo {
@@ -405,3 +419,18 @@ export type {
   StreamingStats,
   StreamingState,
 } from "./streaming-types.js";
+
+// Table extraction types
+export type {
+  Table,
+  TableRow,
+  TableColumn,
+  TableCell,
+  TableExtractionOptions,
+  TableExtractionResult,
+  TableExtractionMetadata,
+  RowCluster,
+  ColumnCluster,
+  ClusterTextItem,
+  TableCandidate,
+} from "./table-types.js";

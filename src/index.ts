@@ -24,6 +24,7 @@ export {
 } from "./extractors/text/index.js";
 export { ImageExtractor } from "./extractors/image/index.js";
 export { PageToImageConverter } from "./extractors/page-to-image/index.js";
+export { TableExtractor } from "./extractors/table/index.js";
 
 // ============================================================================
 // Processors & Optimizers
@@ -84,6 +85,14 @@ export type {
   OCROptions,
   AnalyticsData,
   TemplateOptions,
+
+  // Table types
+  Table,
+  TableRow,
+  TableColumn,
+  TableCell,
+  TableExtractionOptions,
+  TableExtractionResult,
 } from "./types/index.js";
 
 // ============================================================================
@@ -126,12 +135,18 @@ import type {
   ExtractionOptions,
   ExtractionResult,
   ImageItem,
+  TableExtractionOptions,
+  TableExtractionResult,
 } from "./types/index.js";
 import type { StreamingExtractionResult } from "./types/streaming-types.js";
 import { PDFExtractor, pdfExtractor } from "./core/extractor.js";
 import { StreamingPDFExtractor } from "./core/streaming-extractor.js";
 import { TextExtractor } from "./extractors/text/text-extractor.js";
 import { ImageExtractor } from "./extractors/image/image-extractor.js";
+import {
+  TableExtractor,
+  extractTables as extractTablesInternal,
+} from "./extractors/table/index.js";
 import { ImageOptimizer } from "./optimizers/index.js";
 import { FormatProcessor } from "./utils/format-processor.js";
 import {
@@ -365,6 +380,48 @@ export function extractPdfStream(
   return new StreamingPDFExtractor(pdfPath, options);
 }
 
+/**
+ * Extract tables from a PDF file (convenience function)
+ *
+ * Detects and extracts tables from a PDF document using text positioning data.
+ * Tables are detected through spatial clustering of text items.
+ *
+ * @param pdfPath - Path to the PDF file
+ * @param options - Table extraction options
+ * @returns Promise resolving to table extraction result
+ *
+ * @example
+ * ```typescript
+ * import { extractTables, TableExtractor } from 'pdf-plus';
+ *
+ * // Using convenience function
+ * const result = await extractTables('document.pdf', {
+ *   pages: [1, 2, 3],
+ *   detectHeaders: true,
+ *   minRows: 2,
+ *   minColumns: 2
+ * });
+ *
+ * console.log(`Found ${result.tableCount} tables`);
+ *
+ * // Access table data
+ * for (const table of result.tables) {
+ *   console.log(`Table on page ${table.page}: ${table.rowCount}x${table.columnCount}`);
+ *
+ *   // Convert to different formats
+ *   const extractor = new TableExtractor();
+ *   console.log(extractor.tableToMarkdown(table));
+ *   console.log(extractor.tableToCSV(table));
+ * }
+ * ```
+ */
+export async function extractTables(
+  pdfPath: string,
+  options?: TableExtractionOptions
+): Promise<TableExtractionResult> {
+  return extractTablesInternal(pdfPath, options);
+}
+
 // ============================================================================
 // Version & Metadata
 // ============================================================================
@@ -389,6 +446,7 @@ export default {
   StreamingPDFExtractor,
   TextExtractor,
   ImageExtractor,
+  TableExtractor,
   ImageOptimizer,
   FormatProcessor,
 
@@ -399,6 +457,7 @@ export default {
   extractImageFiles,
   generatePageImages,
   extractPdfStream,
+  extractTables,
 
   // Utilities
   validateConfig,
