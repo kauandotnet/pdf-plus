@@ -29,11 +29,11 @@ export const TIFF_PREDICTOR = 2;
 
 /**
  * Paeth predictor algorithm
- * 
+ *
  * Computes a simple linear function of the three neighboring pixels
  * (left, above, upper left), then chooses as predictor the neighboring
  * pixel closest to the computed value.
- * 
+ *
  * @param a - Left pixel value
  * @param b - Above pixel value
  * @param c - Upper left pixel value
@@ -53,6 +53,31 @@ function paethPredictor(a: number, b: number, c: number): number {
     return c;
   }
 }
+
+/**
+ * PNG filter type handlers
+ * Maps filter type byte to decoding function
+ * Each function: (input, left, above, upperLeft) => decoded value
+ */
+type PngFilterFn = (
+  input: number,
+  left: number,
+  above: number,
+  upperLeft: number
+) => number;
+
+const PNG_FILTERS = new Map<number, PngFilterFn>([
+  // NONE - No filtering, use value as-is
+  [0, (input) => input],
+  // SUB - Add the byte to the left
+  [1, (input, left) => (input + left) & 0xff],
+  // UP - Add the byte above
+  [2, (input, _left, above) => (input + above) & 0xff],
+  // AVERAGE - Add the average of left and above bytes
+  [3, (input, left, above) => (input + Math.floor((left + above) / 2)) & 0xff],
+  // PAETH - Add the Paeth predictor
+  [4, (input, left, above, upperLeft) => (input + paethPredictor(left, above, upperLeft)) & 0xff],
+]);
 
 /**
  * Remove PNG predictor filters from decompressed data
@@ -106,45 +131,20 @@ export function removePngPredictor(
     const rowStart = row * rowLengthWithFilter;
     const filterType = input[rowStart];
 
-    // Decode the row based on filter type
+    // Decode the row based on filter type using lookup map
+    const filterFn = PNG_FILTERS.get(filterType);
+    if (!filterFn) {
+      throw new Error(`Unknown PNG filter type: ${filterType}`);
+    }
+
     for (let col = 0; col < rowLength; col++) {
       const inputValue = input[rowStart + 1 + col];
-      let decodedValue: number;
-
-      switch (filterType) {
-        case 0: // PNG_NONE
-          // No filtering - use value as-is
-          decodedValue = inputValue;
-          break;
-
-        case 1: // PNG_SUB
-          // Add the byte to the left
-          decodedValue = (inputValue + getLeft(col)) & 0xff;
-          break;
-
-        case 2: // PNG_UP
-          // Add the byte above
-          decodedValue = (inputValue + getAbove(col)) & 0xff;
-          break;
-
-        case 3: // PNG_AVERAGE
-          // Add the average of left and above bytes
-          decodedValue =
-            (inputValue + Math.floor((getLeft(col) + getAbove(col)) / 2)) &
-            0xff;
-          break;
-
-        case 4: // PNG_PAETH
-          // Add the Paeth predictor
-          decodedValue =
-            (inputValue +
-              paethPredictor(getLeft(col), getAbove(col), getUpperLeft(col))) &
-            0xff;
-          break;
-
-        default:
-          throw new Error(`Unknown PNG filter type: ${filterType}`);
-      }
+      const decodedValue = filterFn(
+        inputValue,
+        getLeft(col),
+        getAbove(col),
+        getUpperLeft(col)
+      );
 
       currentRow[col] = decodedValue;
       output[outputIndex++] = decodedValue;

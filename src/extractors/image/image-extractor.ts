@@ -3,6 +3,12 @@ import path from "node:path";
 import sizeOf from "image-size";
 import type { ExtractionOptions, ImageItem } from "../../types/index.js";
 import { rawPixelsToPng } from "../../utils/napi-canvas-factory.js";
+import {
+  detectImageFormat,
+  getFormatFromMimeType,
+} from "../../utils/image-format-detector.js";
+import { detectColorSpace, isCmykColorSpace } from "../../utils/color-space-config.js";
+import { getErrorMessage } from "../../utils/error-utils.js";
 
 /**
  * Image extraction from PDF files using pdf-lib (clean implementation based on NestJS)
@@ -71,53 +77,6 @@ export class ImageExtractor {
         throw new Error(result.error || "Engine extraction failed");
       }
 
-      // Check if we should use Poppler fallback
-      const shouldUsePopplerFallback =
-        opts.usePopplerFallback && result.images && result.images.length === 0;
-
-      if (shouldUsePopplerFallback) {
-        if (opts.verbose) {
-          console.log(
-            "   ⚠️  No images found with standard extraction, trying Poppler fallback..."
-          );
-        }
-
-        try {
-          const { PopplerImageExtractor } = await import(
-            "./poppler-image-extractor.js"
-          );
-          const popplerExtractor = new PopplerImageExtractor();
-          const popplerResult = await popplerExtractor.extractImages(
-            pdfPath,
-            opts
-          );
-
-          if (popplerResult.images.length > 0) {
-            if (opts.verbose) {
-              console.log(
-                `   ✅ Poppler found ${popplerResult.images.length} images!`
-              );
-            }
-            return {
-              success: true,
-              images: popplerResult.images,
-              metadata: popplerResult.metadata,
-            };
-          }
-        } catch (popplerError) {
-          if (opts.verbose) {
-            console.log(
-              `   ⚠️  Poppler fallback failed: ${
-                popplerError instanceof Error
-                  ? popplerError.message
-                  : "Unknown error"
-              }`
-            );
-          }
-          // Continue with original result (0 images)
-        }
-      }
-
       return {
         success: true,
         images: result.images || [],
@@ -150,9 +109,7 @@ export class ImageExtractor {
           success: false,
           images: [],
           error:
-            fallbackError instanceof Error
-              ? fallbackError.message
-              : String(fallbackError),
+            getErrorMessage(fallbackError),
         };
       }
     }
@@ -304,9 +261,7 @@ export class ImageExtractor {
               if (options.verbose) {
                 console.log(
                   `   ⚠️  Error processing XObject ${key.toString()}: ${
-                    objectError instanceof Error
-                      ? objectError.message
-                      : "Unknown error"
+                    getErrorMessage(objectError)
                   }`
                 );
               }
@@ -316,7 +271,7 @@ export class ImageExtractor {
           if (options.verbose) {
             console.log(
               `   ❌ Failed to process page ${pageNumber}: ${
-                pageError instanceof Error ? pageError.message : "Unknown error"
+                getErrorMessage(pageError)
               }`
             );
           }
@@ -341,7 +296,6 @@ export class ImageExtractor {
             console.log(
               `\n🔄 Converting ${jp2Images.length} JP2 files to JPG...`
             );
-            console.log(`   🔍 options.useSharp = ${options.useSharp}`);
           }
 
           const { ImageOptimizer } = await import(
@@ -355,7 +309,6 @@ export class ImageExtractor {
             const result = await ImageOptimizer.convertJp2ToJpg(imagePath, {
               quality: 100,
               verbose: options.verbose,
-              useSharp: options.useSharp,
             });
 
             if (result.success && result.newPath) {
@@ -387,7 +340,7 @@ export class ImageExtractor {
       if (options.verbose) {
         console.log(
           `   ❌ Error in pdf-lib extraction: ${
-            error instanceof Error ? error.message : "Unknown error"
+            getErrorMessage(error)
           }`
         );
       }
@@ -521,12 +474,7 @@ export class ImageExtractor {
         },
         width: actualWidth,
         height: actualHeight,
-        format:
-          mimeType === "image/jpeg"
-            ? "JPEG"
-            : mimeType === "image/png"
-            ? "PNG"
-            : "unknown",
+        format: getFormatFromMimeType(mimeType),
         filePath: filepath,
       };
 
@@ -535,7 +483,7 @@ export class ImageExtractor {
       if (options.verbose) {
         console.log(
           `   ❌ Failed to extract image from PDF object: ${
-            error instanceof Error ? error.message : "Unknown error"
+            getErrorMessage(error)
           }`
         );
       }
@@ -597,9 +545,7 @@ export class ImageExtractor {
             if (options.verbose) {
               console.log(
                 `   ❌ Zlib decompression failed: ${
-                  zlibError instanceof Error
-                    ? zlibError.message
-                    : "Unknown error"
+                  getErrorMessage(zlibError)
                 }`
               );
             }
@@ -644,7 +590,7 @@ export class ImageExtractor {
             }
 
             // Check if decompressed data is a valid image format
-            const detectedFormat = this.detectImageFormat(rawPixelData);
+            const detectedFormat = this.detectImageFormatLocal(rawPixelData);
             if (detectedFormat.valid) {
               // It's already a valid image format
               imageData = rawPixelData;
@@ -687,9 +633,7 @@ export class ImageExtractor {
             if (options.verbose) {
               console.log(
                 `   ❌ FlateDecode decompression failed: ${
-                  decompressError instanceof Error
-                    ? decompressError.message
-                    : "Unknown error"
+                  getErrorMessage(decompressError)
                 }`
               );
             }
@@ -724,14 +668,14 @@ export class ImageExtractor {
             if (options.verbose) {
               console.log(
                 `   ❌ JPXDecode extraction failed: ${
-                  jpxError instanceof Error ? jpxError.message : "Unknown error"
+                  getErrorMessage(jpxError)
                 }`
               );
             }
             return {
               success: false,
               error: `JPXDecode extraction failed: ${
-                jpxError instanceof Error ? jpxError.message : "Unknown error"
+                getErrorMessage(jpxError)
               }`,
             };
           }
@@ -745,7 +689,7 @@ export class ImageExtractor {
             imageData = Buffer.from(rawData);
 
             // Try to detect format from decompressed data
-            const detectedFormat = this.detectImageFormat(imageData);
+            const detectedFormat = this.detectImageFormatLocal(imageData);
             if (detectedFormat.valid) {
               mimeType = detectedFormat.mimeType!;
               extension = detectedFormat.extension!;
@@ -754,9 +698,7 @@ export class ImageExtractor {
             if (options.verbose) {
               console.log(
                 `   ❌ Generic decompression failed: ${
-                  genericError instanceof Error
-                    ? genericError.message
-                    : "Unknown error"
+                  getErrorMessage(genericError)
                 }`
               );
             }
@@ -780,7 +722,7 @@ export class ImageExtractor {
           imageData = Buffer.from(rawData);
 
           // Try to detect format
-          const detectedFormat = this.detectImageFormat(imageData);
+          const detectedFormat = this.detectImageFormatLocal(imageData);
           if (detectedFormat.valid) {
             mimeType = detectedFormat.mimeType!;
             extension = detectedFormat.extension!;
@@ -789,14 +731,14 @@ export class ImageExtractor {
           if (options.verbose) {
             console.log(
               `   ❌ Raw data extraction failed: ${
-                rawError instanceof Error ? rawError.message : "Unknown error"
+                getErrorMessage(rawError)
               }`
             );
           }
           return {
             success: false,
             error: `Raw data extraction failed: ${
-              rawError instanceof Error ? rawError.message : "Unknown error"
+              getErrorMessage(rawError)
             }`,
           };
         }
@@ -820,73 +762,27 @@ export class ImageExtractor {
       if (options.verbose) {
         console.log(
           `   ❌ Failed to extract image data: ${
-            error instanceof Error ? error.message : "Unknown error"
+            getErrorMessage(error)
           }`
         );
       }
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
       };
     }
   }
 
   /**
-   * Detect image format from binary data (from NestJS implementation)
+   * Detect image format from binary data
+   * Uses centralized image format detection utility
    */
-  private detectImageFormat(data: Buffer): {
+  private detectImageFormatLocal(data: Buffer): {
     valid: boolean;
     mimeType?: string;
     extension?: string;
   } {
-    if (!data || data.length < 10) {
-      return { valid: false };
-    }
-
-    // JPEG
-    if (data[0] === 0xff && data[1] === 0xd8) {
-      return { valid: true, mimeType: "image/jpeg", extension: "jpg" };
-    }
-
-    // PNG
-    if (
-      data[0] === 0x89 &&
-      data[1] === 0x50 &&
-      data[2] === 0x4e &&
-      data[3] === 0x47
-    ) {
-      return { valid: true, mimeType: "image/png", extension: "png" };
-    }
-
-    // GIF
-    if (data[0] === 0x47 && data[1] === 0x49 && data[2] === 0x46) {
-      return { valid: true, mimeType: "image/gif", extension: "gif" };
-    }
-
-    // TIFF
-    if (
-      (data[0] === 0x49 && data[1] === 0x49) ||
-      (data[0] === 0x4d && data[1] === 0x4d)
-    ) {
-      return { valid: true, mimeType: "image/tiff", extension: "tiff" };
-    }
-
-    // JPEG 2000 (JP2)
-    if (
-      data.length >= 12 &&
-      data[0] === 0x00 &&
-      data[1] === 0x00 &&
-      data[2] === 0x00 &&
-      data[3] === 0x0c &&
-      data[4] === 0x6a &&
-      data[5] === 0x50 &&
-      data[6] === 0x20 &&
-      data[7] === 0x20
-    ) {
-      return { valid: true, mimeType: "image/jp2", extension: "jp2" };
-    }
-
-    return { valid: false };
+    return detectImageFormat(data);
   }
 
   /**
@@ -905,28 +801,11 @@ export class ImageExtractor {
     error?: string;
   }> {
     try {
-      // Determine color space from PDF metadata
+      // Determine color space from PDF metadata using centralized utility
       const colorSpaceStr = colorSpace?.toString() || "";
-      let componentsPerPixel = 3; // Default RGB
-      let isCmyk = false;
-
-      if (
-        colorSpaceStr.includes("DeviceGray") ||
-        colorSpaceStr.includes("Gray")
-      ) {
-        componentsPerPixel = 1;
-      } else if (
-        colorSpaceStr.includes("DeviceRGB") ||
-        colorSpaceStr.includes("RGB")
-      ) {
-        componentsPerPixel = 3;
-      } else if (
-        colorSpaceStr.includes("DeviceCMYK") ||
-        colorSpaceStr.includes("CMYK")
-      ) {
-        componentsPerPixel = 4;
-        isCmyk = true;
-      }
+      const colorConfig = detectColorSpace(colorSpaceStr);
+      const componentsPerPixel = colorConfig.components;
+      const isCmyk = isCmykColorSpace(colorSpaceStr);
 
       // Calculate expected data size
       const expectedSize =
@@ -982,7 +861,7 @@ export class ImageExtractor {
       return {
         success: false,
         error: `PNG creation error: ${
-          error instanceof Error ? error.message : "Unknown error"
+          getErrorMessage(error)
         }`,
       };
     }

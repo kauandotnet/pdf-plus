@@ -6,6 +6,12 @@ import type { WorkerTask } from "../../../types/worker-types.js";
 import { PixelConverter } from "../utils/pixel-converter.js";
 import { decodePredictor } from "../../../utils/predictor-decoder.js";
 import { rawRgbaToPng } from "../../../utils/napi-canvas-factory.js";
+import {
+  detectImageFormat,
+  getFormatFromMimeType,
+} from "../../../utils/image-format-detector.js";
+import { getColorComponents } from "../../../utils/color-space-config.js";
+import { getErrorMessage } from "../../../utils/error-utils.js";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
@@ -90,7 +96,7 @@ export class PdfLibEngine extends BaseImageEngine {
       if (options.verbose) {
         console.error(
           "❌ Worker pool initialization failed:",
-          error instanceof Error ? error.message : error
+          getErrorMessage(error)
         );
       }
       // Don't throw - just continue without workers
@@ -114,8 +120,7 @@ export class PdfLibEngine extends BaseImageEngine {
   private async convertJp2FileWithWorker(
     jp2Path: string,
     quality: number,
-    verbose: boolean,
-    useSharp?: boolean
+    verbose: boolean
   ): Promise<{ success: boolean; newPath?: string; error?: string }> {
     const useWorker =
       this.workerPool && this.workerPool.getStats().totalWorkers > 0;
@@ -126,7 +131,6 @@ export class PdfLibEngine extends BaseImageEngine {
       return ImageOptimizer.convertJp2ToJpg(jp2Path, {
         quality,
         verbose,
-        useSharp,
       });
     }
 
@@ -140,7 +144,7 @@ export class PdfLibEngine extends BaseImageEngine {
         taskId: `convert-${Date.now()}-${Math.random()}`,
         data: {
           buffer,
-          options: { quality, useSharp },
+          options: { quality },
         },
       };
 
@@ -164,7 +168,7 @@ export class PdfLibEngine extends BaseImageEngine {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
       };
     }
   }
@@ -179,7 +183,6 @@ export class PdfLibEngine extends BaseImageEngine {
       quality?: number;
       progressive?: boolean;
       verbose?: boolean;
-      useSharp?: boolean;
     }
   ): Promise<{
     success: boolean;
@@ -245,7 +248,7 @@ export class PdfLibEngine extends BaseImageEngine {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
       };
     }
   }
@@ -407,8 +410,7 @@ export class PdfLibEngine extends BaseImageEngine {
                   return this.convertJp2FileWithWorker(
                     image.filepath,
                     quality,
-                    options.verbose || false,
-                    options.useSharp
+                    options.verbose || false
                   );
                 }
                 return { success: false, error: "File not found" };
@@ -481,7 +483,6 @@ export class PdfLibEngine extends BaseImageEngine {
                 return this.optimizeFileWithWorker(image.filepath, {
                   quality: options.imageQuality || 80,
                   verbose: false, // Reduce noise in parallel mode
-                  useSharp: options.useSharp,
                 });
               }
               return { success: false, error: "File not found" };
@@ -524,7 +525,6 @@ export class PdfLibEngine extends BaseImageEngine {
               const result = await this.optimizeFileWithWorker(image.filepath, {
                 quality: options.imageQuality || 80,
                 verbose: options.verbose,
-                useSharp: options.useSharp,
               });
 
               if (result.success && options.verbose) {
@@ -561,7 +561,7 @@ export class PdfLibEngine extends BaseImageEngine {
       return {
         success: false,
         error: `PDF-lib extraction failed: ${
-          error instanceof Error ? error.message : "Unknown error"
+          getErrorMessage(error)
         }`,
       };
     }
@@ -942,7 +942,7 @@ export class PdfLibEngine extends BaseImageEngine {
         page: pageNumber,
         width: finalWidth,
         height: finalHeight,
-        format: this.getFormatFromMimeType(extractionResult.mimeType || ""),
+        format: this.getFormatFromMimeTypeLocal(extractionResult.mimeType || ""),
         mimeType: extractionResult.mimeType || "",
         size,
         position: { x: 0, y: 0, width: finalWidth, height: finalHeight },
@@ -953,7 +953,7 @@ export class PdfLibEngine extends BaseImageEngine {
       if (options.verbose) {
         console.log(
           `   ❌ Error in pdf-lib extraction: ${
-            error instanceof Error ? error.message : "Unknown error"
+            getErrorMessage(error)
           }`
         );
       }
@@ -1013,9 +1013,7 @@ export class PdfLibEngine extends BaseImageEngine {
             if (options.verbose) {
               console.log(
                 `   ❌ Zlib decompression failed: ${
-                  zlibError instanceof Error
-                    ? zlibError.message
-                    : "Unknown error"
+                  getErrorMessage(zlibError)
                 }`
               );
             }
@@ -1103,7 +1101,7 @@ export class PdfLibEngine extends BaseImageEngine {
                 try {
                   // Determine color components from colorSpace if not in DecodeParms
                   const components =
-                    colorsVal ?? this.getColorComponents(colorSpace);
+                    colorsVal ?? this.getColorComponentsLocal(colorSpace);
 
                   rawPixelData = decodePredictor(
                     rawPixelData,
@@ -1122,9 +1120,7 @@ export class PdfLibEngine extends BaseImageEngine {
                   if (options.verbose) {
                     console.log(
                       `   ⚠️  Predictor decoding failed: ${
-                        predictorError instanceof Error
-                          ? predictorError.message
-                          : "Unknown error"
+                        getErrorMessage(predictorError)
                       }`
                     );
                   }
@@ -1134,7 +1130,7 @@ export class PdfLibEngine extends BaseImageEngine {
             }
 
             // Check if decompressed data is a valid image format
-            const detectedFormat = this.detectImageFormat(rawPixelData);
+            const detectedFormat = this.detectImageFormatLocal(rawPixelData);
             if (detectedFormat.valid) {
               // It's already a valid image format
               imageData = rawPixelData;
@@ -1177,9 +1173,7 @@ export class PdfLibEngine extends BaseImageEngine {
             if (options.verbose) {
               console.log(
                 `   ❌ FlateDecode decompression failed: ${
-                  decompressError instanceof Error
-                    ? decompressError.message
-                    : "Unknown error"
+                  getErrorMessage(decompressError)
                 }`
               );
             }
@@ -1211,14 +1205,14 @@ export class PdfLibEngine extends BaseImageEngine {
             if (options.verbose) {
               console.log(
                 `   ❌ JPXDecode extraction failed: ${
-                  jpxError instanceof Error ? jpxError.message : "Unknown error"
+                  getErrorMessage(jpxError)
                 }`
               );
             }
             return {
               success: false,
               error: `JPXDecode extraction failed: ${
-                jpxError instanceof Error ? jpxError.message : "Unknown error"
+                getErrorMessage(jpxError)
               }`,
             };
           }
@@ -1232,7 +1226,7 @@ export class PdfLibEngine extends BaseImageEngine {
             imageData = Buffer.from(rawData);
 
             // Try to detect format from decompressed data
-            const detectedFormat = this.detectImageFormat(imageData);
+            const detectedFormat = this.detectImageFormatLocal(imageData);
             if (detectedFormat.valid) {
               mimeType = detectedFormat.mimeType!;
               extension = detectedFormat.extension!;
@@ -1241,9 +1235,7 @@ export class PdfLibEngine extends BaseImageEngine {
             if (options.verbose) {
               console.log(
                 `   ❌ Generic decompression failed: ${
-                  genericError instanceof Error
-                    ? genericError.message
-                    : "Unknown error"
+                  getErrorMessage(genericError)
                 }`
               );
             }
@@ -1267,7 +1259,7 @@ export class PdfLibEngine extends BaseImageEngine {
           imageData = Buffer.from(rawData);
 
           // Try to detect format
-          const detectedFormat = this.detectImageFormat(imageData);
+          const detectedFormat = this.detectImageFormatLocal(imageData);
           if (detectedFormat.valid) {
             mimeType = detectedFormat.mimeType!;
             extension = detectedFormat.extension!;
@@ -1276,14 +1268,14 @@ export class PdfLibEngine extends BaseImageEngine {
           if (options.verbose) {
             console.log(
               `   ❌ Raw data extraction failed: ${
-                rawError instanceof Error ? rawError.message : "Unknown error"
+                getErrorMessage(rawError)
               }`
             );
           }
           return {
             success: false,
             error: `Raw data extraction failed: ${
-              rawError instanceof Error ? rawError.message : "Unknown error"
+              getErrorMessage(rawError)
             }`,
           };
         }
@@ -1299,66 +1291,23 @@ export class PdfLibEngine extends BaseImageEngine {
       return {
         success: false,
         error: `Image data extraction failed: ${
-          error instanceof Error ? error.message : "Unknown error"
+          getErrorMessage(error)
         }`,
       };
     }
   }
 
   // Additional helper methods would go here...
-  private detectImageFormat(data: Buffer): {
+  /**
+   * Detect image format from binary data
+   * Uses centralized image format detection utility
+   */
+  private detectImageFormatLocal(data: Buffer): {
     valid: boolean;
     mimeType?: string;
     extension?: string;
   } {
-    if (!data || data.length < 10) {
-      return { valid: false };
-    }
-
-    // JPEG
-    if (data[0] === 0xff && data[1] === 0xd8) {
-      return { valid: true, mimeType: "image/jpeg", extension: "jpg" };
-    }
-
-    // PNG
-    if (
-      data[0] === 0x89 &&
-      data[1] === 0x50 &&
-      data[2] === 0x4e &&
-      data[3] === 0x47
-    ) {
-      return { valid: true, mimeType: "image/png", extension: "png" };
-    }
-
-    // GIF
-    if (data[0] === 0x47 && data[1] === 0x49 && data[2] === 0x46) {
-      return { valid: true, mimeType: "image/gif", extension: "gif" };
-    }
-
-    // TIFF
-    if (
-      (data[0] === 0x49 && data[1] === 0x49) ||
-      (data[0] === 0x4d && data[1] === 0x4d)
-    ) {
-      return { valid: true, mimeType: "image/tiff", extension: "tiff" };
-    }
-
-    // JPEG 2000 (JP2)
-    if (
-      data.length >= 12 &&
-      data[0] === 0x00 &&
-      data[1] === 0x00 &&
-      data[2] === 0x00 &&
-      data[3] === 0x0c &&
-      data[4] === 0x6a &&
-      data[5] === 0x50 &&
-      data[6] === 0x20 &&
-      data[7] === 0x20
-    ) {
-      return { valid: true, mimeType: "image/jp2", extension: "jp2" };
-    }
-
-    return { valid: false };
+    return detectImageFormat(data);
   }
 
   private async createPngFromPdfMetadata(
@@ -1463,60 +1412,28 @@ export class PdfLibEngine extends BaseImageEngine {
       return {
         success: false,
         error: `PNG creation error: ${
-          error instanceof Error ? error.message : "Unknown error"
+          getErrorMessage(error)
         }`,
       };
     }
   }
 
-  private getFormatFromMimeType(mimeType: string): string {
-    switch (mimeType) {
-      case "image/jpeg":
-        return "JPEG";
-      case "image/png":
-        return "PNG";
-      case "image/jp2":
-        return "JPEG 2000";
-      case "image/gif":
-        return "GIF";
-      case "image/tiff":
-        return "TIFF";
-      default:
-        return "unknown";
-    }
+  /**
+   * Get format name from MIME type
+   * Uses centralized MIME type mapping utility
+   */
+  private getFormatFromMimeTypeLocal(mimeType: string): string {
+    return getFormatFromMimeType(mimeType);
   }
 
   /**
    * Get the number of color components from a PDF ColorSpace
+   * Uses centralized color space utility
    */
-  private getColorComponents(colorSpace: any): number {
+  private getColorComponentsLocal(colorSpace: any): number {
     if (!colorSpace) {
       return 3; // Default to RGB
     }
-
-    const colorSpaceStr = colorSpace.toString();
-
-    // DeviceGray or CalGray
-    if (colorSpaceStr.includes("Gray")) {
-      return 1;
-    }
-
-    // DeviceRGB or CalRGB
-    if (colorSpaceStr.includes("RGB")) {
-      return 3;
-    }
-
-    // DeviceCMYK
-    if (colorSpaceStr.includes("CMYK")) {
-      return 4;
-    }
-
-    // Indexed color space - typically 1 component (index)
-    if (colorSpaceStr.includes("Indexed")) {
-      return 1;
-    }
-
-    // Default to RGB
-    return 3;
+    return getColorComponents(colorSpace.toString());
   }
 }

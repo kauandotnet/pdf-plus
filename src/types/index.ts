@@ -194,41 +194,6 @@ export interface ExtractionOptions {
    */
   preserveJp2?: boolean;
 
-  /**
-   * Use Sharp library for ALL image processing operations (better quality & performance).
-   *
-   * When enabled, Sharp is used as the global image processing engine for:
-   * - JP2 to JPG conversion
-   * - Image optimization
-   * - Image resizing
-   * - Format conversions
-   *
-   * Sharp is an OPTIONAL dependency. Install it for better performance:
-   * ```bash
-   * npm install sharp
-   * ```
-   *
-   * If Sharp is not installed, the library will automatically fall back to pure JavaScript (Jimp).
-   *
-   * (default: false - use pure JS Jimp)
-   */
-  useSharp?: boolean;
-
-  /**
-   * Use Poppler's pdfimages as fallback when standard extraction finds no images.
-   * Poppler can extract images that are embedded in non-standard ways (Form XObjects, inline images, etc.)
-   * that the standard XObject-based extraction might miss.
-   *
-   * Requires poppler-utils to be installed on the system.
-   *
-   * Installation:
-   * - Linux: sudo apt-get install poppler-utils
-   * - macOS: brew install poppler
-   *
-   * (default: false)
-   */
-  usePopplerFallback?: boolean;
-
   // Performance options
   /** Enable parallel processing for better performance (default: true) */
   parallelProcessing?: boolean;

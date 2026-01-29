@@ -3,8 +3,10 @@
  * Optimized for speed with direct buffer manipulation
  */
 
+import { detectColorSpace as detectColorSpaceUtil } from "../../../utils/color-space-config.js";
+
 /**
- * Color space configuration
+ * Color space configuration (legacy interface for backwards compatibility)
  */
 interface ColorSpaceConfig {
   readonly componentsPerPixel: number;
@@ -23,24 +25,14 @@ export class PixelConverter {
 
   /**
    * Detect color space from PDF metadata
+   * Uses centralized color space detection utility
    */
   static detectColorSpace(colorSpaceStr: string): ColorSpaceConfig {
-    if (
-      colorSpaceStr.includes("DeviceGray") ||
-      colorSpaceStr.includes("Gray")
-    ) {
-      return { componentsPerPixel: 1, colorType: 0 }; // Grayscale
-    }
-    if (colorSpaceStr.includes("DeviceRGB") || colorSpaceStr.includes("RGB")) {
-      return { componentsPerPixel: 3, colorType: 2 }; // RGB
-    }
-    if (
-      colorSpaceStr.includes("DeviceCMYK") ||
-      colorSpaceStr.includes("CMYK")
-    ) {
-      return { componentsPerPixel: 4, colorType: 2 }; // CMYK (will convert to RGB)
-    }
-    return { componentsPerPixel: 3, colorType: 2 }; // Default RGB
+    const result = detectColorSpaceUtil(colorSpaceStr);
+    return {
+      componentsPerPixel: result.components,
+      colorType: result.colorType,
+    };
   }
 
   /**

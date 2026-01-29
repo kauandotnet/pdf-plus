@@ -20,7 +20,6 @@ parentPort.on("message", async (task: WorkerTask) => {
 
     const { buffer, options } = task.data;
     const quality = options?.quality ?? 100;
-    const useSharp = options?.useSharp ?? false;
 
     // Import the converter dynamically to avoid loading it at startup
     const { convertJp2ToJpg } = await import(
@@ -46,7 +45,6 @@ parentPort.on("message", async (task: WorkerTask) => {
         quality,
         verbose: false,
         deleteOriginal: true,
-        useSharp: useSharp,
       });
 
       if (!result.success || !result.newPath) {

@@ -50,26 +50,6 @@ export interface ExtractionOptions {
    */
   preserveJp2?: boolean;
 
-  /**
-   * Use Sharp library for ALL image processing operations (better quality & performance).
-   *
-   * When enabled, Sharp is used as the global image processing engine for:
-   * - JP2 to JPG conversion
-   * - Image optimization
-   * - Image resizing
-   * - Format conversions
-   *
-   * Sharp is an OPTIONAL dependency. Install it for better performance:
-   * ```bash
-   * npm install sharp
-   * ```
-   *
-   * If Sharp is not installed, the library will automatically fall back to pure JavaScript (Jimp).
-   *
-   * (default: false - use pure JS Jimp)
-   */
-  useSharp?: boolean;
-
   // Performance options
   /** Enable parallel processing for better performance (default: true) */
   parallelProcessing?: boolean;
