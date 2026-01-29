@@ -12,8 +12,10 @@ import type {
   TextExtractionOptions,
   TextExtractionResult,
   TextItemsExtractionResult,
+  TextExtractionMeta,
 } from "./types.js";
 import { getDocumentProxy, isPDFDocumentProxy } from "./document.js";
+import { ParallelProcessor } from "../../utils/parallel-processor.js";
 
 /**
  * Extract text from a single page
@@ -115,6 +117,7 @@ export async function extractText(
   input: PDFInput,
   options: TextExtractionOptions = {}
 ): Promise<TextExtractionResult<string | string[]>> {
+  const startTime = Date.now();
   const doc = await getDocumentProxy(input);
   const shouldDestroy = !isPDFDocumentProxy(input);
 
@@ -125,39 +128,123 @@ export async function extractText(
       includeMarkedContent = false,
       disableNormalization = false,
       mergePages = false,
+      maxConcurrency = 10,
+      onProgress,
+      chunkSize,
+      onChunkComplete,
     } = options;
 
     const totalPages = doc.numPages;
-
-    // Build page numbers array
     const pageNumbers = Array.from(
       { length: lastPage - firstPage + 1 },
       (_, i) => firstPage + i
     );
 
-    // Process pages in parallel
-    const texts = await Promise.all(
-      pageNumbers.map((pageNum) =>
-        getPageText(doc, pageNum, { includeMarkedContent, disableNormalization })
-      )
-    );
+    const extractPage = (pageNum: number) =>
+      getPageText(doc, pageNum, { includeMarkedContent, disableNormalization });
 
-    if (mergePages) {
-      return {
-        totalPages,
-        text: texts.filter((t) => t.trim()).join("\n\n"),
-      };
-    }
+    const reportProgress = (processedPages: number, currentPage: number) => {
+      onProgress?.({
+        processedPages,
+        totalPages: pageNumbers.length,
+        percentage: (processedPages / pageNumbers.length) * 100,
+        currentPage,
+      });
+    };
+
+    // Use chunked processing for very large PDFs if chunkSize is set
+    const useChunked = chunkSize && pageNumbers.length > chunkSize;
+
+    const { texts, method } = useChunked
+      ? await processChunked(
+          pageNumbers,
+          chunkSize,
+          extractPage,
+          reportProgress,
+          onChunkComplete,
+          maxConcurrency
+        )
+      : await processParallel(
+          pageNumbers,
+          extractPage,
+          reportProgress,
+          maxConcurrency
+        );
+
+    const _meta: TextExtractionMeta = {
+      duration: Date.now() - startTime,
+      pagesProcessed: texts.length,
+      method,
+    };
 
     return {
       totalPages,
-      text: texts,
+      text: mergePages ? texts.filter((t) => t.trim()).join("\n\n") : texts,
+      _meta,
     };
   } finally {
     if (shouldDestroy) {
       await doc.destroy();
     }
   }
+}
+
+async function processParallel<T>(
+  pageNumbers: number[],
+  extractor: (pageNum: number) => Promise<T>,
+  reportProgress: (processed: number, current: number) => void,
+  maxConcurrency: number
+): Promise<{ texts: T[]; method: "parallel" }> {
+  const texts = await ParallelProcessor.map(
+    pageNumbers,
+    async (pageNum, index) => {
+      const result = await extractor(pageNum);
+      reportProgress(index + 1, pageNum);
+      return result;
+    },
+    { maxConcurrency }
+  );
+  return { texts, method: "parallel" };
+}
+
+async function processChunked<T>(
+  pageNumbers: number[],
+  chunkSize: number,
+  extractor: (pageNum: number) => Promise<T>,
+  reportProgress: (processed: number, current: number) => void,
+  onChunkComplete: TextExtractionOptions["onChunkComplete"],
+  maxConcurrency: number
+): Promise<{ texts: T[]; method: "chunked" }> {
+  const totalChunks = Math.ceil(pageNumbers.length / chunkSize);
+  const counter = { value: 0 };
+
+  const chunkResults = await ParallelProcessor.processInChunks(
+    pageNumbers,
+    chunkSize,
+    async (chunk, chunkIndex) => {
+      const chunkTexts = await ParallelProcessor.map(
+        chunk,
+        async (pageNum) => {
+          const result = await extractor(pageNum);
+          counter.value++;
+          reportProgress(counter.value, pageNum);
+          return result;
+        },
+        { maxConcurrency }
+      );
+
+      onChunkComplete?.({
+        chunkIndex,
+        totalChunks,
+        pagesProcessed: Math.min((chunkIndex + 1) * chunkSize, pageNumbers.length),
+      });
+
+      return chunkTexts;
+    },
+    { maxConcurrency: 1 }
+  );
+
+  return { texts: chunkResults.flat(), method: "chunked" };
 }
 
 /**
@@ -182,6 +269,7 @@ export async function extractTextItems(
   input: PDFInput,
   options: Omit<TextExtractionOptions, "mergePages"> = {}
 ): Promise<TextItemsExtractionResult> {
+  const startTime = Date.now();
   const doc = await getDocumentProxy(input);
   const shouldDestroy = !isPDFDocumentProxy(input);
 
@@ -191,26 +279,56 @@ export async function extractTextItems(
       lastPage = doc.numPages,
       includeMarkedContent = false,
       disableNormalization = false,
+      maxConcurrency = 10,
+      onProgress,
+      chunkSize,
+      onChunkComplete,
     } = options;
 
     const totalPages = doc.numPages;
-
-    // Build page numbers array
     const pageNumbers = Array.from(
       { length: lastPage - firstPage + 1 },
       (_, i) => firstPage + i
     );
 
-    // Process pages in parallel
-    const items = await Promise.all(
-      pageNumbers.map((pageNum) =>
-        getPageTextItems(doc, pageNum, { includeMarkedContent, disableNormalization })
-      )
-    );
+    const extractPage = (pageNum: number) =>
+      getPageTextItems(doc, pageNum, { includeMarkedContent, disableNormalization });
+
+    const reportProgress = (processedPages: number, currentPage: number) => {
+      onProgress?.({
+        processedPages,
+        totalPages: pageNumbers.length,
+        percentage: (processedPages / pageNumbers.length) * 100,
+        currentPage,
+      });
+    };
+
+    const useChunked = chunkSize && pageNumbers.length > chunkSize;
+
+    const { texts: items, method } = useChunked
+      ? await processChunked(
+          pageNumbers,
+          chunkSize,
+          extractPage,
+          reportProgress,
+          onChunkComplete,
+          maxConcurrency
+        )
+      : await processParallel(
+          pageNumbers,
+          extractPage,
+          reportProgress,
+          maxConcurrency
+        );
 
     return {
       totalPages,
       items,
+      _meta: {
+        duration: Date.now() - startTime,
+        pagesProcessed: items.length,
+        method,
+      },
     };
   } finally {
     if (shouldDestroy) {

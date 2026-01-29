@@ -61,6 +61,32 @@ export interface PDFTextItem {
 }
 
 /**
+ * Progress information for text extraction
+ */
+export interface TextExtractionProgress {
+  /** Number of pages processed so far */
+  processedPages: number;
+  /** Total number of pages to process */
+  totalPages: number;
+  /** Percentage complete (0-100) */
+  percentage: number;
+  /** Current page being processed (1-based) */
+  currentPage?: number;
+}
+
+/**
+ * Performance metadata for text extraction
+ */
+export interface TextExtractionMeta {
+  /** Duration in milliseconds */
+  duration: number;
+  /** Number of pages processed */
+  pagesProcessed: number;
+  /** Processing method used */
+  method: "parallel" | "sequential" | "chunked";
+}
+
+/**
  * Options for text extraction
  */
 export interface TextExtractionOptions {
@@ -74,6 +100,18 @@ export interface TextExtractionOptions {
   disableNormalization?: boolean;
   /** Merge all pages into a single string (default: false) */
   mergePages?: boolean;
+  /** Maximum concurrent page extractions (default: 10) */
+  maxConcurrency?: number;
+  /** Progress callback called after each page is processed */
+  onProgress?: (progress: TextExtractionProgress) => void;
+  /** Chunk size for processing very large PDFs (default: undefined = no chunking) */
+  chunkSize?: number;
+  /** Callback called after each chunk is processed (when chunkSize is set) */
+  onChunkComplete?: (info: {
+    chunkIndex: number;
+    totalChunks: number;
+    pagesProcessed: number;
+  }) => void;
 }
 
 /**
@@ -84,6 +122,8 @@ export interface TextExtractionResult<T extends string | string[]> {
   totalPages: number;
   /** Extracted text - string[] when mergePages is false, string when true */
   text: T;
+  /** Performance metadata (available when extraction completes) */
+  _meta?: TextExtractionMeta;
 }
 
 /**
@@ -94,6 +134,8 @@ export interface TextItemsExtractionResult {
   totalPages: number;
   /** Text items per page */
   items: PDFTextItem[][];
+  /** Performance metadata (available when extraction completes) */
+  _meta?: TextExtractionMeta;
 }
 
 /**

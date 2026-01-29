@@ -122,6 +122,8 @@ export type {
   TextExtractionOptions,
   TextExtractionResult,
   TextItemsExtractionResult,
+  TextExtractionProgress,
+  TextExtractionMeta,
   // Metadata types
   MetadataOptions,
   PDFMetadata,
