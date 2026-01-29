@@ -429,7 +429,7 @@ export async function extractTables(
 /**
  * Library version
  */
-export const version = "1.0.3";
+export const version = "2.0.0";
 
 // ============================================================================
 // Default Export (CommonJS compatibility)
