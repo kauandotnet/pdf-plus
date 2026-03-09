@@ -16,7 +16,7 @@ importers:
         version: 0.1.95
       file-type:
         specifier: ^21.0.0
-        version: 21.3.0
+        version: 21.3.1
       image-size:
         specifier: ^1.1.1
         version: 1.1.1
@@ -29,10 +29,6 @@ importers:
       utif:
         specifier: ^3.1.0
         version: 3.1.0
-    optionalDependencies:
-      sharp:
-        specifier: ^0.33.5
-        version: 0.33.5
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.2.4
@@ -61,6 +57,10 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.5.2)(@vitest/ui@3.2.4)(yaml@2.8.1)
+    optionalDependencies:
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
 
 packages:
 
@@ -831,8 +831,8 @@ packages:
   fflate@0.8.2:
     resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
-  file-type@21.3.0:
-    resolution: {integrity: sha512-8kPJMIGz1Yt/aPEwOsrR97ZyZaD1Iqm8PClb1nYFclUCkBi0Ma5IsYNQzvSFS9ib51lWyIw5mIT9rWzI/xjpzA==}
+  file-type@21.3.1:
+    resolution: {integrity: sha512-SrzXX46I/zsRDjTb82eucsGg0ODq2NpGDp4HcsFKApPy8P8vACjpJRDoGGMfEzhFC0ry61ajd7f72J3603anBA==}
     engines: {node: '>=20'}
 
   fix-dts-default-cjs-exports@1.0.1:
@@ -1947,7 +1947,7 @@ snapshots:
 
   fflate@0.8.2: {}
 
-  file-type@21.3.0:
+  file-type@21.3.1:
     dependencies:
       '@tokenizer/inflate': 0.4.1
       strtok3: 10.3.4
