@@ -11,7 +11,30 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import type { PDFDocumentProxy, PDFSource, PDFLoadOptions, PDFInput } from "./types.js";
+import type { DocumentInitParameters } from "pdfjs-dist/types/src/display/api.js";
 import { napiCanvasFactory } from "../../utils/napi-canvas-factory.js";
+import {
+  Path2D as NapiPath2D,
+  DOMMatrix as NapiDOMMatrix,
+  DOMPoint as NapiDOMPoint,
+  DOMRect as NapiDOMRect,
+} from "@napi-rs/canvas";
+
+// Polyfill browser globals for pdf.js in Node.js
+// pdf.js expects Path2D, DOMMatrix, etc. as browser globals for canvas rendering.
+// In Node.js these don't exist, so we provide them from @napi-rs/canvas.
+globalThis.Path2D ??= NapiPath2D as unknown as typeof Path2D;
+globalThis.DOMMatrix ??= NapiDOMMatrix as unknown as typeof DOMMatrix;
+globalThis.DOMPoint ??= NapiDOMPoint as unknown as typeof DOMPoint;
+globalThis.DOMRect ??= NapiDOMRect as unknown as typeof DOMRect;
+
+/**
+ * Extended DocumentInitParameters that includes the runtime-only
+ * `canvasFactory` field (pdfjs types only expose `CanvasFactory`).
+ */
+interface PDFDocumentInitParams extends DocumentInitParameters {
+  canvasFactory?: { create(w: number, h: number): unknown; reset(c: unknown, w: number, h: number): void; destroy(c: unknown): void };
+}
 
 // Lazy-loaded pdf.js module
 let pdfjs: typeof import("pdfjs-dist/legacy/build/pdf.mjs") | null = null;
@@ -142,15 +165,16 @@ export async function loadPDF(
   }
 
   // Create document loading task with sensible defaults
-  const loadingTask = pdfjs.getDocument({
+  const params: PDFDocumentInitParams = {
     data,
     password: options.password,
     verbosity: options.verbosity ?? pdfjs.VerbosityLevel.ERRORS,
     useWorkerFetch: false,
     isEvalSupported: false,
     useSystemFonts: true,
-    canvasFactory: napiCanvasFactory as any,
-  } as any);
+    canvasFactory: napiCanvasFactory,
+  };
+  const loadingTask = pdfjs.getDocument(params);
 
   return loadingTask.promise;
 }
