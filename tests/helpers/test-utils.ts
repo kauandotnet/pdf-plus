@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -41,9 +42,9 @@ export function getArtBaselPDF(): string {
  * Create a temporary directory for test outputs
  */
 export function createTempDir(prefix = "test-"): string {
-  const tmpDir = path.join(__dirname, "../../tmp", `${prefix}${Date.now()}`);
-  fs.mkdirSync(tmpDir, { recursive: true });
-  return tmpDir;
+  const baseDir = path.join(os.tmpdir(), "pdf-plus-tests");
+  fs.mkdirSync(baseDir, { recursive: true });
+  return fs.mkdtempSync(path.join(baseDir, `${prefix}`));
 }
 
 /**
