@@ -250,7 +250,8 @@ export class ImageExtractor {
                 pdfObject,
                 pageNumber,
                 globalImageId,
-                options
+                options,
+                pdfDoc
               );
 
               if (extractedImage) {
@@ -355,7 +356,8 @@ export class ImageExtractor {
     pdfObject: any,
     pageNumber: number,
     imageIndex: number,
-    options: ExtractionOptions
+    options: ExtractionOptions,
+    pdfDoc?: any
   ): Promise<ImageItem | null> {
     try {
       const { PDFName } = await import("pdf-lib");
@@ -398,7 +400,8 @@ export class ImageExtractor {
         heightVal,
         colorSpace,
         bitsVal,
-        options
+        options,
+        pdfDoc
       );
 
       if (!extractionResult.success || !extractionResult.imageData) {
@@ -501,7 +504,8 @@ export class ImageExtractor {
     height: number,
     colorSpace: any,
     bitsPerComponent: number,
-    options: ExtractionOptions
+    options: ExtractionOptions,
+    pdfDoc?: any
   ): Promise<{
     success: boolean;
     imageData?: Buffer;
@@ -600,33 +604,56 @@ export class ImageExtractor {
                 console.log(`   ✅ Detected valid format: ${mimeType}`);
               }
             } else {
-              // Raw pixel data - create PNG using actual PDF metadata
-              const pngResult = await this.createPngFromPdfMetadata(
-                rawPixelData,
-                width,
-                height,
-                colorSpace,
-                bitsPerComponent,
-                options
-              );
-
-              if (pngResult.success && pngResult.pngData) {
-                imageData = pngResult.pngData;
-                mimeType = "image/png";
-                extension = "png";
-                if (options.verbose) {
-                  console.log(
-                    `   ✅ Created PNG from PDF metadata: ${rawPixelData.length} → ${imageData.length} bytes`
-                  );
+              // Check for Indexed color space and expand palette if needed
+              const indexedInfo = this.resolveIndexedColorSpace(colorSpace, pdfDoc, options);
+              if (indexedInfo) {
+                // Expand indexed pixel data and create PNG directly
+                const expandedData = this.expandIndexedPixels(rawPixelData, indexedInfo.palette, indexedInfo.baseComponents, width, height);
+                const pngData = rawPixelsToPng(expandedData, width, height, indexedInfo.baseComponents, false);
+                if (pngData) {
+                  imageData = pngData;
+                  mimeType = "image/png";
+                  extension = "png";
+                  if (options.verbose) {
+                    console.log(
+                      `   ✅ Created PNG from indexed data: ${rawPixelData.length} → ${imageData.length} bytes (${indexedInfo.maxIndex + 1} palette entries)`
+                    );
+                  }
+                } else {
+                  return {
+                    success: false,
+                    error: `Failed to convert indexed pixels (${indexedInfo.baseComponents} components)`,
+                  };
                 }
               } else {
-                if (options.verbose) {
-                  console.log(`   ❌ PNG creation failed: ${pngResult.error}`);
+                // Non-indexed raw pixel data - create PNG using actual PDF metadata
+                const pngResult = await this.createPngFromPdfMetadata(
+                  rawPixelData,
+                  width,
+                  height,
+                  colorSpace,
+                  bitsPerComponent,
+                  options
+                );
+
+                if (pngResult.success && pngResult.pngData) {
+                  imageData = pngResult.pngData;
+                  mimeType = "image/png";
+                  extension = "png";
+                  if (options.verbose) {
+                    console.log(
+                      `   ✅ Created PNG from PDF metadata: ${rawPixelData.length} → ${imageData.length} bytes`
+                    );
+                  }
+                } else {
+                  if (options.verbose) {
+                    console.log(`   ❌ PNG creation failed: ${pngResult.error}`);
+                  }
+                  return {
+                    success: false,
+                    error: `PNG creation failed: ${pngResult.error}`,
+                  };
                 }
-                return {
-                  success: false,
-                  error: `PNG creation failed: ${pngResult.error}`,
-                };
               }
             }
           } catch (decompressError) {
@@ -771,6 +798,135 @@ export class ImageExtractor {
         error: getErrorMessage(error),
       };
     }
+  }
+
+  /**
+   * Resolve an Indexed color space from a PDF ColorSpace object.
+   * Returns palette info if it's Indexed, or null otherwise.
+   *
+   * Indexed color space format: [/Indexed base maxIndex lookupTable]
+   */
+  private resolveIndexedColorSpace(
+    colorSpace: any,
+    pdfDoc: any,
+    options: ExtractionOptions
+  ): {
+    palette: Buffer;
+    maxIndex: number;
+    baseComponents: number;
+    baseColorSpaceName: string;
+  } | null {
+    if (!pdfDoc || !colorSpace) return null;
+
+    try {
+      // Resolve the colorSpace reference if needed
+      let resolved = colorSpace;
+      if (colorSpace.objectNumber !== undefined) {
+        resolved = pdfDoc.context.lookup(colorSpace);
+      }
+
+      // Check if it's an array (Indexed is always an array)
+      if (!resolved?.array) return null;
+
+      const arr = resolved.array;
+      if (arr.length < 4) return null;
+
+      // First element must be /Indexed
+      const csName = arr[0]?.toString?.();
+      if (csName !== "/Indexed") return null;
+
+      // arr[1] = base color space (e.g., [/ICCBased ref] or /DeviceRGB)
+      // arr[2] = maxIndex (highest valid index, so palette has maxIndex+1 entries)
+      // arr[3] = lookup table (palette data)
+
+      const maxIndex = typeof arr[2]?.value === "number" ? arr[2].value : parseInt(String(arr[2]), 10);
+
+      // Extract palette data first, then infer components from its size
+      let paletteData: Buffer;
+      let lookupTable = arr[3];
+      if (lookupTable?.objectNumber !== undefined) {
+        lookupTable = pdfDoc.context.lookup(lookupTable);
+      }
+
+      if (lookupTable?.contents) {
+        try {
+          const zlib = require("node:zlib");
+          paletteData = zlib.inflateSync(Buffer.from(lookupTable.contents));
+        } catch {
+          paletteData = Buffer.from(lookupTable.contents);
+        }
+      } else if (Buffer.isBuffer(lookupTable) || lookupTable instanceof Uint8Array) {
+        paletteData = Buffer.from(lookupTable);
+      } else {
+        if (options.verbose) {
+          console.log(`   ⚠️  Could not read Indexed palette data`);
+        }
+        return null;
+      }
+
+      // Determine base components from palette size: palette = (maxIndex+1) * components
+      const paletteEntries = maxIndex + 1;
+      let baseComponents: number;
+      let baseColorSpaceName: string;
+
+      if (paletteData.length === paletteEntries * 4) {
+        baseComponents = 4;
+        baseColorSpaceName = "/DeviceCMYK";
+      } else if (paletteData.length === paletteEntries * 3) {
+        baseComponents = 3;
+        baseColorSpaceName = "/DeviceRGB";
+      } else if (paletteData.length === paletteEntries) {
+        baseComponents = 1;
+        baseColorSpaceName = "/DeviceGray";
+      } else {
+        baseComponents = 3;
+        baseColorSpaceName = "/DeviceRGB";
+      }
+
+      if (options.verbose) {
+        console.log(
+          `   🎨 Indexed color space: ${maxIndex + 1} colors, base=${baseColorSpaceName} (${baseComponents} components)`
+        );
+      }
+
+      return {
+        palette: paletteData,
+        maxIndex,
+        baseComponents,
+        baseColorSpaceName,
+      };
+    } catch (error) {
+      if (options.verbose) {
+        console.log(`   ⚠️  Failed to resolve Indexed color space: ${getErrorMessage(error)}`);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Expand indexed pixel data to full RGB/Gray/CMYK using a palette lookup table.
+   * Each input byte is an index into the palette.
+   */
+  private expandIndexedPixels(
+    indexedData: Buffer,
+    palette: Buffer,
+    baseComponents: number,
+    width: number,
+    height: number,
+  ): Buffer {
+    const pixelCount = width * height;
+    const expandedData = Buffer.alloc(pixelCount * baseComponents);
+
+    for (let i = 0; i < pixelCount; i++) {
+      const index = indexedData[i] || 0;
+      const paletteOffset = index * baseComponents;
+
+      for (let c = 0; c < baseComponents; c++) {
+        expandedData[i * baseComponents + c] = palette[paletteOffset + c] || 0;
+      }
+    }
+
+    return expandedData;
   }
 
   /**
