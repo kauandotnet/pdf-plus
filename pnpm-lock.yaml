@@ -16,7 +16,7 @@ importers:
         version: 0.1.96
       file-type:
         specifier: ^21.0.0
-        version: 21.3.1
+        version: 21.3.2
       image-size:
         specifier: ^1.1.1
         version: 1.1.1
@@ -29,10 +29,6 @@ importers:
       utif:
         specifier: ^3.1.0
         version: 3.1.0
-    optionalDependencies:
-      sharp:
-        specifier: ^0.33.5
-        version: 0.33.5
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.2.4
@@ -61,6 +57,10 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.5.2)(@vitest/ui@3.2.4)(yaml@2.8.1)
+    optionalDependencies:
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
 
 packages:
 
@@ -117,8 +117,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@borewit/text-codec@0.2.1':
-    resolution: {integrity: sha512-k7vvKPbf7J2fZ5klGRD9AeKfUvojuZIQ3BT5u7Jfv+puwXkUBUT5PVyMDfJZpy30CBDXGMgw7fguK/lpOMBvgw==}
+  '@borewit/text-codec@0.2.2':
+    resolution: {integrity: sha512-DDaRehssg1aNrH4+2hnj1B7vnUGEjU6OIlyRdkMd0aUdIUvKXrJfXsy8LVtXAy7DRvYVluWbMspsRhz2lcW0mQ==}
 
   '@cornerstonejs/codec-openjpeg@1.2.4':
     resolution: {integrity: sha512-UT2su6xZZnCPSuWf2ldzKa/2+guQ7BGgfBSKqxanggwJHh48gZqIAzekmsLyJHMMK5YDK+ti+fzvVJhBS3Xi/g==}
@@ -831,8 +831,8 @@ packages:
   fflate@0.8.2:
     resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
-  file-type@21.3.1:
-    resolution: {integrity: sha512-SrzXX46I/zsRDjTb82eucsGg0ODq2NpGDp4HcsFKApPy8P8vACjpJRDoGGMfEzhFC0ry61ajd7f72J3603anBA==}
+  file-type@21.3.2:
+    resolution: {integrity: sha512-DLkUvGwep3poOV2wpzbHCOnSKGk1LzyXTv+aHFgN2VFl96wnp8YA9YjO2qPzg5PuL8q/SW9Pdi6WTkYOIh995w==}
     engines: {node: '>=20'}
 
   fix-dts-default-cjs-exports@1.0.1:
@@ -1383,7 +1383,7 @@ snapshots:
   '@biomejs/cli-win32-x64@2.2.4':
     optional: true
 
-  '@borewit/text-codec@0.2.1': {}
+  '@borewit/text-codec@0.2.2': {}
 
   '@cornerstonejs/codec-openjpeg@1.2.4': {}
 
@@ -1947,7 +1947,7 @@ snapshots:
 
   fflate@0.8.2: {}
 
-  file-type@21.3.1:
+  file-type@21.3.2:
     dependencies:
       '@tokenizer/inflate': 0.4.1
       strtok3: 10.3.4
@@ -2314,7 +2314,7 @@ snapshots:
 
   token-types@6.1.2:
     dependencies:
-      '@borewit/text-codec': 0.2.1
+      '@borewit/text-codec': 0.2.2
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
