@@ -72,7 +72,7 @@
     "file-type": "^21.0.0",
     "image-size": "^1.1.1",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "5.5.207",
+    "pdfjs-dist": "5.6.205",
     "utif": "^3.1.0"
   },
   "optionalDependencies": {
