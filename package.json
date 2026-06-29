@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "@cornerstonejs/codec-openjpeg": "^1.2.4",
-    "@napi-rs/canvas": "^0.1.68",
+    "@napi-rs/canvas": "^1.0.1",
     "file-type": "^22.0.0",
     "image-size": "^1.1.1",
     "pdf-lib": "^1.17.1",
